@@ -1,0 +1,31 @@
+
+# 服务器端口，如果不配置默认是80端口
+server:
+  port: 8088
+  servlet:
+    context-path: /xwxsb
+
+
+max-http-header-size: 102400
+# 数据库设置
+spring:
+  application:
+    name: myf
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/myf?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf8
+    username: root
+    password: password
+    devtools:
+      restart:
+        enabled: true
+  redis:
+    host: localhost
+    port: 6379
+    password: password
+
+
+
+
+
+
