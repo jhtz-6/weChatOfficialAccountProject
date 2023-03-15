@@ -119,7 +119,7 @@ public final class WeChatUtil {
         WeChatKeyWordMap.put("紫笋茶", "紫笋茶是趣物,不是菜。");
         WeChatKeyWordMap.put("投稿", TG_UTL);
         WeChatKeyWordMap.put("建议", JY_URL);
-        WeChatKeyWordMap.put("吃瓜", "http://122.51.212.21:8080/xwxsb/ssfh/44dg.do");
+        WeChatKeyWordMap.put("吃瓜", "https://mp.weixin.qq.com/mp/appmsgalbum?__biz=MzkzNzE4OTAyMA==&action=getalbum&album_id=2794944040499642370#wechat_redirect");
         WeChatKeyWordMap.put("阵容", ACCOMPANY_RECCOMEND);
         WeChatKeyWordMap.put("阵容推荐", ACCOMPANY_RECCOMEND);
         WeChatKeyWordMap.put("推荐阵容", ACCOMPANY_RECCOMEND);

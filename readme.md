@@ -12,7 +12,7 @@
 
 # 目录结构
 
-![DDD领域驱动设计代码结构](D:\Downloads\chromeDownload\DDD领域驱动设计代码结构.png)
+![DDD领域驱动设计代码结构](https://www.520myf.com:8089/DDD%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E4%BB%A3%E7%A0%81%E7%BB%93%E6%9E%84.png)
 
 # 使用说明
 
