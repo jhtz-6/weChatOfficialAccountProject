@@ -12,7 +12,7 @@
 
 # 目录结构
 
-![DDD领域驱动设计代码结构](https://www.520myf.com:8089/DDD%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E4%BB%A3%E7%A0%81%E7%BB%93%E6%9E%84.png)
+![DDD领域驱动设计代码结构](https://camo.githubusercontent.com/cf8db1dc38030cf016579b41bead75902c33c279034ad933c8d9f3f81fd3bb7d/68747470733a2f2f7777772e3532306d79662e636f6d3a383038392f4444442545392541322538362545352539462539462545392541392542312545352538412541382545382541452542452545382541452541312545342542422541332545372541302538312545372542422539332545362539452538342e706e67)
 
 # 使用说明
 
@@ -27,15 +27,27 @@
 ​    项目启动后可参考[微信公众号官方文档接收普通消息的能力说明](https://developers.weixin.qq.com/doc/offiaccount/Message_Management/Receiving_standard_messages.html),本地请求url:localhost:8088/xwxsb/weChat/msg,请求参数实例:
 
 ```xml
-                                        <xml>
-                                          <ToUserName><![CDATA[toUser]]></ToUserName>
-                                          <FromUserName><![CDATA[fromUser]]></FromUserName>
-                                          <CreateTime>1348831860</CreateTime>
-                                          <MsgType><![CDATA[text]]></MsgType>
-                                          <Content><![CDATA[this is a test]]></Content>
-                                          <MsgId>1234567890123456</MsgId>
-                                          <MsgDataId>xxxx</MsgDataId>
-                                          <Idx>xxxx</Idx>
-                                        </xml>
+                                    <xml>
+                                      <ToUserName><![CDATA[toUser]]></ToUserName>
+                                      <FromUserName><![CDATA[fromUser]]></FromUserName>
+                                      <CreateTime>1348831860</CreateTime>
+                                      <MsgType><![CDATA[text]]></MsgType>
+                                      <Content><![CDATA[this is a test]]></Content>
+                                      <MsgId>1234567890123456</MsgId>
+                                      <MsgDataId>xxxx</MsgDataId>
+                                      <Idx>xxxx</Idx>
+                                    </xml>
 ```
+
+# 版本更新
+
+##### 1.0.1
+
+​    新增与chatgpt对话功能,但前后语境没有联系起来;依赖GPT-3.5-Turb;参考文章 https://github.com/Grt1228/chatgpt-java
+
+​    使用方法：在chatgpt后面输入你的内容即可。
+
+![https://raw.githubusercontent.com/jhtz-6/weChatOfficialAccountProject/master/src/main/resources/static/photo/chatgpt001.jpg](https://raw.githubusercontent.com/jhtz-6/weChatOfficialAccountProject/master/src/main/resources/static/photo/chatgpt001.jpg)
+
+![https://raw.githubusercontent.com/jhtz-6/weChatOfficialAccountProject/master/src/main/resources/static/photo/chatgpt002.jpg](https://raw.githubusercontent.com/jhtz-6/weChatOfficialAccountProject/master/src/main/resources/static/photo/chatgpt002.jpg)
 
