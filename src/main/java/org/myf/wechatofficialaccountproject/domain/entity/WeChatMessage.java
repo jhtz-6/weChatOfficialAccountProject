@@ -90,7 +90,7 @@ public class WeChatMessage {
                 }
             }
         }
-        return StringUtils.isBlank(handleWeChatMessageResult) ? "查询菜谱错误,请确认是否有该菜谱,提示:" + handleWeChatMessageResult
+        return StringUtils.isNotBlank(handleWeChatMessageResult) ? "查询菜谱错误,请确认是否有该菜谱,提示:" + handleWeChatMessageResult
             : handleWeChatMessageResult;
     }
 

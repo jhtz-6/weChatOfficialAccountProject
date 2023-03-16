@@ -2,6 +2,7 @@ package org.myf.wechatofficialaccountproject.infrastructure.util.helper;
 
 import com.baidu.aip.ocr.AipOcr;
 import com.github.qcloudsms.SmsSingleSender;
+import com.unfbx.chatgpt.OpenAiStreamClient;
 import org.myf.wechatofficialaccountproject.application.dto.FoodDTO;
 import org.myf.wechatofficialaccountproject.application.dto.MaterialDTO;
 import org.myf.wechatofficialaccountproject.application.dto.MenuDTO;
@@ -43,6 +44,7 @@ public class InitData {
 
     public static SmsSingleSender SSENDER;
     public static AipOcr CLIENT;
+    public static OpenAiStreamClient OPENAI_STREAM_CLIENT;
 
     @PostConstruct
     public void initStaticData() {
@@ -81,8 +83,13 @@ public class InitData {
         }
         SSENDER = new SmsSingleSender(Integer.parseInt(CONFIGURATION_MAP.get(WeChatUtil.TENCENT_APPID)),
             CONFIGURATION_MAP.get(WeChatUtil.TENCENT_APPKEY));
+
         CLIENT = new AipOcr(WeChatUtil.CONFIGURATION_MAP.get(WeChatUtil.BAIDU_APPID),
             WeChatUtil.CONFIGURATION_MAP.get(WeChatUtil.BAIDU_APPKEY),
             WeChatUtil.CONFIGURATION_MAP.get(WeChatUtil.BAIDU_SECRET_KEY));
+
+        OPENAI_STREAM_CLIENT = OpenAiStreamClient.builder().connectTimeout(50).readTimeout(50).writeTimeout(50)
+            .apiKey(WeChatUtil.CONFIGURATION_MAP.get(WeChatUtil.OPENAI_APIKEY))
+            .apiHost(WeChatUtil.CONFIGURATION_MAP.get(WeChatUtil.OPENAI_APIHOST)).build();
     }
 }

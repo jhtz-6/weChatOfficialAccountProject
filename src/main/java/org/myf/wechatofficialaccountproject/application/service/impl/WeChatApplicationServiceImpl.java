@@ -128,6 +128,11 @@ public class WeChatApplicationServiceImpl implements WeChatApplicationService {
         if (StringUtils.isNotBlank(handleWeChatMessageResult)) {
             return handleWeChatMessageResult;
         }
+        //chatgpt
+        String hadleByOpenAiResult = weChatDomainService.handleByOpenAi(weChatMessageDTO);
+        if(StringUtils.isNotBlank(hadleByOpenAiResult)){
+            return hadleByOpenAiResult;
+        }
         String handleByTuLingResult = weChatDomainService.handleByTuLing(weChatMessageDTO.getContent());
         if (StringUtils.isNotBlank(handleByTuLingResult)) {
             return handleByTuLingResult;

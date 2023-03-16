@@ -57,11 +57,20 @@ public interface WeChatDomainService {
     String handleByTuLing(String message);
 
     /**
-     *
+     * 获取当前在线人数
+     * 
      * @param setKey
      * @param value
      * @param timeOut
      * @return
      */
     String getCurrentPersonNum(String setKey, String value, Long timeOut);
+
+    /**
+     * 获取openai处理结果
+     * 
+     * @param weChatMessageDTO
+     * @return
+     */
+    String handleByOpenAi(WeChatMessageDTO weChatMessageDTO);
 }

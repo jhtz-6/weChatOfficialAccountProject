@@ -13,16 +13,12 @@ import org.myf.wechatofficialaccountproject.domain.service.WeChatDomainService;
 import org.myf.wechatofficialaccountproject.infrastructure.base.entity.*;
 import org.myf.wechatofficialaccountproject.infrastructure.base.enums.BooleanEnum;
 import org.myf.wechatofficialaccountproject.infrastructure.base.enums.MsgTypeEnum;
-import org.myf.wechatofficialaccountproject.infrastructure.util.client.BaiduOcrClient;
-import org.myf.wechatofficialaccountproject.infrastructure.util.client.RedisCilent;
-import org.myf.wechatofficialaccountproject.infrastructure.util.client.TencentShortMessageClient;
-import org.myf.wechatofficialaccountproject.infrastructure.util.client.TuLingClient;
+import org.myf.wechatofficialaccountproject.infrastructure.util.client.*;
 import org.myf.wechatofficialaccountproject.infrastructure.util.dbdriver.reposiitory.*;
 import org.myf.wechatofficialaccountproject.infrastructure.util.entity.BaiduOcrResponse;
 import org.myf.wechatofficialaccountproject.infrastructure.util.entity.BaiduOcrWordsResult;
 import org.myf.wechatofficialaccountproject.infrastructure.util.entity.TuLingResponse;
 import org.myf.wechatofficialaccountproject.infrastructure.util.helper.CommonUtil;
-import org.myf.wechatofficialaccountproject.infrastructure.util.helper.DateUtils;
 import org.myf.wechatofficialaccountproject.infrastructure.util.helper.TuLingUtil;
 import org.myf.wechatofficialaccountproject.infrastructure.util.helper.WeChatUtil;
 import org.slf4j.Logger;
@@ -64,6 +60,8 @@ public class WeChatDomainServiceImpl implements WeChatDomainService {
     TuLingClient tuLingClient;
     @Resource
     TencentShortMessageClient tencentShortMessageClient;
+    @Resource
+    OpenAiClient openAiClient;
 
     @Override
     public <T> WeChatMessageDO convertDtoToDo(T t) {
@@ -275,6 +273,31 @@ public class WeChatDomainServiceImpl implements WeChatDomainService {
             redisCilent.addValueToRedis("num_current_person", keySet.size() + "", null);
         }
         return redisCilent.getValueByKey("num_current_person");
+    }
+
+    @Override
+    public String handleByOpenAi(WeChatMessageDTO weChatMessageDTO) {
+        //从redis中取
+        String redisOpenAiValue = redisCilent.getValueByKey(WeChatUtil.CHATGPT + "-" + weChatMessageDTO.getFromUserName());
+        if(WeChatUtil.CHATGPT.equals(weChatMessageDTO.getContent())){
+            if(StringUtils.isEmpty(redisOpenAiValue)){
+                return "您尚未发送chatgpt相关请求;请参考示例: chatgpt帮我写一份情书、chatgpt以我爱打游戏写一首打油诗";
+            }else{
+                redisCilent.deleteValueByKey(WeChatUtil.CHATGPT + "-" + weChatMessageDTO.getFromUserName());
+            }
+            return "以下数据来自chatgpt:\n"+redisOpenAiValue;
+        }else if(weChatMessageDTO.getContent().contains(WeChatUtil.CHATGPT)){
+            String redisProcessValue = redisCilent.getValueByKey(WeChatUtil.CHATGPT_PROCESS + "-" +
+                    weChatMessageDTO.getFromUserName());
+            if(BooleanEnum.FALSE.value.equals(redisProcessValue)){
+                return "数据较多,正在处理中,请于一两分钟后发送chatgpt来获取结果;注意:在您获取当前结果前,您不可以再次请求chatgpt。";
+            }
+            if(StringUtils.isNotBlank(redisOpenAiValue)){
+                return "您有chatgpt结果尚未接收,请发送chatgpt来接收。";
+            }
+            return openAiClient.getResultByOpenAi(weChatMessageDTO);
+        }
+        return null;
     }
 
     private String queryFoodOrMaterial(WeChatMessageDTO weChatMessageDTO) {

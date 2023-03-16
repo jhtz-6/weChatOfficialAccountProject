@@ -60,7 +60,8 @@ public final class WeChatUtil {
         + "1、关于升星：升星主要加的是血量和攻击力；那血量和攻击力给到什么样的随从可以利益最大化呢？给到阵容里用来打输出的随从；像木兰、诸葛、兰陵王、李白等等。因为这些随从想要打出更高的输出就需要更高的攻击力。所以一般情况下优先给阵容里打输出的随从升星。\n"
         + "2、关于升等级；升等级虽然也会加血加攻击（很少）但更主要的是加速度。那主要加的速度给到什么样的随从可以利益最大化呢？答案是给到那些需要先手硬/软控制的随从；像武则天、貂蝉、岳飞等这些对速度比较依赖的随从。因为我们不依靠这些随从打出很高的伤害；但需要这些随从先手；所以一般情况下优先给阵容里需要先手控制的随从升等级。\n"
         + "\n" + "最后总结一下：\n" + "一般情况下，优先给打输出的随从升星；优先给先手控制的随从升等级";
-    private static String TO_GROUP = "https://www.520myf.com:8089/wx.jpg\n\n  如果显示群人数已满,可以通过菜单右下角的【联系我】添加wx拉你进群。";
+    private static String TO_GROUP =
+        "请把链接复制到浏览器中打开 \nhttps://110.40.208.47:8089/wx.jpg\n\n  如果显示群人数已满,可以通过菜单右下角的【联系我】添加wx拉你进群。";
     private static String BZQH = "百转千回主要看反应速度,几点小技巧:\n"
         + "优先选择方向,比如出现【左或红色】,我们看到左或就可以了,不需要关心或后面是什么颜色,然后去选择正确的方向即可,因为选择方向大脑只需计算一次,眼睛看到方向,传给大脑,大脑发出指令给手,手即可做出动作。\n"
         + "而选择颜色需要大脑计算两次,眼睛看到颜色,传给大脑,大脑再发出指令告诉眼睛,眼睛再寻找正确的颜色所在位置,找到后告诉大脑,大脑再发出指令给到手。所以优先选择方向。\n\n"
@@ -100,26 +101,31 @@ public final class WeChatUtil {
     public static String BAIDU_APPKEY = "BAIDU_APPKEY";
     public static String BAIDU_APPID = "BAIDU_APPID";
     public static String BAIDU_SECRET_KEY = "BAIDU_SECRET_KEY";
+    public static String OPENAI_APIKEY = "OPENAI_APIKEY";
+    public static String OPENAI_APIHOST = "OPENAI_APIHOST";
     public static Map<String, String> CONFIGURATION_MAP = new HashMap<>();
     public static long CURRENT_PERSON_TIMEOUT = 600000L;
     public static String RESPONSE_FORMAT = "<xml>\n" + "<ToUserName><![CDATA[%1$s]]></ToUserName>\n"
         + "<FromUserName><![CDATA[%2$s]]></FromUserName>\n" + "<CreateTime>%3$s</CreateTime>\n"
         + "<MsgType><![CDATA[%4$s]]></MsgType>\n" + "<Content><![CDATA[%5$s]]></Content>\n" + "</xml>";
+    public static String CHATGPT = "chatgpt";
+    public static String CHATGPT_PROCESS = "chatgpt-process";
 
     static {
         WeChatKeyWordMap.put("赛马", SM_URL);
         WeChatKeyWordMap.put("跑马", SM_URL);
-        WeChatKeyWordMap.put("excel", "http://110.40.208.47:8088/xwxsb/wx/menuExcel\n\n第一个sheet页是菜谱;第二个sheet页是价格");
-        WeChatKeyWordMap.put("EXCEL", "http://110.40.208.47:8088/xwxsb/wx/menuExcel\n\n第一个sheet页是菜谱;第二个sheet页是价格");
-        WeChatKeyWordMap.put("价格表", "http://110.40.208.47:8088/xwxsb/wx/menuExcel\n\n第一个sheet页是菜谱;第二个sheet页是价格");
-        WeChatKeyWordMap.put("价格", "http://110.40.208.47:8088/xwxsb/wx/menuExcel\n\n第一个sheet页是菜谱;第二个sheet页是价格");
+        WeChatKeyWordMap.put("excel", "http://110.40.208.47:8088/xwxsb/weChat/menuExcel\n\n第一个sheet页是菜谱;第二个sheet页是价格");
+        WeChatKeyWordMap.put("EXCEL", "http://110.40.208.47:8088/xwxsb/weChat/menuExcel\n\n第一个sheet页是菜谱;第二个sheet页是价格");
+        WeChatKeyWordMap.put("价格表", "http://110.40.208.47:8088/xwxsb/weChat/menuExcel\n\n第一个sheet页是菜谱;第二个sheet页是价格");
+        WeChatKeyWordMap.put("价格", "http://110.40.208.47:8088/xwxsb/weChat/menuExcel\n\n第一个sheet页是菜谱;第二个sheet页是价格");
         WeChatKeyWordMap.put("盛世芳华管理员", "ssfh666");
         WeChatKeyWordMap.put("菜谱推荐", MENU_RECOMEND_URL);
         WeChatKeyWordMap.put("推荐菜谱", MENU_RECOMEND_URL);
         WeChatKeyWordMap.put("紫笋茶", "紫笋茶是趣物,不是菜。");
         WeChatKeyWordMap.put("投稿", TG_UTL);
         WeChatKeyWordMap.put("建议", JY_URL);
-        WeChatKeyWordMap.put("吃瓜", "https://mp.weixin.qq.com/mp/appmsgalbum?__biz=MzkzNzE4OTAyMA==&action=getalbum&album_id=2794944040499642370#wechat_redirect");
+        WeChatKeyWordMap.put("吃瓜",
+            "https://mp.weixin.qq.com/mp/appmsgalbum?__biz=MzkzNzE4OTAyMA==&action=getalbum&album_id=2794944040499642370#wechat_redirect");
         WeChatKeyWordMap.put("阵容", ACCOMPANY_RECCOMEND);
         WeChatKeyWordMap.put("阵容推荐", ACCOMPANY_RECCOMEND);
         WeChatKeyWordMap.put("推荐阵容", ACCOMPANY_RECCOMEND);
@@ -127,7 +133,7 @@ public final class WeChatUtil {
         WeChatKeyWordMap.put("礼包码", LBM);
         WeChatKeyWordMap.put("小屋写随笔", XWXSB);
         WeChatKeyWordMap.put("excel密码", "xwxsb");
-        WeChatKeyWordMap.put("关键词", "https://www.520myf.com:8089/xwxsb_gjc.xlsx");
+        WeChatKeyWordMap.put("关键词", "请把链接复制到浏览器中打开\nhttps://110.40.208.47:8089/xwxsb_gjc.xlsx");
         WeChatKeyWordMap.put("菜谱识图",
             "https://mp.weixin.qq.com/s?__biz=MzkzNzE4OTAyMA==&mid=2247484029&idx=1&sn=9a48771aa"
                 + "39df1ad419c1876f64a5fd6&chksm=c292098ef5e58098292db1aa774c8ac3bc1b590c63b644d57cb5678526e741129d4f18561ad1#rd");
