@@ -1,6 +1,5 @@
 package org.myf.wechatofficialaccountproject.application.service.impl;
 
-import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Maps;
 import org.apache.commons.lang3.StringUtils;
 import org.myf.wechatofficialaccountproject.application.dto.WeChatMessageDTO;
@@ -13,8 +12,6 @@ import org.myf.wechatofficialaccountproject.infrastructure.base.entity.WeChatMes
 import org.myf.wechatofficialaccountproject.infrastructure.base.enums.EventEnum;
 import org.myf.wechatofficialaccountproject.infrastructure.util.helper.CommonUtil;
 import org.myf.wechatofficialaccountproject.infrastructure.util.helper.WeChatUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,7 +19,6 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -33,7 +29,6 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 @Service
 public class WeChatApplicationServiceImpl implements WeChatApplicationService {
-    private static final Logger LOGGER = LoggerFactory.getLogger(WeChatApplicationServiceImpl.class);
 
     @Autowired
     WeChatDomainService weChatDomainService;
@@ -41,13 +36,23 @@ public class WeChatApplicationServiceImpl implements WeChatApplicationService {
     SubscribeDomainService subscribeDomainService;
     @Autowired
     RecommendDomainService recommendDomainService;
-    static ExecutorService weChatThreadPoolExecutor;
+    static ExecutorService weChatSaveReceiveThreadPoolExecutor, weChatSaveSendThreadPoolExecutor;
     static {
-        AtomicInteger threadNumber = new AtomicInteger(1);
-        weChatThreadPoolExecutor =
+        AtomicInteger saveReceiveThreadNumber = new AtomicInteger(1);
+        weChatSaveReceiveThreadPoolExecutor =
             new ThreadPoolExecutor(5, 10, 30, TimeUnit.SECONDS, new ArrayBlockingQueue<>(10), task -> {
                 Thread thread = new Thread(task);
-                thread.setName("weChatMessageThread-" + threadNumber.incrementAndGet() + "-" + thread.getName());
+                thread.setName("weChatMessageSaveReceiveThread-" + saveReceiveThreadNumber.incrementAndGet() + "-"
+                    + thread.getName());
+                return thread;
+            });
+
+        AtomicInteger saveSendThreadNumber = new AtomicInteger(1);
+        weChatSaveSendThreadPoolExecutor =
+            new ThreadPoolExecutor(5, 10, 30, TimeUnit.SECONDS, new ArrayBlockingQueue<>(10), task -> {
+                Thread thread = new Thread(task);
+                thread.setName("weChatMessageSaveSendThreadPoolExecutor-" + saveSendThreadNumber.incrementAndGet() + "-"
+                    + thread.getName());
                 return thread;
             });
     }
@@ -55,43 +60,49 @@ public class WeChatApplicationServiceImpl implements WeChatApplicationService {
     @Override
     public WeChatMessageResponse handleMsgbyMap(Map<String, String> map) {
         WeChatMessageDTO weChatMessageDTO = convertMapToWeChatMessageDTO(map);
-        Future<WeChatMessageResponse> weChatMessageResponseFuture =
-            weChatThreadPoolExecutor.submit(new WeChatMessageTask(weChatMessageDTO));
-        try {
-            if (Objects.nonNull(weChatMessageResponseFuture.get())) {
-                return weChatMessageResponseFuture.get();
-            }
-        } catch (Exception e) {
-            LOGGER.error("handleMsgbyMap.e:{},weChatMessageDTO:{}", e, JSON.toJSONString(weChatMessageDTO));
+        weChatSaveReceiveThreadPoolExecutor.submit(new WeChatSaveReceiveMessageTask(weChatMessageDTO));
+        replaceCharacter(weChatMessageDTO);
+        String handleMsgResult = handleMsg(weChatMessageDTO);
+        if (StringUtils.isEmpty(handleMsgResult)) {
+            handleMsgResult = "服务处理异常,请稍后再试或联系管理员处理";
         }
-        return new WeChatMessageResponse();
+        String currentPersonNum =
+            weChatDomainService.getCurrentPersonNum("current_person_" + weChatMessageDTO.getFromUserName(),
+                weChatMessageDTO.getFromUserName(), WeChatUtil.CURRENT_PERSON_TIMEOUT);;
+        WeChatMessageResponse weChatMessageResponse =
+            buildHandleMsgResult("当前在线人数:" + currentPersonNum + "\n" + handleMsgResult, weChatMessageDTO);
+        weChatMessageResponse.setType("send");
+        weChatSaveSendThreadPoolExecutor.submit(new WeChatSaveSendTask(weChatMessageResponse));
+        return weChatMessageResponse;
     }
 
-    class WeChatMessageTask implements Callable<WeChatMessageResponse> {
+    class WeChatSaveReceiveMessageTask implements Callable<Void> {
         WeChatMessageDTO weChatMessageDTO;
 
-        public WeChatMessageTask(WeChatMessageDTO weChatMessageDTO) {
+        public WeChatSaveReceiveMessageTask(WeChatMessageDTO weChatMessageDTO) {
             this.weChatMessageDTO = weChatMessageDTO;
         }
 
         @Override
-        public WeChatMessageResponse call() throws Exception {
+        public Void call() throws Exception {
             weChatMessageDTO.setType("receive");
             WeChatMessageDO weChatMessageDO = weChatDomainService.convertDtoToDo(weChatMessageDTO);
             weChatDomainService.saveWeChatMessageDO(weChatMessageDO);
-            replaceCharacter(weChatMessageDTO);
-            String handleMsgResult = handleMsg(weChatMessageDTO);
-            if (StringUtils.isEmpty(handleMsgResult)) {
-                handleMsgResult = "服务处理异常,请稍后再试或联系管理员处理";
-            }
-            String currentPersonNum =
-                weChatDomainService.getCurrentPersonNum("current_person_" + weChatMessageDTO.getFromUserName(),
-                    weChatMessageDTO.getFromUserName(), WeChatUtil.CURRENT_PERSON_TIMEOUT);
-            WeChatMessageResponse weChatMessageResponse =
-                buildHandleMsgResult("当前在线人数:" + currentPersonNum + "\n" + handleMsgResult, weChatMessageDTO);
-            weChatMessageResponse.setType("send");
+            return null;
+        }
+    }
+
+    class WeChatSaveSendTask implements Callable<Void> {
+        WeChatMessageResponse weChatMessageResponse;
+
+        public WeChatSaveSendTask(WeChatMessageResponse weChatMessageResponse) {
+            this.weChatMessageResponse = weChatMessageResponse;
+        }
+
+        @Override
+        public Void call() throws Exception {
             weChatDomainService.saveWeChatMessageDO(weChatDomainService.convertDtoToDo(weChatMessageResponse));
-            return weChatMessageResponse;
+            return null;
         }
     }
 
@@ -128,9 +139,9 @@ public class WeChatApplicationServiceImpl implements WeChatApplicationService {
         if (StringUtils.isNotBlank(handleWeChatMessageResult)) {
             return handleWeChatMessageResult;
         }
-        //chatgpt
+        // chatgpt
         String hadleByOpenAiResult = weChatDomainService.handleByOpenAi(weChatMessageDTO);
-        if(StringUtils.isNotBlank(hadleByOpenAiResult)){
+        if (StringUtils.isNotBlank(hadleByOpenAiResult)) {
             return hadleByOpenAiResult;
         }
         String handleByTuLingResult = weChatDomainService.handleByTuLing(weChatMessageDTO.getContent());

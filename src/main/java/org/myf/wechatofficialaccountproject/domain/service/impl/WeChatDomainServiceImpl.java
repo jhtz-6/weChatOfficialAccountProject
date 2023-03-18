@@ -272,27 +272,28 @@ public class WeChatDomainServiceImpl implements WeChatDomainService {
         if (CollectionUtils.isNotEmpty(keySet)) {
             redisCilent.addValueToRedis("num_current_person", keySet.size() + "", null);
         }
-        return redisCilent.getValueByKey("num_current_person");
+        return keySet.size() + "";
     }
 
     @Override
     public String handleByOpenAi(WeChatMessageDTO weChatMessageDTO) {
-        //从redis中取
-        String redisOpenAiValue = redisCilent.getValueByKey(WeChatUtil.CHATGPT + "-" + weChatMessageDTO.getFromUserName());
-        if(WeChatUtil.CHATGPT.equals(weChatMessageDTO.getContent())){
-            if(StringUtils.isEmpty(redisOpenAiValue)){
+        // 从redis中取
+        String redisOpenAiValue =
+            redisCilent.getValueByKey(WeChatUtil.CHATGPT + "-" + weChatMessageDTO.getFromUserName());
+        if (WeChatUtil.CHATGPT.equals(weChatMessageDTO.getContent())) {
+            if (StringUtils.isEmpty(redisOpenAiValue)) {
                 return "您尚未发送chatgpt相关请求;请参考示例: chatgpt帮我写一份情书、chatgpt以我爱打游戏写一首打油诗";
-            }else{
+            } else {
                 redisCilent.deleteValueByKey(WeChatUtil.CHATGPT + "-" + weChatMessageDTO.getFromUserName());
             }
-            return "以下数据来自chatgpt:\n"+redisOpenAiValue;
-        }else if(weChatMessageDTO.getContent().contains(WeChatUtil.CHATGPT)){
-            String redisProcessValue = redisCilent.getValueByKey(WeChatUtil.CHATGPT_PROCESS + "-" +
-                    weChatMessageDTO.getFromUserName());
-            if(BooleanEnum.FALSE.value.equals(redisProcessValue)){
+            return "以下数据来自chatgpt:\n" + redisOpenAiValue;
+        } else if (weChatMessageDTO.getContent().contains(WeChatUtil.CHATGPT)) {
+            String redisProcessValue =
+                redisCilent.getValueByKey(WeChatUtil.CHATGPT_PROCESS + "-" + weChatMessageDTO.getFromUserName());
+            if (BooleanEnum.FALSE.value.equals(redisProcessValue)) {
                 return "数据较多,正在处理中,请于一两分钟后发送chatgpt来获取结果;注意:在您获取当前结果前,您不可以再次请求chatgpt。";
             }
-            if(StringUtils.isNotBlank(redisOpenAiValue)){
+            if (StringUtils.isNotBlank(redisOpenAiValue)) {
                 return "您有chatgpt结果尚未接收,请发送chatgpt来接收。";
             }
             return openAiClient.getResultByOpenAi(weChatMessageDTO);
