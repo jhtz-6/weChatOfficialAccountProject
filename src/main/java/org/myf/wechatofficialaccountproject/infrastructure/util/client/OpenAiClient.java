@@ -43,7 +43,6 @@ public class OpenAiClient {
         OpenAiEventSourceListener eventSourceListener = new OpenAiEventSourceListener(countDownLatch, weChatMessageDTO);
         Completion completion =
             Completion.builder().prompt(weChatMessageDTO.getContent().substring(7)).stream(true).build();
-        System.out.println(JSON.toJSONString(InitData.OPENAI_STREAM_CLIENT));
         InitData.OPENAI_STREAM_CLIENT.streamCompletions(completion, eventSourceListener);
         try {
             // 超时返回false
