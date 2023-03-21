@@ -8,9 +8,12 @@ import java.util.Objects;
 
 import org.apache.commons.lang3.StringUtils;
 
+/**
+ * @author myf
+ */
 public class DateUtils {
 
-    public static String DateToString(Date date, String pattern) {
+    public static String dateToString(Date date, String pattern) {
 
         if (Objects.isNull(date)) {
             date = new Date();
@@ -23,18 +26,13 @@ public class DateUtils {
 
     }
 
-    public static void main(String[] args) {
-        String s = DateToString(new Date(), null);
-        System.out.println(s);
-    }
-
-    public static Date StringToDate(String date, String pattern) {
+    public static Date stringToDate(String date, String pattern) {
 
         if (StringUtils.isBlank(pattern)) {
             pattern = "yyyy-MM-dd HH:mm:ss";
         }
         if (StringUtils.isBlank(date)) {
-            return StringToDate(DateToString(new Date(), null), pattern);
+            return new Date();
         }
         DateFormat df = new SimpleDateFormat(pattern);
         try {

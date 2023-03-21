@@ -16,12 +16,12 @@ import java.util.Date;
 public class MetaObjectHandlerImpl implements MetaObjectHandler {
     @Override
     public void insertFill(MetaObject metaObject) {
-        metaObject.setValue("createTime", DateUtils.StringToDate(DateUtils.DateToString(new Date(), null), null));
-        metaObject.setValue("updateTime", DateUtils.StringToDate(DateUtils.DateToString(new Date(), null), null));
+        metaObject.setValue("createTime", DateUtils.stringToDate(DateUtils.dateToString(new Date(), null), null));
+        metaObject.setValue("updateTime", DateUtils.stringToDate(DateUtils.dateToString(new Date(), null), null));
     }
 
     @Override
     public void updateFill(MetaObject metaObject) {
-        metaObject.setValue("updateTime", DateUtils.StringToDate(DateUtils.DateToString(new Date(), null), null));
+        metaObject.setValue("updateTime", DateUtils.stringToDate(DateUtils.dateToString(new Date(), null), null));
     }
 }
