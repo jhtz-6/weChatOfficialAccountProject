@@ -40,7 +40,7 @@ public class WeChatApplicationServiceImpl implements WeChatApplicationService {
     static {
         AtomicInteger saveReceiveThreadNumber = new AtomicInteger(1);
         weChatSaveReceiveThreadPoolExecutor =
-            new ThreadPoolExecutor(5, 10, 30, TimeUnit.SECONDS, new ArrayBlockingQueue<>(10), task -> {
+            new ThreadPoolExecutor(5, 10, 30, TimeUnit.SECONDS, new LinkedBlockingDeque<>(10), task -> {
                 Thread thread = new Thread(task);
                 thread.setName("weChatMessageSaveReceiveThread-" + saveReceiveThreadNumber.incrementAndGet() + "-"
                     + thread.getName());
@@ -49,7 +49,7 @@ public class WeChatApplicationServiceImpl implements WeChatApplicationService {
 
         AtomicInteger saveSendThreadNumber = new AtomicInteger(1);
         weChatSaveSendThreadPoolExecutor =
-            new ThreadPoolExecutor(5, 10, 30, TimeUnit.SECONDS, new ArrayBlockingQueue<>(10), task -> {
+            new ThreadPoolExecutor(5, 10, 30, TimeUnit.SECONDS, new LinkedBlockingDeque<>(10), task -> {
                 Thread thread = new Thread(task);
                 thread.setName("weChatMessageSaveSendThreadPoolExecutor-" + saveSendThreadNumber.incrementAndGet() + "-"
                     + thread.getName());
@@ -60,9 +60,14 @@ public class WeChatApplicationServiceImpl implements WeChatApplicationService {
     @Override
     public WeChatMessageResponse handleMsgbyMap(Map<String, String> map) {
         WeChatMessageDTO weChatMessageDTO = convertMapToWeChatMessageDTO(map);
-        weChatSaveReceiveThreadPoolExecutor.submit(new WeChatSaveReceiveMessageTask(weChatMessageDTO));
+        String handleMsgResult;
+        try {
+            weChatSaveReceiveThreadPoolExecutor.submit(new WeChatSaveReceiveMessageTask(weChatMessageDTO));
+        } catch (RejectedExecutionException rejectedExecutionException) {
+            return buildHandleMsgResult("当前访问人数较多,请稍后再试!", weChatMessageDTO);
+        }
         replaceCharacter(weChatMessageDTO);
-        String handleMsgResult = handleMsg(weChatMessageDTO);
+        handleMsgResult = handleMsg(weChatMessageDTO);
         if (StringUtils.isEmpty(handleMsgResult)) {
             handleMsgResult = "服务处理异常,请稍后再试或联系管理员处理";
         }
