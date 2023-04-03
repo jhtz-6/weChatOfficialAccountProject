@@ -396,6 +396,9 @@ public final class CommonUtil {
     }
 
     public static String unicodeToUtf8(String theString) {
+        if(StringUtils.isBlank(theString)){
+            return "";
+        }
         char aChar;
         int len = theString.length();
         StringBuffer outBuffer = new StringBuffer(len);

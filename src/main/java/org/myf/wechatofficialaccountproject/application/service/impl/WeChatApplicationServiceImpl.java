@@ -165,7 +165,6 @@ public class WeChatApplicationServiceImpl implements WeChatApplicationService {
         replaceMap.put("；", ";");
         replaceMap.put("，", ";");
         replaceMap.put("块", "个");
-        replaceMap.put("条", "个");
         replaceMap.put("。", ";");
         replaceMap.put("和", ";");
         weChatMessageDTO.setContent(CommonUtil.replaceCharacterByMap(replaceMap, weChatMessageDTO.getContent()));
