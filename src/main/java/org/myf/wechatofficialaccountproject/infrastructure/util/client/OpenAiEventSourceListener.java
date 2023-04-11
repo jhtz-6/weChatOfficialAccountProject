@@ -94,7 +94,7 @@ public class OpenAiEventSourceListener extends EventSourceListener {
                 }
             }
         } catch (Exception e) {
-            if (StringUtils.isNotBlank(
+            if (StringUtils.isBlank(
                 REDIS_CILENT.getValueByKey(WeChatUtil.CHATGPT + "-" + weChatMessageDTO.getFromUserName()))) {
                 REDIS_CILENT.addValueToRedis(WeChatUtil.CHATGPT + "-" + weChatMessageDTO.getFromUserName(),
                         "该条数据chatgpt处理异常,请重试或尝试其它数据", null);
