@@ -30,4 +30,11 @@ public interface SubscribeRepository {
      * @return
      */
     Integer selectCountByArea(String area);
+
+    /**
+     * selectCountByParam
+     * @param subscribeQueryParam
+     * @return
+     */
+    Integer selectCountByParam(SubscribeQueryParam subscribeQueryParam);
 }

@@ -8,8 +8,10 @@ import org.myf.wechatofficialaccountproject.application.service.WeChatApplicatio
 import org.myf.wechatofficialaccountproject.domain.service.RecommendDomainService;
 import org.myf.wechatofficialaccountproject.domain.service.SubscribeDomainService;
 import org.myf.wechatofficialaccountproject.domain.service.WeChatDomainService;
+import org.myf.wechatofficialaccountproject.domain.service.factory.MessageTypeHandlerFactory;
 import org.myf.wechatofficialaccountproject.infrastructure.base.entity.WeChatMessageDO;
 import org.myf.wechatofficialaccountproject.infrastructure.base.enums.EventEnum;
+import org.myf.wechatofficialaccountproject.infrastructure.base.enums.MsgTypeEnum;
 import org.myf.wechatofficialaccountproject.infrastructure.util.helper.CommonUtil;
 import org.myf.wechatofficialaccountproject.infrastructure.util.helper.WeChatUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +38,8 @@ public class WeChatApplicationServiceImpl implements WeChatApplicationService {
     SubscribeDomainService subscribeDomainService;
     @Autowired
     RecommendDomainService recommendDomainService;
+    @Autowired
+    MessageTypeHandlerFactory messageTypeHandlerFactory;
     static ExecutorService weChatSaveReceiveThreadPoolExecutor, weChatSaveSendThreadPoolExecutor;
     static {
         AtomicInteger saveReceiveThreadNumber = new AtomicInteger(1);
@@ -67,7 +71,7 @@ public class WeChatApplicationServiceImpl implements WeChatApplicationService {
             return buildHandleMsgResult("当前访问人数较多,请稍后再试!", weChatMessageDTO);
         }
         replaceCharacter(weChatMessageDTO);
-        handleMsgResult = handleMsg(weChatMessageDTO);
+        handleMsgResult = messageTypeHandlerFactory.createMessageTypeHandler(weChatMessageDTO).handleMessageChain();
         if (StringUtils.isEmpty(handleMsgResult)) {
             handleMsgResult = "服务处理异常,请稍后再试或联系管理员处理";
         }
@@ -123,6 +127,7 @@ public class WeChatApplicationServiceImpl implements WeChatApplicationService {
         return weChatMessageResponse;
     }
 
+    @Deprecated
     private String handleMsg(WeChatMessageDTO weChatMessageDTO) {
         String headResult = subscribeDomainService.registerArea(weChatMessageDTO);
         if (StringUtils.isNotBlank(headResult)) {
@@ -176,7 +181,14 @@ public class WeChatApplicationServiceImpl implements WeChatApplicationService {
         weChatMessageDTO.setFromUserName(map.get("FromUserName"));
         weChatMessageDTO.setCreateTime(CommonUtil.getDateTimeByTimeStamp(map.get("CreateTime")));
         weChatMessageDTO.setMsgType(map.get("MsgType"));
-        weChatMessageDTO.setContent(map.get("Content"));
+        if (MsgTypeEnum.VOICE.name.equals(weChatMessageDTO.getMsgType())) {
+            String recognition = map.get("Recognition");
+            if (StringUtils.isNotBlank(recognition)) {
+                weChatMessageDTO.setContent(recognition.substring(0, recognition.length() - 1));
+            }
+        } else {
+            weChatMessageDTO.setContent(map.get("Content"));
+        }
         weChatMessageDTO.setMsgId(map.get("MsgId"));
         weChatMessageDTO.setEvent(EventEnum.getEventEnumByName(map.get("Event")));
         weChatMessageDTO.setPicUrl(map.get("PicUrl"));

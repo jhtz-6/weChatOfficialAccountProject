@@ -18,7 +18,7 @@ import java.util.Objects;
  * @Description: SubscribeRepositoryimpl
  */
 @Service
-public class SubscribeRepositoryimpl implements SubscribeRepository {
+public class SubscribeRepositoryImpl implements SubscribeRepository {
 
     @Resource
     SubscribeMapper subscribeMapper;
@@ -67,6 +67,21 @@ public class SubscribeRepositoryimpl implements SubscribeRepository {
         }
         QueryWrapper<SubscribeDO> subscribeDOQueryWrapper = new QueryWrapper<>();
         subscribeDOQueryWrapper.eq(AREA, area);
+        return Math.toIntExact(subscribeMapper.selectCount(subscribeDOQueryWrapper));
+    }
+
+    @Override
+    public Integer selectCountByParam(SubscribeQueryParam subscribeQueryParam) {
+        QueryWrapper<SubscribeDO> subscribeDOQueryWrapper = new QueryWrapper<>();
+        if (StringUtils.isNotBlank(subscribeQueryParam.getSubscriber())) {
+            subscribeDOQueryWrapper.eq(SUBSCRIBER, subscribeQueryParam.getSubscriber());
+        }
+        if (StringUtils.isNotBlank(subscribeQueryParam.getStatus())) {
+            subscribeDOQueryWrapper.eq(STATUS, subscribeQueryParam.getStatus());
+        }
+        if (Objects.nonNull(subscribeQueryParam.getId())) {
+            subscribeDOQueryWrapper.eq(ID, subscribeQueryParam.getId());
+        }
         return Math.toIntExact(subscribeMapper.selectCount(subscribeDOQueryWrapper));
     }
 }

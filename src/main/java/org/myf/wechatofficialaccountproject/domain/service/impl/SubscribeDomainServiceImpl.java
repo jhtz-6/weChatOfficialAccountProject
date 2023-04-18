@@ -18,6 +18,7 @@ import java.util.Objects;
  * @Description: SubscribeDomainServiceImpl
  */
 @Service
+@Deprecated
 public class SubscribeDomainServiceImpl implements SubscribeDomainService {
 
     @Autowired

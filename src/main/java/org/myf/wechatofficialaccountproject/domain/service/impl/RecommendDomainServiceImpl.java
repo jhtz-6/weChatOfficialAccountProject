@@ -23,6 +23,7 @@ import java.util.*;
  * @Description: RecommendDomainServiceImpl
  */
 @Service
+@Deprecated
 public class RecommendDomainServiceImpl implements RecommendDomainService {
 
     @Resource
