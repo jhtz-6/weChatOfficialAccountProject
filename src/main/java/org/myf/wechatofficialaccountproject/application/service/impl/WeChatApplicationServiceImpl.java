@@ -13,12 +13,11 @@ import org.myf.wechatofficialaccountproject.infrastructure.base.entity.WeChatMes
 import org.myf.wechatofficialaccountproject.infrastructure.base.enums.EventEnum;
 import org.myf.wechatofficialaccountproject.infrastructure.base.enums.MsgTypeEnum;
 import org.myf.wechatofficialaccountproject.infrastructure.util.helper.CommonUtil;
+import org.myf.wechatofficialaccountproject.infrastructure.util.helper.DateUtils;
 import org.myf.wechatofficialaccountproject.infrastructure.util.helper.WeChatUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.*;
@@ -55,8 +54,8 @@ public class WeChatApplicationServiceImpl implements WeChatApplicationService {
         weChatSaveSendThreadPoolExecutor =
             new ThreadPoolExecutor(5, 10, 30, TimeUnit.SECONDS, new LinkedBlockingDeque<>(10), task -> {
                 Thread thread = new Thread(task);
-                thread.setName("weChatMessageSaveSendThreadPoolExecutor-" + saveSendThreadNumber.incrementAndGet() + "-"
-                    + thread.getName());
+                thread.setName(
+                    "weChatMessageSaveSendThread-" + saveSendThreadNumber.incrementAndGet() + "-" + thread.getName());
                 return thread;
             });
     }
@@ -120,9 +119,7 @@ public class WeChatApplicationServiceImpl implements WeChatApplicationService {
         weChatMessageResponse.setToUserName(weChatMessageDTO.getFromUserName());
         weChatMessageResponse.setFromUserName(weChatMessageDTO.getToUserName());
         weChatMessageResponse.setMsgType("text");
-        DateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        String date = format.format(new Date(System.currentTimeMillis()));
-        weChatMessageResponse.setCreateTime(date);
+        weChatMessageResponse.setCreateTime(DateUtils.dateToString(new Date(), null));
         weChatMessageResponse.setContent(handleMsgResult);
         return weChatMessageResponse;
     }

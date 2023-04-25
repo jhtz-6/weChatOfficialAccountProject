@@ -27,20 +27,16 @@ public class VoiceMessageContentHandlerChain extends MessageContentHandlerChain 
     @Override
     public String handleMessageContentByChain(WeChatMessageDTO weChatMessageDTO,
         List<MessageContentHandler> messageContentHandlerList) {
-        if (CollectionUtils.isNotEmpty(messageContentHandlerList)) {
-            return super.handleMessageContentByChain(weChatMessageDTO, messageContentHandlerList);
-        }
-        return super.handleMessageContentByChain(weChatMessageDTO, voiceMessageContentHandlerList);
+        return super.handleMessageContentByChain(weChatMessageDTO, CollectionUtils.isNotEmpty(messageContentHandlerList) ?
+                messageContentHandlerList : voiceMessageContentHandlerList);
     }
 
     @PostConstruct
     @Override
     protected void createMessageContentHandlerChain() {
-        voiceMessageContentHandlerList.add(new RegisterAreaHandler());
         voiceMessageContentHandlerList.add(new QueryFoodOrMaterialHandler());
         voiceMessageContentHandlerList.add(new SimpleKeyWordHandler());
         voiceMessageContentHandlerList.add(new CharacterRecognitionHandler());
-        voiceMessageContentHandlerList.add(new OpenAiHandler());
         voiceMessageContentHandlerList.add(new SendMobileMessageHandler());
         voiceMessageContentHandlerList.add(new TuLingHandler());
     }

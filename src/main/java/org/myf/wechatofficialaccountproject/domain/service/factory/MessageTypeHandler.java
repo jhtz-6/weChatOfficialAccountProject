@@ -1,6 +1,5 @@
 package org.myf.wechatofficialaccountproject.domain.service.factory;
 
-import org.myf.wechatofficialaccountproject.application.dto.WeChatMessageDTO;
 
 /**
  * @author myf

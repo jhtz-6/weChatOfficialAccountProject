@@ -1,6 +1,5 @@
 package org.myf.wechatofficialaccountproject.domain.service.chain.impl;
 
-import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.myf.wechatofficialaccountproject.application.dto.WeChatMessageDTO;
 import org.myf.wechatofficialaccountproject.domain.service.chain.MessageContentHandler;
@@ -17,7 +16,7 @@ import java.util.Objects;
  * @CreateTime: 2023-04-17 12:11
  * @Description: 处理区服登记相关处理器
  */
-@AllArgsConstructor
+
 public class RegisterAreaHandler implements MessageContentHandler {
 
     static SubscribeRepository subscribeRepository;

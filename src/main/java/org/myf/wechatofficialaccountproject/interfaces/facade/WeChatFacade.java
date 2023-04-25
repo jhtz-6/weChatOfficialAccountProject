@@ -24,7 +24,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import java.awt.*;
 import java.io.IOException;
 import java.net.URLEncoder;
@@ -57,18 +56,14 @@ public class WeChatFacade {
             weChatMessageResponse = weChatApplicationService.handleMsgbyMap(map);
             response.setCharacterEncoding("utf-8");
             response.setHeader("Content-Type", "text/html;charset=utf-8");
-            response.getWriter()
-                .write(String.format(WeChatUtil.RESPONSE_FORMAT, weChatMessageResponse.getToUserName(),
-                    weChatMessageResponse.getFromUserName(), weChatMessageResponse.getCreateTime(),
-                    weChatMessageResponse.getMsgType(), weChatMessageResponse.getContent()));
+            response.getWriter().write(buildResponseWrite(weChatMessageResponse, weChatMessageResponse.getContent()));
+        } catch (IOException ioException) {
+            LOGGER.error("WeChatFacade.ioException: {},weChatMessageResponse:{},map:{}", ioException,
+                JSON.toJSONString(weChatMessageResponse), JSON.toJSONString(map));
         } catch (Exception e) {
             try {
-                response.getWriter()
-                    .write(String.format(WeChatUtil.RESPONSE_FORMAT, weChatMessageResponse.getToUserName(),
-                        weChatMessageResponse.getFromUserName(), weChatMessageResponse.getCreateTime(),
-                        weChatMessageResponse.getMsgType(), e));
+                response.getWriter().write(buildResponseWrite(weChatMessageResponse, e.getMessage()));
             } catch (IOException ex) {
-
             }
             LOGGER.error("WeChatFacade.e: {},weChatMessageResponse:{},map:{}", e,
                 JSON.toJSONString(weChatMessageResponse), JSON.toJSONString(map));
@@ -76,8 +71,7 @@ public class WeChatFacade {
     }
 
     @GetMapping("menuExcel")
-    public void menuExcel(HttpServletRequest request, HttpServletResponse response, HttpSession session)
-        throws IOException {
+    public void menuExcel(HttpServletResponse response) throws IOException {
         response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         response.setCharacterEncoding("utf-8");
         String fileName = URLEncoder.encode("盛世芳华菜谱及价格", "UTF-8").replaceAll("\\+", "%20");
@@ -114,6 +108,12 @@ public class WeChatFacade {
                 excelWriter.finish();
             }
         }
+    }
+
+    private String buildResponseWrite(WeChatMessageResponse weChatMessageResponse, String content) {
+        return String.format(WeChatUtil.RESPONSE_FORMAT, weChatMessageResponse.getToUserName(),
+            weChatMessageResponse.getFromUserName(), weChatMessageResponse.getCreateTime(),
+            weChatMessageResponse.getMsgType(), content);
     }
 
 }

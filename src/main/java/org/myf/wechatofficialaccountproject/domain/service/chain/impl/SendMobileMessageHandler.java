@@ -35,15 +35,11 @@ public class SendMobileMessageHandler implements MessageContentHandler {
         }
         String[] params = new String[9];
         try {
-            params[0] = weChatMessageDTOContent.substring(0, Math.min(6, weChatMessageDTOContent.length()));
-            params[1] = weChatMessageDTOContent.substring(6, Math.min(12, weChatMessageDTOContent.length()));
-            params[2] = weChatMessageDTOContent.substring(12, Math.min(18, weChatMessageDTOContent.length()));
-            params[3] = weChatMessageDTOContent.substring(18, Math.min(24, weChatMessageDTOContent.length()));
-            params[4] = weChatMessageDTOContent.substring(24, Math.min(30, weChatMessageDTOContent.length()));
-            params[5] = weChatMessageDTOContent.substring(30, Math.min(36, weChatMessageDTOContent.length()));
-            params[6] = weChatMessageDTOContent.substring(36, Math.min(42, weChatMessageDTOContent.length()));
-            params[7] = weChatMessageDTOContent.substring(42, Math.min(48, weChatMessageDTOContent.length()));
-            params[8] = weChatMessageDTOContent.substring(48, Math.min(54, weChatMessageDTOContent.length()));
+            for (int i = 0; i < params.length; i++) {
+                int start = 6 * 0;
+                int end = Math.min(start + 6, weChatMessageDTOContent.length());
+                params[i] = weChatMessageDTOContent.substring(start, end);
+            }
         } catch (Exception e) {
             LOGGER.error("WeChatDomainServiceImpl.e:{},weChatMessageDTOContent:{}", e,
                 JSON.toJSONString(weChatMessageDTOContent));

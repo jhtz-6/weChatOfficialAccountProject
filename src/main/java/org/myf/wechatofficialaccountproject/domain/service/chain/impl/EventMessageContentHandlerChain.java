@@ -27,10 +27,8 @@ public class EventMessageContentHandlerChain extends MessageContentHandlerChain 
     @Override
     public String handleMessageContentByChain(WeChatMessageDTO weChatMessageDTO,
         List<MessageContentHandler> messageContentHandlerList) {
-        if (CollectionUtils.isNotEmpty(messageContentHandlerList)) {
-            return super.handleMessageContentByChain(weChatMessageDTO, messageContentHandlerList);
-        }
-        return super.handleMessageContentByChain(weChatMessageDTO, eventMessageContentHandlerList);
+        return super.handleMessageContentByChain(weChatMessageDTO, CollectionUtils.isNotEmpty(messageContentHandlerList)
+            ? messageContentHandlerList : eventMessageContentHandlerList);
     }
 
     @PostConstruct
