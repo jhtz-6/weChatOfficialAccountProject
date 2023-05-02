@@ -50,7 +50,7 @@ public class BaiduOcrClient {
         try {
             baiduOcrResponse = JSON.parseObject(res.toString(), BaiduOcrResponse.class);
         } catch (Exception e) {
-            LOGGER.error("getOcrResult.e {},res {}", e, JSON.toJSONString(res));
+            LOGGER.error("getOcrResult.res {}", JSON.toJSONString(res), e);
         }
         return baiduOcrResponse;
     }

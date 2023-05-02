@@ -41,15 +41,14 @@ public class SendMobileMessageHandler implements MessageContentHandler {
                 params[i] = weChatMessageDTOContent.substring(start, end);
             }
         } catch (Exception e) {
-            LOGGER.error("WeChatDomainServiceImpl.e:{},weChatMessageDTOContent:{}", e,
-                JSON.toJSONString(weChatMessageDTOContent));
+            LOGGER.error("weChatMessageDTOContent:{}", e, JSON.toJSONString(weChatMessageDTOContent), e);
         }
         SmsSingleSenderResult smsSingleSenderResult;
         try {
             smsSingleSenderResult = tencentShortMessageClient.sendShortMessagebyParams(params, 415610);
         } catch (Exception e) {
-            LOGGER.error("sendMessagebyTencent.e:{},weChatMessageDTOContent:{}", e,
-                JSON.toJSONString(weChatMessageDTOContent));
+            LOGGER.error("handlerMessageContent.weChatMessageDTOContent:{}", JSON.toJSONString(weChatMessageDTOContent),
+                e);
             return "短信发送失败:" + e;
         }
         if (smsSingleSenderResult.result != 0) {

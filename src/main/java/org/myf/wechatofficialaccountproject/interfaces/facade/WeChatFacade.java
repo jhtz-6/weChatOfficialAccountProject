@@ -58,15 +58,15 @@ public class WeChatFacade {
             response.setHeader("Content-Type", "text/html;charset=utf-8");
             response.getWriter().write(buildResponseWrite(weChatMessageResponse, weChatMessageResponse.getContent()));
         } catch (IOException ioException) {
-            LOGGER.error("WeChatFacade.ioException: {},weChatMessageResponse:{},map:{}", ioException,
-                JSON.toJSONString(weChatMessageResponse), JSON.toJSONString(map));
+            LOGGER.error("weChatMessageResponse:{},map:{}", JSON.toJSONString(weChatMessageResponse),
+                JSON.toJSONString(map), ioException);
         } catch (Exception e) {
             try {
                 response.getWriter().write(buildResponseWrite(weChatMessageResponse, e.getMessage()));
             } catch (IOException ex) {
             }
-            LOGGER.error("WeChatFacade.e: {},weChatMessageResponse:{},map:{}", e,
-                JSON.toJSONString(weChatMessageResponse), JSON.toJSONString(map));
+            LOGGER.error("weChatMessageResponse:{},map:{}", JSON.toJSONString(weChatMessageResponse),
+                JSON.toJSONString(map), e);
         }
     }
 

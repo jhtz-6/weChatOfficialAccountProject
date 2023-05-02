@@ -66,8 +66,8 @@ public class EventHandler implements MessageContentHandler {
                 return "取关成功";
             }
         } catch (Exception e) {
-            LOGGER.error("EventHandler.handlerMessageContent.e : {},weChatMessageDTO: {} ", e,
-                JSON.toJSONString(weChatMessageDTO));
+            LOGGER.error("EventHandler.handlerMessageContent.weChatMessageDTO:{}", JSON.toJSONString(weChatMessageDTO),
+                e);
         } finally {
             lock.unlock();
         }

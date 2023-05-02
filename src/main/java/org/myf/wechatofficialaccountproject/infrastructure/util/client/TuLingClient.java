@@ -30,7 +30,7 @@ public class TuLingClient {
                 tuLingResponse.setRebotName(TuLingUtil.TULING_REBOT_NAME_MAP.get(appKey));
                 return tuLingResponse;
             } catch (Exception e) {
-                LOGGER.error("getResultByTuling.e {},result {},message {}", e, result, JSON.toJSONString(message));
+                LOGGER.error("getResultByTuling.result {},message {}", result, JSON.toJSONString(message), e);
             }
         }
         return null;

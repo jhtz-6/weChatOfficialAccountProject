@@ -63,7 +63,7 @@ public class OpenAiEventSourceListener extends EventSourceListener {
                 LOGGER.info(data);
             }
         } catch (Exception e) {
-            LOGGER.error("onEvent.e {},data {}", e, data);
+            LOGGER.error("onEvent.data {}", data, e);
         }
     }
 
@@ -81,8 +81,8 @@ public class OpenAiEventSourceListener extends EventSourceListener {
             chatgptMessageDomainService.handleByOpenAiResult(weChatMessageDTO, openAiText);
             if (Objects.nonNull(countDownLatch)) {
                 // 数据放到redis
-                REDIS_CILENT.addValueToRedis(WeChatUtil.CHATGPT + "-" + weChatMessageDTO.getFromUserName(),
-                        openAiText, null);
+                REDIS_CILENT.addValueToRedis(WeChatUtil.CHATGPT + "-" + weChatMessageDTO.getFromUserName(), openAiText,
+                    null);
                 if (1 == countDownLatch.getCount()) {
                     countDownLatch.countDown();
                     REDIS_CILENT
@@ -94,12 +94,12 @@ public class OpenAiEventSourceListener extends EventSourceListener {
                 }
             }
         } catch (Exception e) {
-            if (StringUtils.isBlank(
-                REDIS_CILENT.getValueByKey(WeChatUtil.CHATGPT + "-" + weChatMessageDTO.getFromUserName()))) {
+            if (StringUtils
+                .isBlank(REDIS_CILENT.getValueByKey(WeChatUtil.CHATGPT + "-" + weChatMessageDTO.getFromUserName()))) {
                 REDIS_CILENT.addValueToRedis(WeChatUtil.CHATGPT + "-" + weChatMessageDTO.getFromUserName(),
-                        "该条数据chatgpt处理异常,请重试或尝试其它数据", null);
+                    "该条数据chatgpt处理异常,请重试或尝试其它数据", null);
             }
-            LOGGER.error("onClosed.e {},eventSource {}", e, eventSource);
+            LOGGER.error("onClosed.eventSource {}", eventSource, e);
         }
     }
 

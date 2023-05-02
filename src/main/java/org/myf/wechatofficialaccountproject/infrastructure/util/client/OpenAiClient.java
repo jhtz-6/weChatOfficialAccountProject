@@ -57,7 +57,7 @@ public class OpenAiClient {
                 return "数据较多,正在处理中,请于一两分钟后发送chatgpt来获取结果;注意:在您获取当前结果前,您不可以再次请求chatgpt。";
             }
         } catch (InterruptedException e) {
-            LOGGER.error("getResultByOpenAi.e {},weChatMessageDTO {}", e, JSON.toJSONString(weChatMessageDTO));
+            LOGGER.error("getResultByOpenAi.weChatMessageDTO {}", JSON.toJSONString(weChatMessageDTO), e);
         }
         return null;
     }

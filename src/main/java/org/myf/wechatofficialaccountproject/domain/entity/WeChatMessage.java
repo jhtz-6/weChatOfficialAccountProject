@@ -1,5 +1,6 @@
 package org.myf.wechatofficialaccountproject.domain.entity;
 
+import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Lists;
 import lombok.Data;
 import org.apache.commons.collections.CollectionUtils;
@@ -154,7 +155,7 @@ public class WeChatMessage {
                             }
                         }
                     } catch (Exception e) {
-                        LOGGER.error("handleCategory.e: {},content:{}", e, content);
+                        LOGGER.error("handleCategory.content:{}", content, e);
                         handleCategoryResult = new StringBuilder("查询菜谱错误,请检查输入的是否正确。");
                     }
                 }
@@ -440,7 +441,7 @@ public class WeChatMessage {
                     }
                 }
             } catch (Exception e) {
-                LOGGER.error("handleSpecialWord.content:{},e:{}", e, e);
+                LOGGER.error("handleSpecialWord.content:{}", JSON.toJSONString(content), e);
                 handleSpecialWordResult = new StringBuilder("输入格式错误,请参考【皇帝的特不要烧酒】或者【特不要烧酒】或者【皇帝不要烧酒】");
             }
             return handleSpecialWordResult.toString();
@@ -540,7 +541,7 @@ public class WeChatMessage {
                         }
                     }
                 } catch (Exception e) {
-                    LOGGER.error("handleBelongOrNumText.e:" + e);
+                    LOGGER.error("handleBelongOrNumText.e:", e);
                 }
 
             }
