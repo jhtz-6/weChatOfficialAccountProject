@@ -268,11 +268,7 @@ public class WeChatDomainServiceImpl implements WeChatDomainService {
     @Override
     public String getCurrentPersonNum(String setKey, String value, Long timeOut) {
         redisCilent.addValueToRedis(setKey, value, timeOut);
-        Set<String> keySet = redisCilent.getAllKeys("current_person_*");
-        if (CollectionUtils.isNotEmpty(keySet)) {
-            redisCilent.addValueToRedis("num_current_person", keySet.size() + "", null);
-        }
-        return keySet.size() + "";
+        return redisCilent.getAllKeys("current_person_*").size() + "";
     }
 
     @Override

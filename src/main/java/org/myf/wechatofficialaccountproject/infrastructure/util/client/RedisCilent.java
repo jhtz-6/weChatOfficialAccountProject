@@ -52,7 +52,7 @@ public class RedisCilent {
 
     public Set<String> getAllKeys(String pattern) {
         if (StringUtils.isBlank(pattern)) {
-            return null;
+            return Sets.newHashSet();
         }
         return stringRedisTemplate.keys(pattern);
     }
