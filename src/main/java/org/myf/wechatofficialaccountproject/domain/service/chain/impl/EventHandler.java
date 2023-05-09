@@ -40,7 +40,7 @@ public class EventHandler implements MessageContentHandler {
             SubscribeDO subscribeDO = subscribeRepositoryImpl.selectOneByParam(subscribeQueryParam);
             // 幂等处理
             if (Objects.nonNull(subscribeDO) && weChatMessageDTO.getEvent().name.equals(subscribeDO.getStatus())) {
-                return WeChatUtil.XWXSB;
+                return WeChatUtil.SUBSCRIBE_CONTENT;
             }
             // 说明是关注/取消关注
             if (EventEnum.SUBSCRIBE.name.equals(weChatMessageDTO.getEvent().name)) {
@@ -59,7 +59,7 @@ public class EventHandler implements MessageContentHandler {
                     subscribeDO.setStatus(weChatMessageDTO.getEvent().name);
                     subscribeRepositoryImpl.saveOrUpdateId(subscribeDO);
                 }
-                return "你好," + unSubsceibeWord + "你是第" + (count + 1) + "位关注我的人,欢迎你~。\n" + WeChatUtil.XWXSB;
+                return "你好," + unSubsceibeWord + "你是第" + (count + 1) + "位关注我的人,欢迎你~。\n" + WeChatUtil.SUBSCRIBE_CONTENT;
             } else if (EventEnum.UNSUBSCRIBE.name.equals(weChatMessageDTO.getEvent().name)) {
                 subscribeDO.setStatus(weChatMessageDTO.getEvent().name);
                 subscribeRepositoryImpl.saveOrUpdateId(subscribeDO);

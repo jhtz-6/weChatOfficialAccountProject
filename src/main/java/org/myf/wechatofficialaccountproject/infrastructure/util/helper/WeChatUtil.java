@@ -22,6 +22,8 @@ import java.util.stream.Collectors;
  */
 public final class WeChatUtil {
 
+    public static String SUBSCRIBE_CONTENT = "新增chatgpt使用方法,发送【chatgpt】了解，https://mp.weixin.qq.com/s?__biz=MzkzNzE4OTAyMA==&mid=2247485132&idx=1&sn=d4ac8d1f048ead3b2f56607a32d241a8&chksm=c2920d3ff5e58429e96dc55e2b5d2c4b91434a467db9baffb2c62e711d3c9b18efec5b8f01a3#rd\n" +
+            "盛世芳华相关功能,请发送【小屋写随笔】五个字了解。";
     public static String XWXSB = "公众号使用异常可右下角联系我处理!!!!\n公众号功能如下:。\n" + "大朝会系列视频可在微信视频号搜索小屋写随笔进行查看\n"
         + "16、新增关键词:【关键词】、【价格表】、【大朝会】、【琉璃拟饵】、【紧急】、【进群】;钓鱼类相关关键词示例:【银河溪】、【蓝鳖虾】、【橙色鱼】、【紫色鱼】、【血红龙】等等。\n"
         + "15、其它部分关键词:【吃瓜】、【兑换码】、【合服】、【并蒂双莲】、【性价比】、【王爷性价比】、【皇帝性价比】、【贵妃性价比】等。\n"
@@ -109,7 +111,12 @@ public final class WeChatUtil {
         + "<FromUserName><![CDATA[%2$s]]></FromUserName>\n" + "<CreateTime>%3$s</CreateTime>\n"
         + "<MsgType><![CDATA[%4$s]]></MsgType>\n" + "<Content><![CDATA[%5$s]]></Content>\n" + "</xml>";
     public static String CHATGPT = "chatgpt";
+    public static String CHATGPT_ONE = "chatgpt1";
     public static String CHATGPT_PROCESS = "chatgpt-process";
+    public static String CHATGPT_LIST = "chatgpt-list";
+    public static int CHATGPT_LIST_SIZE = 15;
+    public static Map<String, Integer> CHATGPT_NUM_MAP = new HashMap<>();
+    public static int CHATGPT_NUM = 15;
 
     static {
         WeChatKeyWordMap.put("赛马", SM_URL);
