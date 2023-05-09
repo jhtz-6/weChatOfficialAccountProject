@@ -396,7 +396,7 @@ public final class CommonUtil {
     }
 
     public static String unicodeToUtf8(String theString) {
-        if(StringUtils.isBlank(theString)){
+        if (StringUtils.isBlank(theString)) {
             return "";
         }
         char aChar;
@@ -465,6 +465,17 @@ public final class CommonUtil {
             }
         }
         return outBuffer.toString();
+    }
+
+    public static Boolean addValueToChatgptNumMap(String formUserName) {
+        if (Objects.isNull(WeChatUtil.CHATGPT_NUM_MAP.get(formUserName))) {
+            WeChatUtil.CHATGPT_NUM_MAP.put(formUserName, 1);
+            return true;
+        } else if (WeChatUtil.CHATGPT_NUM_MAP.get(formUserName) < WeChatUtil.CHATGPT_NUM) {
+            WeChatUtil.CHATGPT_NUM_MAP.put(formUserName, WeChatUtil.CHATGPT_NUM_MAP.get(formUserName) + 1);
+            return true;
+        }
+        return false;
     }
 
 }

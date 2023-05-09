@@ -19,4 +19,6 @@ public class ChoiceDTO {
     private String logprobs;
 
     private String finish_reason;
+
+    private DetailDTO delta;
 }

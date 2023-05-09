@@ -2,7 +2,6 @@ package org.myf.wechatofficialaccountproject.infrastructure.util.client;
 
 import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Lists;
-import com.unfbx.chatgpt.sse.ConsoleEventSourceListener;
 import okhttp3.Response;
 import okhttp3.sse.EventSource;
 import okhttp3.sse.EventSourceListener;
@@ -12,7 +11,7 @@ import org.myf.wechatofficialaccountproject.application.dto.WeChatMessageDTO;
 import org.myf.wechatofficialaccountproject.domain.service.ChatgptMessageDomainService;
 import org.myf.wechatofficialaccountproject.infrastructure.base.enums.BooleanEnum;
 import org.myf.wechatofficialaccountproject.infrastructure.util.helper.ApplicationContextUtil;
-import org.myf.wechatofficialaccountproject.infrastructure.util.helper.CommonUtil;
+import org.myf.wechatofficialaccountproject.infrastructure.util.helper.OpenAiUtil;
 import org.myf.wechatofficialaccountproject.infrastructure.util.helper.WeChatUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +26,7 @@ import java.util.concurrent.CountDownLatch;
  * @Description: OpenAiEventSourceListener
  */
 public class OpenAiEventSourceListener extends EventSourceListener {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ConsoleEventSourceListener.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(OpenAiEventSourceListener.class);
 
     static final ThreadLocal<List<OpenAiResponse>> OPENAI_RESPONSE_LIST_THREADLOCAL = new ThreadLocal<>();
     static final RedisCilent REDIS_CILENT = (RedisCilent)ApplicationContextUtil.getBeanByName("redisCilent");
@@ -48,7 +47,7 @@ public class OpenAiEventSourceListener extends EventSourceListener {
         REDIS_CILENT.addValueToRedis(WeChatUtil.CHATGPT_PROCESS + "-" + weChatMessageDTO.getFromUserName(),
             BooleanEnum.FALSE.value, null);
         OPENAI_RESPONSE_LIST_THREADLOCAL.set(Lists.newArrayList());
-        LOGGER.info("weweweOpenAI建立sse连接...");
+        LOGGER.info("OpenAI建立sse连接...");
     }
 
     @Override
@@ -63,6 +62,10 @@ public class OpenAiEventSourceListener extends EventSourceListener {
                 LOGGER.info(data);
             }
         } catch (Exception e) {
+            if (StringUtils.isNotBlank(
+                REDIS_CILENT.getValueByKey(WeChatUtil.CHATGPT_PROCESS + "-" + weChatMessageDTO.getFromUserName()))) {
+                REDIS_CILENT.deleteValueByKey(WeChatUtil.CHATGPT_PROCESS + "-" + weChatMessageDTO.getFromUserName());
+            }
             LOGGER.error("onEvent.data {}", data, e);
         }
     }
@@ -70,11 +73,7 @@ public class OpenAiEventSourceListener extends EventSourceListener {
     @Override
     public void onClosed(EventSource eventSource) {
         try {
-            for (OpenAiResponse openAiResponse : OPENAI_RESPONSE_LIST_THREADLOCAL.get()) {
-                for (ChoiceDTO choiceDTO : openAiResponse.getChoices()) {
-                    choiceDTO.setResultText(CommonUtil.unicodeToUtf8(choiceDTO.getText()));
-                }
-            }
+
             String openAiText = getOpenAiText();
             LOGGER.info("openAiText:" + openAiText);
             // 数据落库
@@ -85,13 +84,8 @@ public class OpenAiEventSourceListener extends EventSourceListener {
                     null);
                 if (1 == countDownLatch.getCount()) {
                     countDownLatch.countDown();
-                    REDIS_CILENT
-                        .deleteValueByKey(WeChatUtil.CHATGPT_PROCESS + "-" + weChatMessageDTO.getFromUserName());
-                } else {
-                    // 数据处理完毕
-                    REDIS_CILENT.addValueToRedis(WeChatUtil.CHATGPT_PROCESS + "-" + weChatMessageDTO.getFromUserName(),
-                        BooleanEnum.TRUE.value, null);
                 }
+                REDIS_CILENT.deleteValueByKey(WeChatUtil.CHATGPT_PROCESS + "-" + weChatMessageDTO.getFromUserName());
             }
         } catch (Exception e) {
             if (StringUtils
@@ -105,18 +99,29 @@ public class OpenAiEventSourceListener extends EventSourceListener {
 
     @Override
     public void onFailure(EventSource eventSource, @Nullable Throwable t, @Nullable Response response) {
+        if (StringUtils.isNotBlank(
+            REDIS_CILENT.getValueByKey(WeChatUtil.CHATGPT_PROCESS + "-" + weChatMessageDTO.getFromUserName()))) {
+            REDIS_CILENT.deleteValueByKey(WeChatUtil.CHATGPT_PROCESS + "-" + weChatMessageDTO.getFromUserName());
+        }
         LOGGER.error("response {},t {}", response, t);
     }
 
     public static String getOpenAiText() {
         StringBuilder openAiText = new StringBuilder();
         for (OpenAiResponse openAiResponse : OPENAI_RESPONSE_LIST_THREADLOCAL.get()) {
-            for (ChoiceDTO choiceDTO : openAiResponse.getChoices()) {
-                if (StringUtils.isNotBlank(choiceDTO.getResultText())) {
-                    openAiText.append(choiceDTO.getResultText());
-                }
-            }
+            openAiText.append(BuildResultTextByRes(openAiResponse));
         }
         return String.valueOf(openAiText);
+    }
+
+    private static String BuildResultTextByRes(OpenAiResponse openAiResponse) {
+        String model = openAiResponse.getModel();
+        switch (model) {
+            case "gpt-3.5-turbo-0301":
+            case "GPT_3_5_TURBO":
+                return OpenAiUtil.BuildResultTextByGPT3_5(openAiResponse);
+            default:
+                return "";
+        }
     }
 }

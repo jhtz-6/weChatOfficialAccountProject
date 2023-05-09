@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -70,5 +71,14 @@ public class RedisCilent {
             return false;
         }
         return stringRedisTemplate.delete(key);
+    }
+
+    public List<String> addStrValueToLimitedList(String key, String value, int size) {
+        Long listSize = stringRedisTemplate.opsForList().size(key);
+        if (listSize == size) {
+            stringRedisTemplate.opsForList().leftPop(key);
+        }
+        stringRedisTemplate.opsForList().rightPush(key, value);
+        return stringRedisTemplate.boundListOps(key).range(0, size);
     }
 }

@@ -30,7 +30,6 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -276,13 +275,24 @@ public class WeChatDomainServiceImpl implements WeChatDomainService {
         // 从redis中取
         String redisOpenAiValue =
             redisCilent.getValueByKey(WeChatUtil.CHATGPT + "-" + weChatMessageDTO.getFromUserName());
-        if (WeChatUtil.CHATGPT.equals(weChatMessageDTO.getContent())) {
+        if (StringUtils.equalsAny(weChatMessageDTO.getContent(), WeChatUtil.CHATGPT, WeChatUtil.CHATGPT_ONE)) {
             if (StringUtils.isEmpty(redisOpenAiValue)) {
                 return "您尚未发送chatgpt相关请求;请参考示例: chatgpt帮我写一份情书、chatgpt以我爱打游戏写一首打油诗";
             } else {
-                redisCilent.deleteValueByKey(WeChatUtil.CHATGPT + "-" + weChatMessageDTO.getFromUserName());
+                boolean firstGet = weChatMessageDTO.getContent().equals(WeChatUtil.CHATGPT);
+                if (redisOpenAiValue.length() > 550) {
+                    redisOpenAiValue =
+                        redisOpenAiValue.substring(firstGet ? 0 : 550, firstGet ? 550 : redisOpenAiValue.length());
+                    if (!firstGet) {
+                        redisCilent.deleteValueByKey(WeChatUtil.CHATGPT + "-" + weChatMessageDTO.getFromUserName());
+                    } else {
+                        return "以下数据来自chatgpt(请发送chatgpt1来获取剩下的内容)" + ":\n" + redisOpenAiValue;
+                    }
+                } else {
+                    redisCilent.deleteValueByKey(WeChatUtil.CHATGPT + "-" + weChatMessageDTO.getFromUserName());
+                }
+                return "以下数据来自chatgpt" + ":\n" + redisOpenAiValue;
             }
-            return "以下数据来自chatgpt:\n" + redisOpenAiValue;
         } else if (weChatMessageDTO.getContent().contains(WeChatUtil.CHATGPT)) {
             String redisProcessValue =
                 redisCilent.getValueByKey(WeChatUtil.CHATGPT_PROCESS + "-" + weChatMessageDTO.getFromUserName());

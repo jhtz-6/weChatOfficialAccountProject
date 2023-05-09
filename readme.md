@@ -43,7 +43,7 @@
 
 ##### 1.0.1
 
-​    新增与chatgpt对话功能,但前后语境没有联系起来;依赖GPT-3.5-Turb;参考文章 https://github.com/Grt1228/chatgpt-java
+​    新增与chatgpt对话功能,前后语境已经联系了起来;依赖GPT-3.5-Turb;参考文章 https://github.com/Grt1228/chatgpt-java
 
 ​    使用方法：在chatgpt后面输入你的内容即可。
 

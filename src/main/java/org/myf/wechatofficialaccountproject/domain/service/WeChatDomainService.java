@@ -72,5 +72,6 @@ public interface WeChatDomainService {
      * @param weChatMessageDTO
      * @return
      */
+    @Deprecated
     String handleByOpenAi(WeChatMessageDTO weChatMessageDTO);
 }
