@@ -6,7 +6,7 @@ package org.myf.wechatofficialaccountproject.infrastructure.base.enums;
  */
 public enum EventEnum {
 
-    SUBSCRIBE("subscribe", "订阅"), UNSUBSCRIBE("unsubscribe", "取消订阅");
+    SUBSCRIBE("subscribe", "订阅"), UNSUBSCRIBE("unsubscribe", "取消订阅"), VIEW("VIEW", "点击菜单跳转链接");
 
     public String name;
     public String value;

@@ -1,7 +1,5 @@
 package org.myf.wechatofficialaccountproject.application.service;
 
-import org.myf.wechatofficialaccountproject.application.dto.WeChatMessageResponse;
-
 import java.util.Map;
 
 /**
@@ -13,6 +11,6 @@ public interface WeChatApplicationService {
      * @param map
      * @return WeChatMessageDTO
      */
-    WeChatMessageResponse handleMsgbyMap(Map<String, String> map);
+    String handleMsgbyMap(Map<String, String> map);
 
 }

@@ -11,8 +11,10 @@ import com.google.common.collect.Maps;
 import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.myf.wechatofficialaccountproject.application.dto.MaterialDTO;
 import org.myf.wechatofficialaccountproject.application.dto.MenuDTO;
+import org.myf.wechatofficialaccountproject.application.dto.WeChatMessageDTO;
 import org.myf.wechatofficialaccountproject.application.dto.WeChatMessageResponse;
 import org.myf.wechatofficialaccountproject.application.service.WeChatApplicationService;
+import org.myf.wechatofficialaccountproject.infrastructure.base.enums.MsgTypeEnum;
 import org.myf.wechatofficialaccountproject.infrastructure.util.helper.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,10 +29,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.awt.*;
 import java.io.IOException;
 import java.net.URLEncoder;
-import java.util.ArrayList;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -51,11 +51,12 @@ public class WeChatFacade {
     public void msg(HttpServletRequest request, HttpServletResponse response) {
         WeChatMessageResponse weChatMessageResponse = new WeChatMessageResponse();
         Map<String, String> map = Maps.newHashMap();
+        response.setCharacterEncoding("utf-8");
+        response.setHeader("Content-Type", "text/html;charset=utf-8");
         try {
             map = CommonUtil.convertServerletInputStreamToMap(request.getInputStream());
-            weChatMessageResponse = weChatApplicationService.handleMsgbyMap(map);
-            response.setCharacterEncoding("utf-8");
-            response.setHeader("Content-Type", "text/html;charset=utf-8");
+            buildResponse(weChatMessageResponse, map);
+            weChatMessageResponse.setContent(weChatApplicationService.handleMsgbyMap(map));
             response.getWriter().write(buildResponseWrite(weChatMessageResponse, weChatMessageResponse.getContent()));
         } catch (IOException ioException) {
             LOGGER.error("weChatMessageResponse:{},map:{}", JSON.toJSONString(weChatMessageResponse),
@@ -112,8 +113,14 @@ public class WeChatFacade {
 
     private String buildResponseWrite(WeChatMessageResponse weChatMessageResponse, String content) {
         return String.format(WeChatUtil.RESPONSE_FORMAT, weChatMessageResponse.getToUserName(),
-            weChatMessageResponse.getFromUserName(), weChatMessageResponse.getCreateTime(),
+            weChatMessageResponse.getFromUserName(), DateUtils.dateToString(new Date(), null),
             weChatMessageResponse.getMsgType(), content);
+    }
+
+    private void buildResponse(WeChatMessageResponse weChatMessageResponse, Map<String, String> map) {
+        weChatMessageResponse.setFromUserName(map.get("ToUserName"));
+        weChatMessageResponse.setToUserName(map.get("FromUserName"));
+        weChatMessageResponse.setMsgType(MsgTypeEnum.TEXT.name);
     }
 
 }

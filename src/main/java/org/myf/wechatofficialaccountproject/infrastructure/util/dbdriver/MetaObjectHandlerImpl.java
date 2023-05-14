@@ -6,6 +6,7 @@ import org.myf.wechatofficialaccountproject.infrastructure.util.helper.DateUtils
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
+import java.util.Objects;
 
 /**
  * @Author: myf
@@ -16,7 +17,10 @@ import java.util.Date;
 public class MetaObjectHandlerImpl implements MetaObjectHandler {
     @Override
     public void insertFill(MetaObject metaObject) {
-        metaObject.setValue("createTime", DateUtils.stringToDate(DateUtils.dateToString(new Date(), null), null));
+        Object createTime = metaObject.getValue("createTime");
+        if (Objects.isNull(createTime)) {
+            metaObject.setValue("createTime", DateUtils.stringToDate(DateUtils.dateToString(new Date(), null), null));
+        }
         metaObject.setValue("updateTime", DateUtils.stringToDate(DateUtils.dateToString(new Date(), null), null));
     }
 
