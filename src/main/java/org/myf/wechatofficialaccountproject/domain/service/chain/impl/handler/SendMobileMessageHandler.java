@@ -1,4 +1,4 @@
-package org.myf.wechatofficialaccountproject.domain.service.chain.impl;
+package org.myf.wechatofficialaccountproject.domain.service.chain.impl.handler;
 
 import com.alibaba.fastjson.JSON;
 import com.github.qcloudsms.SmsSingleSenderResult;
@@ -7,31 +7,30 @@ import org.myf.wechatofficialaccountproject.application.dto.WeChatMessageDTO;
 import org.myf.wechatofficialaccountproject.domain.service.chain.MessageContentHandler;
 import org.myf.wechatofficialaccountproject.infrastructure.base.enums.MsgTypeEnum;
 import org.myf.wechatofficialaccountproject.infrastructure.util.client.TencentShortMessageClient;
-import org.myf.wechatofficialaccountproject.infrastructure.util.helper.ApplicationContextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
-import java.util.Objects;
+import static org.myf.wechatofficialaccountproject.domain.service.chain.MessageContentHandler.SendMobile.EXCEED_LENGTH;
+import static org.myf.wechatofficialaccountproject.domain.service.chain.MessageContentHandler.SendMobile.MAX_LENGTH;
 
 /**
  * @Author: myf
  * @CreateTime: 2023-04-17 12:14
  * @Description: 发送手机短信相关逻辑
  */
+@Service
 public class SendMobileMessageHandler implements MessageContentHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(SendMobileMessageHandler.class);
-
-    static TencentShortMessageClient tencentShortMessageClient;
+    @Autowired
+    TencentShortMessageClient tencentShortMessageClient;
 
     @Override
     public String handlerMessageContent(WeChatMessageDTO weChatMessageDTO) {
-        if (Objects.isNull(tencentShortMessageClient)) {
-            tencentShortMessageClient =
-                (TencentShortMessageClient)ApplicationContextUtil.getBeanByName("tencentShortMessageClient");
-        }
         String weChatMessageDTOContent = weChatMessageDTO.getContent();
-        if (weChatMessageDTOContent.length() > 100) {
-            return "最多50个字,字数超限。";
+        if (weChatMessageDTOContent.length() > MAX_LENGTH) {
+            return EXCEED_LENGTH;
         }
         String[] params = new String[9];
         try {
@@ -60,13 +59,8 @@ public class SendMobileMessageHandler implements MessageContentHandler {
 
     @Override
     public boolean isMatched(WeChatMessageDTO weChatMessageDTO) {
-        if (!StringUtils.equalsAny(weChatMessageDTO.getMsgType(), MsgTypeEnum.TEXT.name, MsgTypeEnum.VOICE.name)) {
-            return false;
-        }
-        if (weChatMessageDTO.getContent().startsWith("紧急")) {
-            return true;
-        }
-        return false;
+        return StringUtils.equalsAny(weChatMessageDTO.getMsgType(), MsgTypeEnum.TEXT.name, MsgTypeEnum.VOICE.name)
+            && weChatMessageDTO.getContent().startsWith("紧急");
     }
 
     @Override

@@ -1,6 +1,8 @@
 package org.myf.wechatofficialaccountproject.infrastructure.util.dbdriver.Entity;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import lombok.Data;
+import org.myf.wechatofficialaccountproject.infrastructure.base.enums.SystemBelongEnum;
 
 /**
  * @Author: myf
@@ -15,4 +17,6 @@ public class SubscribeQueryParam extends BaseQueryParam {
     private String status;
 
     private String area;
+
+    private SystemBelongEnum belonger;
 }

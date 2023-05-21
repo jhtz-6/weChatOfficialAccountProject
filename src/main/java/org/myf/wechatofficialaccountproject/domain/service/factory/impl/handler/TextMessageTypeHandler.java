@@ -1,4 +1,4 @@
-package org.myf.wechatofficialaccountproject.domain.service.factory.impl;
+package org.myf.wechatofficialaccountproject.domain.service.factory.impl.handler;
 
 import lombok.AllArgsConstructor;
 import org.myf.wechatofficialaccountproject.application.dto.WeChatMessageDTO;
@@ -8,18 +8,17 @@ import org.myf.wechatofficialaccountproject.infrastructure.util.helper.Applicati
 
 /**
  * @Author: myf
- * @CreateTime: 2023-04-17  11:08
- * @Description: 图片消息处理器
+ * @CreateTime: 2023-04-17  11:07
+ * @Description: 文字消息处理器
  */
 @AllArgsConstructor
-public class ImageMessageTypeHandler implements MessageTypeHandler {
+public class TextMessageTypeHandler implements MessageTypeHandler {
 
+    static final MessageContentHandlerChain textMessageContentHandlerChain = (MessageContentHandlerChain)
+            ApplicationContextUtil.getBeanByName("textMessageContentHandlerChain");
     private WeChatMessageDTO weChatMessageDTO;
-    static final MessageContentHandlerChain imageMessageContentHandlerChain = (MessageContentHandlerChain)
-            ApplicationContextUtil.getBeanByName("imageMessageContentHandlerChain");
-
     @Override
     public String handleMessageChain() {
-        return imageMessageContentHandlerChain.handleMessageContentByChain(weChatMessageDTO, null);
+        return textMessageContentHandlerChain.handleMessageContentByChain(weChatMessageDTO, null);
     }
 }

@@ -25,7 +25,7 @@ public class ChatgptMessageRepositoryImpl implements ChatgptMessageRepository {
         if (Objects.nonNull(chatgptMessageDO.getId())) {
             ChatgptMessageDO chatgptMessageResult = chatgptMessageMapper.selectById(chatgptMessageDO.getId());
             if (Objects.nonNull(chatgptMessageResult)) {
-                CommonUtil.copyProperties(chatgptMessageDO, chatgptMessageResult);
+                CommonUtil.copyPropertiesExceptNull(chatgptMessageDO, chatgptMessageResult);
                 return chatgptMessageMapper.updateById(chatgptMessageResult);
             }
         }

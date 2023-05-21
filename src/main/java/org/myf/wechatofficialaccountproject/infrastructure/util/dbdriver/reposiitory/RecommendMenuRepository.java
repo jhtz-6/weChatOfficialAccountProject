@@ -10,7 +10,7 @@ import java.util.List;
  * @CreateTime: 2023-03-06 22:03
  * @Description: RecommendMenuRepository
  */
-public interface RecommendMenuRepository {
+public interface RecommendMenuRepository extends BaseRepository{
 
     /**
      * selectListByParam
@@ -20,5 +20,9 @@ public interface RecommendMenuRepository {
      */
     List<RecommendMenuDO> selectListByParam(RecommendMenuQueryParam recommendMenuQueryParam);
 
+    /**
+     * 保存或更新数据
+     * @param recommendMenuDO
+     */
     void saveOrUpdateByID(RecommendMenuDO recommendMenuDO);
 }

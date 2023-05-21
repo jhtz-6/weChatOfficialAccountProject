@@ -3,6 +3,7 @@ package org.myf.wechatofficialaccountproject.infrastructure.base.entity;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
+import org.myf.wechatofficialaccountproject.infrastructure.base.enums.SystemBelongEnum;
 
 /**
  * @Author: myf
@@ -18,5 +19,8 @@ public class FoodDO extends BaseDO {
 
     @TableField("sfyx")
     private String sfyx = "1";
+
+    @TableField("belonger")
+    private SystemBelongEnum belonger;
 
 }

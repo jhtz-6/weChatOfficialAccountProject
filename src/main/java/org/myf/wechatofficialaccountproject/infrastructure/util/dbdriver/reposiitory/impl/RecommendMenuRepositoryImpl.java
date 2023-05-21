@@ -24,9 +24,6 @@ public class RecommendMenuRepositoryImpl implements RecommendMenuRepository {
     @Resource
     RecommendMenumapper recommendMenumapper;
 
-    private final static String FROM_USER_NAME = "from_user_name";
-    private final static String ID = "id";
-
     @Override
     public List<RecommendMenuDO> selectListByParam(RecommendMenuQueryParam recommendMenuQueryParam) {
         QueryWrapper<RecommendMenuDO> queryWrapper = new QueryWrapper<>();
@@ -46,7 +43,7 @@ public class RecommendMenuRepositoryImpl implements RecommendMenuRepository {
         }
         RecommendMenuDO preRecommendDO = recommendMenumapper.selectById(recommendMenuDO.getId());
         if (Objects.nonNull(preRecommendDO)) {
-            CommonUtil.copyProperties(recommendMenuDO, preRecommendDO);
+            CommonUtil.copyPropertiesExceptNull(recommendMenuDO, preRecommendDO);
             recommendMenumapper.updateById(preRecommendDO);
         } else {
             recommendMenumapper.insert(recommendMenuDO);

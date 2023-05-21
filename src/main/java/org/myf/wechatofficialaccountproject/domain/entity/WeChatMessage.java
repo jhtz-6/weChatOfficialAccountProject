@@ -8,9 +8,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.myf.wechatofficialaccountproject.application.dto.FoodDTO;
 import org.myf.wechatofficialaccountproject.application.dto.MaterialDTO;
 import org.myf.wechatofficialaccountproject.application.dto.MenuDTO;
+import org.myf.wechatofficialaccountproject.infrastructure.base.enums.Category;
 import org.myf.wechatofficialaccountproject.infrastructure.base.enums.MsgTypeEnum;
 import org.myf.wechatofficialaccountproject.infrastructure.util.entity.GameFishDTO;
 import org.myf.wechatofficialaccountproject.infrastructure.util.helper.CommonUtil;
+import org.myf.wechatofficialaccountproject.infrastructure.util.helper.ThreadLocalHolder;
 import org.myf.wechatofficialaccountproject.infrastructure.util.helper.WeChatUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +23,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import static org.myf.wechatofficialaccountproject.infrastructure.util.helper.WeChatUtil.FRAGRANCE_MENU_SET;
 import static org.myf.wechatofficialaccountproject.infrastructure.util.helper.WeChatUtil.FuzzyMatchingList;
 
 /**
@@ -43,11 +44,15 @@ public class WeChatMessage {
     private String content;
     private String handleWeChatMessageResult = "";
 
-    public WeChatMessage(String fromUserName, MsgTypeEnum msgType, String picUrl, String content) {
+    private List<MenuDTO> MENU_LIST;
+
+    public WeChatMessage(String fromUserName, MsgTypeEnum msgType, String picUrl, String content,
+        List<MenuDTO> menuDTOList) {
         this.fromUserName = fromUserName;
         this.msgType = msgType;
         this.picUrl = picUrl;
         this.content = content;
+        this.MENU_LIST = menuDTOList;
     }
 
     public String handKeyWord() {
@@ -61,15 +66,18 @@ public class WeChatMessage {
     }
 
     private String getHandleResultByKeyMap() {
-        if (StringUtils.isNotBlank(WeChatUtil.WeChatKeyWordMap.get(content))) {
-            handleWeChatMessageResult = WeChatUtil.WeChatKeyWordMap.get(content);
+        if (StringUtils
+            .isNotBlank(WeChatUtil.WeChatKeyWordMap.get(ThreadLocalHolder.BELONGER_THREAD_LOCAL.get() + content))) {
+            handleWeChatMessageResult =
+                WeChatUtil.WeChatKeyWordMap.get(ThreadLocalHolder.BELONGER_THREAD_LOCAL.get() + content);
         }
         return handleWeChatMessageResult;
     }
 
     private String getHandleResultByKeyList() {
         WeChatUtil.FuzzyMatchingkeyWord fuzzyMatchingkeyWord =
-            FuzzyMatchingList.stream().filter(x -> content.contains(x.getKeyWord())).findAny().orElse(null);
+            FuzzyMatchingList.stream().filter(x -> x.getKeyType().equals(ThreadLocalHolder.BELONGER_THREAD_LOCAL.get())
+                && content.contains(x.getKeyWord())).findAny().orElse(null);
         if (Objects.nonNull(fuzzyMatchingkeyWord)) {
             handleWeChatMessageResult = fuzzyMatchingkeyWord.getFuzzyMatchingResult();
         }
@@ -78,12 +86,12 @@ public class WeChatMessage {
 
     public String errorCorrection() {
         if (content.length() > 2) {
-            List<MenuDTO> menuDTOList = WeChatUtil.MENU_LIST.stream()
-                .filter(x -> x.getFood().contains(content.substring(0, 2))).collect(Collectors.toList());
+            List<MenuDTO> menuDTOList = MENU_LIST.stream().filter(x -> x.getFood().contains(content.substring(0, 2)))
+                .collect(Collectors.toList());
             if (CollectionUtils.isEmpty(menuDTOList) && content.length() >= 3) {
-                menuDTOList = WeChatUtil.MENU_LIST.stream()
-                    .filter(x -> x.getFood().contains(content.substring(content.length() - 2)))
-                    .collect(Collectors.toList());
+                menuDTOList =
+                    MENU_LIST.stream().filter(x -> x.getFood().contains(content.substring(content.length() - 2)))
+                        .collect(Collectors.toList());
             }
             if (CollectionUtils.isNotEmpty(menuDTOList)) {
                 for (MenuDTO menuDTO : menuDTOList) {
@@ -100,14 +108,14 @@ public class WeChatMessage {
         List<MenuDTO> menuDTOList;
         if (WeChatUtil.CATEGORY_MAP.containsKey(content)) {
             Integer beginNum = WeChatUtil.CATEGORY_MAP.get(content);
-            menuDTOList = WeChatUtil.MENU_LIST.stream().filter(x -> content.substring(0, 1).equals(x.getCategory()))
+            menuDTOList = MENU_LIST.stream().filter(x -> content.substring(0, 1).equals(x.getCategory()))
                 .collect(Collectors.toList());
             menuDTOList = menuDTOList.subList(beginNum * 30, Math.min((beginNum + 1) * 30, menuDTOList.size()));
-            if ("普".equals(content)) {
+            if (Category.COMMON.getValue().equals(content)) {
                 handleCategoryResult.append("(请输入【普1】获取剩余的菜谱)\n");
-            } else if ("精".equals(content)) {
+            } else if (Category.PREMIUM.getValue().equals(content)) {
                 handleCategoryResult.append("(请输入【精1】【精2】【精3】【精4】获取剩余的菜谱)\n");
-            } else if ("特".equals(content)) {
+            } else if (Category.SPECIAL.getValue().equals(content)) {
                 handleCategoryResult.append("(请输入【特1】获取剩余的菜谱)\n");
             }
             for (int i = 0; i < menuDTOList.size(); i++) {
@@ -119,8 +127,8 @@ public class WeChatMessage {
             && !content.contains("+") && !content.contains("不要")) {
             if (!content.contains(" ")) {
                 // 想查询菜谱归属者
-                menuDTOList = WeChatUtil.MENU_LIST.stream()
-                    .filter(x -> content.substring(0, 2).equals(x.getBelongUser())).collect(Collectors.toList());
+                menuDTOList = MENU_LIST.stream().filter(x -> content.substring(0, 2).equals(x.getBelongUser()))
+                    .collect(Collectors.toList());
                 if (CollectionUtils.isNotEmpty(menuDTOList)) {
                     Integer ceil = 0;
                     if (content.length() == 2) {
@@ -161,7 +169,7 @@ public class WeChatMessage {
                 }
             } else {
                 String[] contentArray = content.split(" ");
-                menuDTOList = WeChatUtil.MENU_LIST.stream()
+                menuDTOList = MENU_LIST.stream()
                     .filter(x -> contentArray[0].equals(x.getBelongUser()) && contentArray[1].equals(x.getCategory()))
                     .collect(Collectors.toList());
                 for (int i = 0; i < menuDTOList.size(); i++) {
@@ -209,9 +217,9 @@ public class WeChatMessage {
             return null;
         }
         String handleCostPerformanceResult = "";
-        List<MenuDTO> menuList = Lists.newArrayList(WeChatUtil.MENU_LIST);
+        List<MenuDTO> menuList = Lists.newArrayList(MENU_LIST);
         if (!StringUtils.equalsAny(content, "性价比", "坑比")) {
-            menuList = WeChatUtil.MENU_LIST.stream()
+            menuList = MENU_LIST.stream()
                 .filter(
                     x -> StringUtils.isNotBlank(x.getBelongUser()) && x.getBelongUser().equals(content.substring(0, 2)))
                 .collect(Collectors.toList());
@@ -238,7 +246,9 @@ public class WeChatMessage {
 
     public String handleSpecialWord() {
         StringBuilder handleSpecialWordResult = new StringBuilder();
-        List<FoodDTO> foodDTOList = Lists.newArrayList(WeChatUtil.FOOD_LIST);
+        List<FoodDTO> foodDTOList = Lists.newArrayList(WeChatUtil.FOOD_LIST.stream()
+            .filter(x -> ThreadLocalHolder.BELONGER_THREAD_LOCAL.get().equals(x.getBelonger()))
+            .collect(Collectors.toList()));
         if ("菜谱".equals(content)) {
             handleSpecialWordResult = new StringBuilder(
                 "目前盛世芳华共有[" + foodDTOList.size() + "]种菜名(因微信消息长度限制,菜谱需要分两批发送,请发送" + "[菜谱1]、[菜谱2]获取剩下的菜谱),前[100]种如下:");
@@ -270,7 +280,8 @@ public class WeChatMessage {
             return handleFishKeyWordResult;
         }
         if (content.contains("香谱")) {
-            Object[] fraganceMenuArray = FRAGRANCE_MENU_SET.toArray();
+            Object[] fraganceMenuArray =
+                WeChatUtil.FRAGRANCE_MENU_SET_MAP.get(ThreadLocalHolder.BELONGER_THREAD_LOCAL.get()).toArray();
             for (int i = 0; i < fraganceMenuArray.length; i++) {
                 handleFishKeyWordResult += (i + 1) + "、" + ((MenuDTO)fraganceMenuArray[i]).getFood() + ":"
                     + ((MenuDTO)fraganceMenuArray[i]).getRawMaterial() + ";\n";
@@ -290,12 +301,12 @@ public class WeChatMessage {
                 if ((contentArray.length >= 2)) {
                     firstList = materialDTOList.stream().filter(x -> contentArray[1].equals(x.getMaterialName()))
                         .collect(Collectors.toList());
-                    menuDTOList = WeChatUtil.MENU_LIST.stream().filter(x -> contentArray[1].equals(x.getRawMaterial()))
+                    menuDTOList = MENU_LIST.stream().filter(x -> contentArray[1].equals(x.getRawMaterial()))
                         .collect(Collectors.toList());
                 } else {
-                    menuDTOList = WeChatUtil.MENU_LIST.stream()
-                        .filter(x -> materialDTO.getMaterialName().equals(x.getRawMaterial()))
-                        .collect(Collectors.toList());
+                    menuDTOList =
+                        MENU_LIST.stream().filter(x -> materialDTO.getMaterialName().equals(x.getRawMaterial()))
+                            .collect(Collectors.toList());
                 }
                 if (contentArray.length == 3) {
                     menuDTOList = menuDTOList.stream().filter(x -> x.getRawMaterial().contains(contentArray[2]))
@@ -402,8 +413,8 @@ public class WeChatMessage {
         } else if (content.contains("不要")) {
             try {
                 String[] contentArray = content.split("不要");
-                List<MenuDTO> menuDTOList = WeChatUtil.MENU_LIST.stream()
-                    .filter(x -> StringUtils.isNotBlank(x.getBelongUser())).collect(Collectors.toList());
+                List<MenuDTO> menuDTOList = MENU_LIST.stream().filter(x -> StringUtils.isNotBlank(x.getBelongUser()))
+                    .collect(Collectors.toList());
                 if (contentArray.length == 2) {
                     if (StringUtils.isNotBlank(contentArray[0])) {
                         if (contentArray[0].contains("的")) {
@@ -483,7 +494,7 @@ public class WeChatMessage {
             if (content.contains("+")) {
                 String[] contentArray = content.split("\\+");
                 // 想查询指定人物指定材料的菜谱
-                List<MenuDTO> menuDTOList = WeChatUtil.MENU_LIST.stream()
+                List<MenuDTO> menuDTOList = MENU_LIST.stream()
                     .filter(
                         x -> contentArray[0].equals(x.getBelongUser()) && x.getRawMaterial().contains(contentArray[1]))
                     .collect(Collectors.toList());
@@ -522,7 +533,7 @@ public class WeChatMessage {
                             + "】才能实现了啊~~~~99份" + foodname + ",小的只能说大人太壕了";
                     } else {
                         MenuDTO menu = null;
-                        for (MenuDTO menuDTO : WeChatUtil.MENU_LIST) {
+                        for (MenuDTO menuDTO : MENU_LIST) {
                             if (Objects.nonNull(menuDTO.getMaxNum()) && menuDTO.getMaxNum() >= num
                                 && belongUser.equals(menuDTO.getBelongUser()) && Objects.nonNull(menuDTO.getPrice())) {
                                 if (Objects.isNull(menu) || menu.getPrice() > menuDTO.getPrice()) {

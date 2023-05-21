@@ -3,8 +3,8 @@ package org.myf.wechatofficialaccountproject.infrastructure.base.entity;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
+import org.myf.wechatofficialaccountproject.infrastructure.base.enums.SystemBelongEnum;
 
-import java.util.Date;
 
 /**
  * @Author: myf
@@ -32,4 +32,7 @@ public class AdviseDO extends BaseDO {
 
     @TableField("reply_content")
     private String replyContent;
+
+    @TableField("belonger")
+    private SystemBelongEnum belonger;
 }

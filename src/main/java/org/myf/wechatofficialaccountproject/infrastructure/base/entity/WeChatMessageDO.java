@@ -3,8 +3,7 @@ package org.myf.wechatofficialaccountproject.infrastructure.base.entity;
 import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
 import org.myf.wechatofficialaccountproject.infrastructure.base.enums.EventEnum;
-
-import java.util.Date;
+import org.myf.wechatofficialaccountproject.infrastructure.base.enums.SystemBelongEnum;
 
 /**
  * @Author: myf
@@ -44,5 +43,8 @@ public class WeChatMessageDO extends BaseDO {
 
     @TableField("format")
     private String format;
+
+    @TableField("belonger")
+    private SystemBelongEnum belonger;
 
 }

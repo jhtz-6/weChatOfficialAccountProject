@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.util.*;
 
+
 /**
  * @Author: myf
  * @CreateTime: 2023-03-06 22:29
@@ -81,7 +82,7 @@ public class RecommendDomainServiceImpl implements RecommendDomainService {
                     recommendMenuDO.setFromUserName(weChatMessageDTO.getFromUserName());
                     recommendMenuDO.setMenuContent(ocrMenuContentCalue);
                     recommendMenuRepository.saveOrUpdateByID(recommendMenuDO);
-                    handleResult = CommonUtil.recommendMenuByContent("推荐菜谱:" + ocrMenuContentCalue);
+                    handleResult = CommonUtil.recommendMenuByContent(WeChatUtil.RECOMMENDED_MENU + ":" + ocrMenuContentCalue);
                 }
             }
         }

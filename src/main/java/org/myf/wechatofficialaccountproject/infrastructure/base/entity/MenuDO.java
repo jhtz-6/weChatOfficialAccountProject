@@ -3,6 +3,7 @@ package org.myf.wechatofficialaccountproject.infrastructure.base.entity;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
+import org.myf.wechatofficialaccountproject.infrastructure.base.enums.SystemBelongEnum;
 
 import java.util.Date;
 
@@ -41,4 +42,7 @@ public class MenuDO extends BaseDO {
 
     @TableField("cost_performance")
     private Double costPerformance;
+
+    @TableField("belonger")
+    private SystemBelongEnum belonger;
 }

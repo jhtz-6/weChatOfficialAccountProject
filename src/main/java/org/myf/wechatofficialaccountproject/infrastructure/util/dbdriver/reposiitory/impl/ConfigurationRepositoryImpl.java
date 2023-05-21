@@ -6,10 +6,12 @@ import org.myf.wechatofficialaccountproject.infrastructure.base.entity.Configura
 import org.myf.wechatofficialaccountproject.infrastructure.util.dbdriver.Entity.ConfigurationQueryParam;
 import org.myf.wechatofficialaccountproject.infrastructure.util.dbdriver.mapper.ConfigurationMapper;
 import org.myf.wechatofficialaccountproject.infrastructure.util.dbdriver.reposiitory.ConfigurationRepository;
+import org.myf.wechatofficialaccountproject.infrastructure.util.helper.CommonUtil;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @Author: myf
@@ -40,4 +42,19 @@ public class ConfigurationRepositoryImpl implements ConfigurationRepository {
         }
         return configurationMapper.selectList(queryWrapper);
     }
+
+    @Override
+    public int saveOrUpdateById(ConfigurationDO configurationDO) {
+        if (Objects.isNull(configurationDO)) {
+            return 0;
+        }
+        ConfigurationDO preConfigurationDO = configurationMapper.selectById(configurationDO.getId());
+        if (Objects.nonNull(preConfigurationDO)) {
+            CommonUtil.copyPropertiesExceptNull(configurationDO, preConfigurationDO);
+            return configurationMapper.updateById(preConfigurationDO);
+        } else {
+            return configurationMapper.insert(configurationDO);
+        }
+    }
+
 }

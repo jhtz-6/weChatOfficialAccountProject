@@ -49,7 +49,7 @@ public class OpenAiClient {
         OpenAiEventSourceListener eventSourceListener = new OpenAiEventSourceListener(countDownLatch, weChatMessageDTO);
         List<String> chatgptMessageList =
             redisCilent.addStrValueToLimitedList(WeChatUtil.CHATGPT_LIST + weChatMessageDTO.getFromUserName(),
-                weChatMessageDTO.getContent(), WeChatUtil.CHATGPT_LIST_SIZE);
+                weChatMessageDTO.getContent().substring(7), WeChatUtil.CHATGPT_LIST_SIZE);
         ChatCompletion chatCompletion = ChatCompletion
             .builder().model(ChatCompletion.Model.GPT_3_5_TURBO.getName()).messages(chatgptMessageList.stream()
                 .map(x -> Message.builder().role(Message.Role.USER).content(x).build()).collect(Collectors.toList()))

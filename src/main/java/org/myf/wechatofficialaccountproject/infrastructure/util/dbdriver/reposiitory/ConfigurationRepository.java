@@ -12,7 +12,20 @@ import java.util.List;
  */
 public interface ConfigurationRepository {
 
+    /**
+     *
+     * @param name
+     * @return
+     */
     ConfigurationDO selectValueByName(String name);
 
     List<ConfigurationDO> selectListByParam(ConfigurationQueryParam configurationQueryParam);
+
+    /**
+     * 保存或更新数据
+     *
+     * @param configurationDO
+     * @return
+     */
+    int saveOrUpdateById(ConfigurationDO configurationDO);
 }

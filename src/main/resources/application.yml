@@ -10,6 +10,13 @@ max-http-header-size: 102400
 spring:
   application:
     name: myf
+  thymeleaf:
+    prefix: classpath:/templates/
+    check-template-location: true
+    suffix: .html
+    encoding: UTF-8
+    mode: HTML5
+    cache: false
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/myf?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf8

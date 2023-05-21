@@ -25,7 +25,7 @@ public class AdviseRepositoryImpl implements AdviseRepository {
         if (Objects.nonNull(adviseDO.getId())) {
             AdviseDO adviseDOResult = adviseMapper.selectById(adviseDO.getId());
             if (Objects.nonNull(adviseDOResult)) {
-                CommonUtil.copyProperties(adviseDO, adviseDOResult);
+                CommonUtil.copyPropertiesExceptNull(adviseDO, adviseDOResult);
                 return adviseMapper.updateById(adviseDOResult);
             }
         }

@@ -1,4 +1,4 @@
-package org.myf.wechatofficialaccountproject.domain.service.chain.impl;
+package org.myf.wechatofficialaccountproject.domain.service.chain.impl.handler;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -9,7 +9,9 @@ import org.myf.wechatofficialaccountproject.application.dto.WeChatMessageDTO;
 import org.myf.wechatofficialaccountproject.domain.service.chain.MessageContentHandler;
 import org.myf.wechatofficialaccountproject.infrastructure.base.enums.MsgTypeEnum;
 import org.myf.wechatofficialaccountproject.infrastructure.util.helper.CommonUtil;
+import org.myf.wechatofficialaccountproject.infrastructure.util.helper.ThreadLocalHolder;
 import org.myf.wechatofficialaccountproject.infrastructure.util.helper.WeChatUtil;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Objects;
@@ -20,6 +22,7 @@ import java.util.stream.Collectors;
  * @CreateTime: 2023-04-17 12:13
  * @Description: 查询食物或食材相关逻辑
  */
+@Service
 public class QueryFoodOrMaterialHandler implements MessageContentHandler {
 
     @Override
@@ -30,12 +33,14 @@ public class QueryFoodOrMaterialHandler implements MessageContentHandler {
         int index = 1;
         for (String contentStr : contentArray) {
             if (StringUtils.isNotBlank(contentStr)) {
-                List<FoodDTO> foodDOList = WeChatUtil.FOOD_LIST.stream().filter(x -> contentStr.equals(x.getFoodName()))
+                List<FoodDTO> foodDOList = WeChatUtil.FOOD_LIST.stream()
+                    .filter(x -> ThreadLocalHolder.BELONGER_THREAD_LOCAL.get().equals(x.getBelonger())
+                        && contentStr.equals(x.getFoodName()))
                     .collect(Collectors.toList());
                 if (CollectionUtils.isNotEmpty(foodDOList)) {
                     // 说明填的是food 想要查询material
-                    List<MenuDTO> menuList = WeChatUtil.MENU_LIST.stream().filter(x -> contentStr.equals(x.getFood()))
-                        .collect(Collectors.toList());
+                    List<MenuDTO> menuList = WeChatUtil.MENU_LIST_MAP.get(ThreadLocalHolder.BELONGER_THREAD_LOCAL.get())
+                        .stream().filter(x -> contentStr.equals(x.getFood())).collect(Collectors.toList());
                     if (CollectionUtils.isNotEmpty(menuList)) {
                         for (MenuDTO menuDTO : menuList) {
                             if (contentArray.length > 1) {
@@ -59,8 +64,9 @@ public class QueryFoodOrMaterialHandler implements MessageContentHandler {
                         .filter(x -> contentStr.equals(x.getMaterialName())).collect(Collectors.toList());
                     if (CollectionUtils.isNotEmpty(materialList)) {
                         MaterialDTO materialDTO = materialList.get(0);
-                        List<MenuDTO> menuList = WeChatUtil.MENU_LIST.stream()
-                            .filter(x -> x.getRawMaterial().contains(contentStr)).collect(Collectors.toList());
+                        List<MenuDTO> menuList =
+                            WeChatUtil.MENU_LIST_MAP.get(ThreadLocalHolder.BELONGER_THREAD_LOCAL.get()).stream()
+                                .filter(x -> x.getRawMaterial().contains(contentStr)).collect(Collectors.toList());
                         if (CollectionUtils.isNotEmpty(menuList)) {
                             if (Objects.nonNull(materialDTO.getNum()) && Objects.nonNull(materialDTO.getPrice())) {
                                 queryFoodOrMaterialResult = new StringBuilder(materialDTO.getMaterialName() + "最低价格是:"
@@ -100,13 +106,8 @@ public class QueryFoodOrMaterialHandler implements MessageContentHandler {
 
     @Override
     public boolean isMatched(WeChatMessageDTO weChatMessageDTO) {
-        if (!StringUtils.equalsAny(weChatMessageDTO.getMsgType(), MsgTypeEnum.TEXT.name, MsgTypeEnum.VOICE.name)) {
-            return false;
-        }
-        if (weChatMessageDTO.getContent().startsWith("独特") || weChatMessageDTO.getContent().startsWith("建议")) {
-            return false;
-        }
-        return true;
+        return !(!StringUtils.equalsAny(weChatMessageDTO.getMsgType(), MsgTypeEnum.TEXT.name, MsgTypeEnum.VOICE.name)
+            || weChatMessageDTO.getContent().startsWith("独特") || weChatMessageDTO.getContent().startsWith("建议"));
     }
 
     @Override

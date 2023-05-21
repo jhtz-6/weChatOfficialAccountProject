@@ -1,4 +1,4 @@
-package org.myf.wechatofficialaccountproject.domain.service.chain.impl;
+package org.myf.wechatofficialaccountproject.domain.service.chain.impl.handler;
 
 import org.apache.commons.lang3.StringUtils;
 import org.myf.wechatofficialaccountproject.application.dto.WeChatMessageDTO;
@@ -6,33 +6,33 @@ import org.myf.wechatofficialaccountproject.domain.service.chain.MessageContentH
 import org.myf.wechatofficialaccountproject.infrastructure.base.entity.SubscribeDO;
 import org.myf.wechatofficialaccountproject.infrastructure.util.dbdriver.Entity.SubscribeQueryParam;
 import org.myf.wechatofficialaccountproject.infrastructure.util.dbdriver.reposiitory.SubscribeRepository;
-import org.myf.wechatofficialaccountproject.infrastructure.util.helper.ApplicationContextUtil;
 import org.myf.wechatofficialaccountproject.infrastructure.util.helper.WeChatUtil;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.Objects;
+
+import static org.myf.wechatofficialaccountproject.domain.service.chain.MessageContentHandler.RegisterArea.REGISTER_TIP;
 
 /**
  * @Author: myf
  * @CreateTime: 2023-04-17 12:11
  * @Description: 处理区服登记相关处理器
  */
-
+@Service
 public class RegisterAreaHandler implements MessageContentHandler {
-
-    static SubscribeRepository subscribeRepository;
+    @Autowired
+    SubscribeRepository subscribeRepository;
 
     @Override
     public String handlerMessageContent(WeChatMessageDTO weChatMessageDTO) {
-        if (Objects.isNull(subscribeRepository)) {
-            subscribeRepository = (SubscribeRepository)ApplicationContextUtil.getBeanByName("subscribeRepositoryImpl");
-        }
         SubscribeQueryParam subscribeQueryParam = new SubscribeQueryParam();
         subscribeQueryParam.setSubscriber(weChatMessageDTO.getFromUserName());
         SubscribeDO subscribeDO = subscribeRepository.selectOneByParam(subscribeQueryParam);
         if (Objects.nonNull(subscribeDO) && StringUtils.isEmpty(subscribeDO.getArea())) {
             subscribeDO.setArea("已发送");
             subscribeRepository.saveOrUpdateId(subscribeDO);
-            return "(请大人登记下所在区服(多个区服之间用;隔开),示例:【区服:倾国倾城;有凤来仪】)";
+            return REGISTER_TIP;
         }
         if (StringUtils.isNotBlank(weChatMessageDTO.getContent()) && weChatMessageDTO.getContent().contains("区服")) {
             subscribeDO.setSubscriber(weChatMessageDTO.getFromUserName());

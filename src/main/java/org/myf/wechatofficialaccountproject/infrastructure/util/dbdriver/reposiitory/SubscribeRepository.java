@@ -6,7 +6,7 @@ import org.myf.wechatofficialaccountproject.infrastructure.util.dbdriver.Entity.
 /**
  * @author myf
  */
-public interface SubscribeRepository {
+public interface SubscribeRepository extends BaseRepository{
 
     /**
      * selectOneByParam

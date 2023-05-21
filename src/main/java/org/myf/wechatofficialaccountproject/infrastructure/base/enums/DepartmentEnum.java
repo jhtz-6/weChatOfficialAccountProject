@@ -6,7 +6,7 @@ package org.myf.wechatofficialaccountproject.infrastructure.base.enums;
  */
 public enum DepartmentEnum {
 
-    WATER("water", "水系"), FIRE("fire", "火系"), WOOD("wood", "木系"), SUN("sun", "阳系"), YIN("yin", "阴系");
+    WATER("WATER", "水系"), FIRE("FIRE", "火系"), WOOD("WOOD", "木系"), SUN("SUN", "阳系"), YIN("YIN", "阴系");
 
     private String enName;
 

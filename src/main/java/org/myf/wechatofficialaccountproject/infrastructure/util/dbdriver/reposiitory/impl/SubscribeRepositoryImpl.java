@@ -23,10 +23,7 @@ public class SubscribeRepositoryImpl implements SubscribeRepository {
     @Resource
     SubscribeMapper subscribeMapper;
 
-    private final static String SUBSCRIBER = "subscriber";
-    private final static String AREA = "area";
-    private final static String STATUS = "status";
-    private final static String ID = "id";
+
 
     @Override
     public SubscribeDO selectOneByParam(SubscribeQueryParam subscribeQueryParam) {
@@ -43,6 +40,9 @@ public class SubscribeRepositoryImpl implements SubscribeRepository {
         if (Objects.nonNull(subscribeQueryParam.getId())) {
             subscribeDOQueryWrapper.eq(ID, subscribeQueryParam.getId());
         }
+        if (Objects.nonNull(subscribeQueryParam.getBelonger())) {
+            subscribeDOQueryWrapper.eq(BELONGER, subscribeQueryParam.getBelonger());
+        }
         return subscribeMapper.selectOne(subscribeDOQueryWrapper);
     }
 
@@ -53,7 +53,7 @@ public class SubscribeRepositoryImpl implements SubscribeRepository {
         }
         SubscribeDO preSubscribeDO = subscribeMapper.selectById(subscribeDO.getId());
         if (Objects.nonNull(preSubscribeDO)) {
-            CommonUtil.copyProperties(subscribeDO, preSubscribeDO);
+            CommonUtil.copyPropertiesExceptNull(subscribeDO, preSubscribeDO);
             subscribeMapper.updateById(preSubscribeDO);
         } else {
             subscribeMapper.insert(subscribeDO);

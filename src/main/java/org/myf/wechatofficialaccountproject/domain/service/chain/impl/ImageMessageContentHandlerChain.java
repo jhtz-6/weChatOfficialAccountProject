@@ -1,13 +1,12 @@
 package org.myf.wechatofficialaccountproject.domain.service.chain.impl;
 
-import com.google.common.collect.Lists;
 import org.apache.commons.collections.CollectionUtils;
 import org.myf.wechatofficialaccountproject.application.dto.WeChatMessageDTO;
 import org.myf.wechatofficialaccountproject.domain.service.chain.MessageContentHandler;
 import org.myf.wechatofficialaccountproject.domain.service.chain.MessageContentHandlerChain;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
 import java.util.List;
 
 /**
@@ -17,22 +16,15 @@ import java.util.List;
  */
 @Service
 public class ImageMessageContentHandlerChain extends MessageContentHandlerChain {
-    private static final List<MessageContentHandler> imageMessageContentHandlerList = Lists.newLinkedList();
-
-    public void addMessageContentHandler(MessageContentHandler messageContentHandler) {
-        super.addMessageContentHandler(messageContentHandler, imageMessageContentHandlerList);
-    }
+    @Autowired
+    List<MessageContentHandler> messageContentHandlerList;
 
     @Override
     public String handleMessageContentByChain(WeChatMessageDTO weChatMessageDTO,
         List<MessageContentHandler> messageContentHandlerList) {
-        return super.handleMessageContentByChain(weChatMessageDTO, CollectionUtils.isNotEmpty(messageContentHandlerList)
-            ? messageContentHandlerList : imageMessageContentHandlerList);
+        return super.handleMessageContentByChain(weChatMessageDTO,
+            CollectionUtils.isNotEmpty(messageContentHandlerList) ? messageContentHandlerList
+                : createMessageContentHandlerChain(this.messageContentHandlerList, this.getClass()));
     }
 
-    @PostConstruct
-    @Override
-    protected void createMessageContentHandlerChain() {
-        imageMessageContentHandlerList.add(new ImageByBaiduOcrHandler());
-    }
 }

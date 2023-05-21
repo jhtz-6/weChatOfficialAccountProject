@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * @author myf
  */
-public interface FoodRepository {
+public interface FoodRepository extends BaseRepository{
 
     /**
      * selectListByParam
@@ -17,4 +17,12 @@ public interface FoodRepository {
      * @return
      */
     List<FoodDO> selectListByParam(FoodQueryParam foodQueryParam);
+
+    /**
+     * 保存或更新数据
+     *
+     * @param foodDO
+     * @return
+     */
+    int saveOrUpdateById(FoodDO foodDO);
 }

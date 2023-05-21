@@ -1,7 +1,6 @@
 package org.myf.wechatofficialaccountproject.infrastructure.base.enums;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
 
 /**
  * @Author: myf

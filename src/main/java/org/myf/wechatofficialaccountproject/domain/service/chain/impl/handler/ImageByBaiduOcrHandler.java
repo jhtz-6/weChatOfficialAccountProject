@@ -1,4 +1,4 @@
-package org.myf.wechatofficialaccountproject.domain.service.chain.impl;
+package org.myf.wechatofficialaccountproject.domain.service.chain.impl.handler;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -13,7 +13,10 @@ import org.myf.wechatofficialaccountproject.infrastructure.util.entity.BaiduOcrR
 import org.myf.wechatofficialaccountproject.infrastructure.util.entity.BaiduOcrWordsResult;
 import org.myf.wechatofficialaccountproject.infrastructure.util.helper.ApplicationContextUtil;
 import org.myf.wechatofficialaccountproject.infrastructure.util.helper.CommonUtil;
+import org.myf.wechatofficialaccountproject.infrastructure.util.helper.ThreadLocalHolder;
 import org.myf.wechatofficialaccountproject.infrastructure.util.helper.WeChatUtil;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Objects;
@@ -24,19 +27,15 @@ import java.util.stream.Collectors;
  * @CreateTime: 2023-04-17 12:13
  * @Description: 百度OCR处理图片相关逻辑
  */
+@Service
 public class ImageByBaiduOcrHandler implements MessageContentHandler {
-
-    static BaiduOcrClient baiduOcrClient;
-    static RedisCilent redisCilent;
+    @Autowired
+    BaiduOcrClient baiduOcrClient;
+    @Autowired
+    RedisCilent redisCilent;
 
     @Override
     public String handlerMessageContent(WeChatMessageDTO weChatMessageDTO) {
-        if (Objects.isNull(baiduOcrClient)) {
-            baiduOcrClient = (BaiduOcrClient)ApplicationContextUtil.getBeanByName("baiduOcrClient");
-        }
-        if (Objects.isNull(redisCilent)) {
-            redisCilent = (RedisCilent)ApplicationContextUtil.getBeanByName("redisCilent");
-        }
         String handleImageResult = "";
         if (BooleanEnum.TRUE.value
             .equals(redisCilent.getValueByKey(WeChatUtil.OCR_MENU_ACTION + weChatMessageDTO.getFromUserName()))) {
@@ -94,12 +93,12 @@ public class ImageByBaiduOcrHandler implements MessageContentHandler {
                     return "大人,您是要和我斗图吗？\n对于图片我有如下功能关键词:【文字识别开始】、【菜谱识图】";
                 }
                 List<String> ResultStrList = resultList.stream().map(x -> x.getWords()).collect(Collectors.toList());
-                List<MenuDTO> menuList = WeChatUtil.MENU_LIST.stream()
-                    .filter(x -> ResultStrList.contains(x.getFood().trim())).collect(Collectors.toList());
+                List<MenuDTO> menuList = WeChatUtil.MENU_LIST_MAP.get(ThreadLocalHolder.BELONGER_THREAD_LOCAL.get())
+                    .stream().filter(x -> ResultStrList.contains(x.getFood().trim())).collect(Collectors.toList());
                 if (CollectionUtils.isNotEmpty(menuList)) {
                     for (int i = 0; i < menuList.size(); i++) {
                         MenuDTO menuDTO = new MenuDTO();
-                        CommonUtil.copyProperties(menuList.get(i), menuDTO);
+                        CommonUtil.copyPropertiesWithNull(menuList.get(i), menuDTO);
                         handleImageResult =
                             handleImageResult + (i + 1) + "、" + CommonUtil.conactMenuOneUserWithCost(menuDTO) + "\n";
                     }
@@ -113,10 +112,7 @@ public class ImageByBaiduOcrHandler implements MessageContentHandler {
 
     @Override
     public boolean isMatched(WeChatMessageDTO weChatMessageDTO) {
-        if (!MsgTypeEnum.IMAGE.name.equals(weChatMessageDTO.getMsgType())) {
-            return false;
-        }
-        return true;
+        return MsgTypeEnum.IMAGE.name.equals(weChatMessageDTO.getMsgType());
     }
 
     @Override

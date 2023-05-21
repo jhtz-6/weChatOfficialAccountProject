@@ -5,10 +5,12 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import org.myf.wechatofficialaccountproject.application.dto.AccompanyDTO;
 import org.myf.wechatofficialaccountproject.application.dto.FoodDTO;
 import org.myf.wechatofficialaccountproject.application.dto.MaterialDTO;
 import org.myf.wechatofficialaccountproject.application.dto.MenuDTO;
-import org.myf.wechatofficialaccountproject.infrastructure.base.enums.AccompanyEnum;
+import org.myf.wechatofficialaccountproject.infrastructure.base.enums.KeyTypeEnum;
+import org.myf.wechatofficialaccountproject.infrastructure.base.enums.SystemBelongEnum;
 import org.myf.wechatofficialaccountproject.infrastructure.util.entity.GameFishDTO;
 
 import java.util.*;
@@ -76,6 +78,7 @@ public final class WeChatUtil {
     public static final String OCR_MENU_ACTION = "ocr_menu_action:";
     public static final String OCR_MENU_CONTENT = "ocr_menu_content:";
     public static List<MenuDTO> MENU_LIST = Lists.newArrayList();
+    public static Map<SystemBelongEnum,List<MenuDTO>> MENU_LIST_MAP = Maps.newHashMap();
     public static List<MaterialDTO> MATERIAL_LIST = Lists.newArrayList();
     public static List<FoodDTO> FOOD_LIST = Lists.newArrayList();
     public static List<String> MATERIAL_NAME_LIST = new ArrayList<>();
@@ -91,9 +94,10 @@ public final class WeChatUtil {
     public static List<String> RECOMMEND_MENU_LIST = new ArrayList<>();
     public static Map<String, GameFishDTO> FISH_MAP;
     public static List<String> FISH_KEY_WORDS = Lists.newArrayList();
-    public static Map<String, AccompanyEnum> ACCOMPANY_MAP = new HashMap<>();
+    public static Map<String, AccompanyDTO> ACCOMPANY_MAP = new HashMap<>();
     public static Map<String, Integer> CATEGORY_MAP = new HashMap<>();
     public static Set<MenuDTO> FRAGRANCE_MENU_SET = Sets.newHashSet();
+    public static Map<SystemBelongEnum,Set<MenuDTO>> FRAGRANCE_MENU_SET_MAP = Maps.newHashMap();
     public static List<String> BELONG_USER_COSTPERFORMANCE_LIST = new ArrayList<>();
     public static List<String> AREA_LIST = new ArrayList<>();
     public static String TENCENT_APPKEY = "TENCENT_APPKEY";
@@ -117,40 +121,18 @@ public final class WeChatUtil {
     public static int CHATGPT_LIST_SIZE = 15;
     public static Map<String, Integer> CHATGPT_NUM_MAP = new HashMap<>();
     public static int CHATGPT_NUM = 15;
+    public static String RECOMMENDED_MENU = "推荐菜谱";
+    public static String USER_NAME = "userName";
+    public static String LOGIN_PASSWORD = "loginPassword";
+    public static String USER_PHOTO = "userPhoto";
+    public static String DEFAULT_USER_NAME = "游客(点击登录)";
+    public static Map<String, SystemBelongEnum> USER_TO_BELONGER_MAP = Maps.newHashMap();
+    public static String DEFAULT_LAST_HANDLER_RESULT = "没有找到对应的处理器,请联系管理员进行配置~~";
+    public static String SUBSCRIBE_TO_WORD = "关注回复";
 
     static {
-        WeChatKeyWordMap.put("赛马", SM_URL);
-        WeChatKeyWordMap.put("跑马", SM_URL);
-        WeChatKeyWordMap.put("excel", "http://110.40.208.47:8088/xwxsb/weChat/menuExcel\n\n第一个sheet页是菜谱;第二个sheet页是价格");
-        WeChatKeyWordMap.put("EXCEL", "http://110.40.208.47:8088/xwxsb/weChat/menuExcel\n\n第一个sheet页是菜谱;第二个sheet页是价格");
-        WeChatKeyWordMap.put("价格表", "http://110.40.208.47:8088/xwxsb/weChat/menuExcel\n\n第一个sheet页是菜谱;第二个sheet页是价格");
-        WeChatKeyWordMap.put("价格", "http://110.40.208.47:8088/xwxsb/weChat/menuExcel\n\n第一个sheet页是菜谱;第二个sheet页是价格");
-        WeChatKeyWordMap.put("盛世芳华管理员", "ssfh666");
-        WeChatKeyWordMap.put("菜谱推荐", MENU_RECOMEND_URL);
-        WeChatKeyWordMap.put("推荐菜谱", MENU_RECOMEND_URL);
-        WeChatKeyWordMap.put("紫笋茶", "紫笋茶是趣物,不是菜。");
-        WeChatKeyWordMap.put("投稿", TG_UTL);
-        WeChatKeyWordMap.put("建议", JY_URL);
-        WeChatKeyWordMap.put("吃瓜",
-            "https://mp.weixin.qq.com/mp/appmsgalbum?__biz=MzkzNzE4OTAyMA==&action=getalbum&album_id=2794944040499642370#wechat_redirect");
-        WeChatKeyWordMap.put("阵容", ACCOMPANY_RECCOMEND);
-        WeChatKeyWordMap.put("阵容推荐", ACCOMPANY_RECCOMEND);
-        WeChatKeyWordMap.put("推荐阵容", ACCOMPANY_RECCOMEND);
-        WeChatKeyWordMap.put("兑换码", LBM);
-        WeChatKeyWordMap.put("礼包码", LBM);
-        WeChatKeyWordMap.put("小屋写随笔", XWXSB);
-        WeChatKeyWordMap.put("excel密码", "xwxsb");
-        WeChatKeyWordMap.put("关键词", "请把链接复制到浏览器中打开\nhttps://110.40.208.47:8089/xwxsb_gjc.xlsx");
-        WeChatKeyWordMap.put("菜谱识图",
-            "https://mp.weixin.qq.com/s?__biz=MzkzNzE4OTAyMA==&mid=2247484029&idx=1&sn=9a48771aa"
-                + "39df1ad419c1876f64a5fd6&chksm=c292098ef5e58098292db1aa774c8ac3bc1b590c63b644d57cb5678526e741129d4f18561ad1#rd");
-        WeChatKeyWordMap.put("语音",
-            "https://mp.weixin.qq.com/s?__biz=MzkzNzE4OTAyMA==&mid=2247483830&idx=1&sn=9ee009931abfc"
-                + "7fe3c85a0f3c8a39139&chksm=c2920a45f5e58353c770b058ab5f84255d367bb2e8f0c36bb337e22e3ddec7af33b8b375790b#rd");
-        WeChatKeyWordMap.put("添加", "你好,众人拾柴火焰高,2021/11/06菜谱添加功能上线,示例使用如下:发送关键字【蛋炒饭:米饭+鸡蛋】即可添加。格式一定要对哦~~");
-        WeChatKeyWordMap.put("紧急", "如果想发信息给我,可以直接在关键字【紧急】后面跟内容即可,就会把这条信息以短信的形式发到我的手机上;" + "示例(不需要【】):【紧急我要找到你不管南北东西】");
 
-        RECOMMEND_MENU_LIST.add("推荐菜谱");
+        RECOMMEND_MENU_LIST.add(RECOMMENDED_MENU);
         RECOMMEND_MENU_LIST.add("推荐性价比菜谱");
         RECOMMEND_MENU_LIST.add("推荐最高分菜谱");
         RECOMMEND_MENU_LIST.add("推荐王爷性价比菜谱");
@@ -256,9 +238,6 @@ public final class WeChatUtil {
         AREA_LIST.add("锦绣年华");
         AREA_LIST.add("沉鱼落雁");
 
-        for (AccompanyEnum accompany : AccompanyEnum.values()) {
-            ACCOMPANY_MAP.put(accompany.getCharacterName(), accompany);
-        }
     }
 
     @Data
@@ -266,29 +245,9 @@ public final class WeChatUtil {
     public static class FuzzyMatchingkeyWord {
         String keyWord;
         String fuzzyMatchingResult;
+        KeyTypeEnum keyType;
     }
 
-    public final static List<FuzzyMatchingkeyWord> FuzzyMatchingList = Lists.newArrayList(new FuzzyMatchingkeyWord("玉佩",
-        "https://mp.weixin.qq.com/s?__biz=MzkzNzE4OTAyMA==&mid=2247483846&idx=1&sn=e154af48e326827305d74096e421dd27&chksm=c2920a35f5e58323ba4b917cc252266736818376dde740a13b2f91894fbb17ef07ef0ec5c1e4#rd"),
-        new FuzzyMatchingkeyWord("随从",
-            "https://mp.weixin.qq.com/s?__biz=MzkzNzE4OTAyMA==&mid=2247483835&idx=1&sn=fcdc2159da74c1b5606e27bdcce6d1bb&chksm=c2920a48f5e5835e8984d0afd851da67a5732d623ff710af05cd2bbfe03079af9182ccbe9095#rd"),
-        new FuzzyMatchingkeyWord("饕餮",
-            "https://mp.weixin.qq.com/s?__biz=MzkzNzE4OTAyMA==&mid=2247483841&idx=1&sn=284df6e9dc54348b165e2e5383612cf1&chksm=c2920a32f5e58324bbfb0f71d571a2dbf8ae5518b2eec7db4f497aba6229efd059fe7813f136#rd"),
-        new FuzzyMatchingkeyWord("钓鱼",
-            "https://mp.weixin.qq.com/s?__biz=MzkzNzE4OTAyMA==&mid=2247483861&idx=1&sn=d849b1dd97038f8d8c3de631bc4fc310&chksm=\" +\n"
-                + "                    \"c2920a26f5e583308a8b223df6b5a38c58b50bc6eb7788cbf6cb03f04551814ba1d04944be5a#rd\\n\\n 该钓鱼攻略很久没更新了,建议通过关键词来查询:【橙色鱼】、【紫色鱼】"),
-        new FuzzyMatchingkeyWord("合服",
-            "https://mp.weixin.qq.com/s?__biz=MzkzNzE4OTAyMA==&mid=2247484313&idx=1&sn=c39ac3868aa55438b58181992eadeb72&chksm=c292086af5e5817c2ab3db6646a069754c021c447dae13c331aaffbab38973926ab9ce28d2e0#rd"),
-        new FuzzyMatchingkeyWord("升级", UPGRADE), new FuzzyMatchingkeyWord("升星", UPGRADE),
-        new FuzzyMatchingkeyWord("并蒂双莲",
-            "https://mp.weixin.qq.com/s?__biz=MzkzNzE4OTAyMA==&mid=2247484394&idx=1&sn=5c16f8ddb89262832e2d97c2f052d1a9&chksm=c2920819f5e5810f6c304a4f0258902df9dc00d3be38599b2d78b57b66b4f8432378207b1090#rd"),
-        new FuzzyMatchingkeyWord("加群", TO_GROUP), new FuzzyMatchingkeyWord("进群", TO_GROUP),
-        new FuzzyMatchingkeyWord("大朝会",
-            "大朝会攻略: https://mp.weixin.qq.com/s?__biz=MzkzNzE4OTAyMA==&mid=2247484790&idx=1&sn=a643dba1e4fe084a5f6509bc6b14a7cb&chksm=c2920e85f5e58793cd86adfb412263cef0563b9ecd02c1ffa32f422308ac80505983acbc3cd2#rd"
-                + "\n\n大朝会系列视频可以在微信视频号搜索小屋写随笔进行查看"),
-        new FuzzyMatchingkeyWord("百转千回", BZQH),
-        new FuzzyMatchingkeyWord("雅宴谜集", "https://kdocs.cn/l/cs06sz40MAIw\n\n做了一个文档所有人可以编辑,有新题目大家直接补充就行了,注意颜色就行。"),
-        new FuzzyMatchingkeyWord("答题", "https://kdocs.cn/l/cs06sz40MAIw\n\n做了一个文档所有人可以编辑,有新题目大家直接补充就行了,注意颜色就行。"),
-        new FuzzyMatchingkeyWord("周年庆", "周年庆已有活动攻略关键词:【百转千回】、【雅宴谜集】\n\n其它活动持续更新中,也欢迎大家投稿活动攻略(有奖励哦)~~~"));
+    public final static List<FuzzyMatchingkeyWord> FuzzyMatchingList = Lists.newArrayList();
 
 }

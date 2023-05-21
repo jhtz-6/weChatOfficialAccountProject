@@ -11,6 +11,6 @@ public interface WeChatApplicationService {
      * @param map
      * @return WeChatMessageDTO
      */
-    String handleMsgbyMap(Map<String, String> map);
+    String handleMsgByMap(Map<String, String> map);
 
 }

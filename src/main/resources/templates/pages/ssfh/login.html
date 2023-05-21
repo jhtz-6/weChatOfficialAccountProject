@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <!-- import CSS -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="https://110.40.208.47:8089/photo/shortcut.jpg">
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <!-- import Vue before Element -->
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.min.js"></script>    <!-- import JavaScript -->
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="https://unpkg.com/vue-router@3"></script>
+    <title>登录</title>
+
+</head>
+<body>
+<div id="login" >
+    <div class="login-bg"></div>
+    <el-card class="login-card" >
+        <h2 class="login-title">欢迎主儿登录</h2>
+        <el-form :model="loginForm" status-icon ref="loginForm" label-width="80px" class="login-form">
+            <el-form-item label="账号" prop="loginName">
+                <el-input type="input" v-model="loginForm.loginName" placeholder="请输入账号"></el-input>
+            </el-form-item>
+            <el-form-item label="密码" prop="loginPassword">
+                <el-input type="password" v-model="loginForm.loginPassword" placeholder="请输入密码"></el-input>
+            </el-form-item>
+            <el-form-item>
+                <div class="login-buttons">
+                    <el-button type="primary" class="login-button" @click="submitLoginForm('loginForm')">登录</el-button>
+                    <el-button @click="resetForm('loginForm')">重置</el-button>
+                </div>
+            </el-form-item>
+        </el-form>
+    </el-card>
+</div>
+
+
+</body>
+<style>
+    #login {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        width: 100%; /* 添加这一行 */
+        margin: 0 auto;
+    }
+    .login-bg {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: url(https://i.loli.net/2019/11/17/GAYyzeKsiWjP5qO.jpg);
+        background-size: cover;
+        z-index: -1;
+    }
+
+    .login-card {
+        border: none;
+        box-shadow: none;
+        background-color: transparent;
+    }
+
+    .login-title {
+        font-size: 24px;
+        margin-bottom: 20px;
+    }
+
+    .login-form {
+        width: 300px;
+        margin: 0 auto;
+    }
+
+    .login-buttons {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 20px;
+    }
+
+    .login-button {
+        width: 48%;
+    }
+
+
+    @keyframes fadeIn {
+        0% {
+            opacity: 0;
+        }
+        100% {
+            opacity: 1;
+        }
+    }
+
+</style>
+
+<script th:inline="javascript">
+
+    const routes = [
+        {
+            path: '/index',
+            component: { template: '<div>首页内容</div>' } // 首页内容
+        },
+        {
+            path: '/login',
+            component: { template: '<div>登录页面内容</div>' } // 登录页面内容
+        },
+        // 其他路由配置...
+    ];
+
+    const router = new VueRouter({
+        mode: 'history',
+        base: '/xwxsb/ssfh/', // 设置基础路径
+        routes
+    });
+    new Vue({
+        el: '#login',
+        router : router,
+        methods: {
+            submitLoginForm(){
+
+                if( this.loginForm.loginName == null || this.loginForm.loginName==''){
+                    this.$message({
+                        message: "账号不能为空",
+                        type: 'warning'
+                    });
+                    return false;
+                };
+                if( this.loginForm.loginPassword == null || this.loginForm.loginPassword==''){
+                    this.$message({
+                        message: "密码不能为空",
+                        type: 'warning'
+                    });
+                    return false;
+                };
+                axios({
+                    url: 'login',
+                    method: 'post',
+                    data: this.loginForm,
+                    transformRequest: [function (data) {
+                        data = JSON.stringify(data)
+                        return data
+                    }],
+                    headers: {
+                        'Content-Type': 'application/json;charset=UTF-8'
+                    }
+                }).then(response =>{
+                    if(response.data.result == true){
+                        window.location.href = 'index'
+                    }else{
+                        this.$message({
+                            message: response.data.errorMessage,
+                            type: 'warning'
+                        });
+                    }
+
+                });
+            },resetForm(formName) {
+                this.$refs[formName].resetFields();
+            }
+        },
+        mounted() {
+            // 在mounted钩子中设置animated为true，触发CSS动画效果
+        },
+
+        data() {
+            return {
+                loginForm: {
+                    loginName: '',
+                    loginPassword: ''
+                },
+            };
+            }
+    })
+</script>
+
+</html>

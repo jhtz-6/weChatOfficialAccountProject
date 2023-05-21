@@ -1,4 +1,4 @@
-package org.myf.wechatofficialaccountproject.domain.service.chain.impl;
+package org.myf.wechatofficialaccountproject.domain.service.chain.impl.handler;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -10,36 +10,32 @@ import org.myf.wechatofficialaccountproject.infrastructure.base.enums.MsgTypeEnu
 import org.myf.wechatofficialaccountproject.infrastructure.util.client.RedisCilent;
 import org.myf.wechatofficialaccountproject.infrastructure.util.dbdriver.Entity.RecommendMenuQueryParam;
 import org.myf.wechatofficialaccountproject.infrastructure.util.dbdriver.reposiitory.RecommendMenuRepository;
-import org.myf.wechatofficialaccountproject.infrastructure.util.helper.ApplicationContextUtil;
 import org.myf.wechatofficialaccountproject.infrastructure.util.helper.CommonUtil;
 import org.myf.wechatofficialaccountproject.infrastructure.util.helper.WeChatUtil;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Objects;
 
 /**
  * @Author: myf
  * @CreateTime: 2023-04-17 12:12
  * @Description: 关键字"文字识别"相关逻辑
  */
+@Service
 public class CharacterRecognitionHandler implements MessageContentHandler {
 
-    static RecommendMenuRepository recommendMenuRepository;
-    static RedisCilent redisCilent;
+    @Autowired
+    RecommendMenuRepository recommendMenuRepository;
+    @Autowired
+    RedisCilent redisCilent;
 
     @Override
     public String handlerMessageContent(WeChatMessageDTO weChatMessageDTO) {
-        if (Objects.isNull(recommendMenuRepository)) {
-            recommendMenuRepository =
-                (RecommendMenuRepository)ApplicationContextUtil.getBeanByName("recommendMenuRepositoryImpl");
-        }
-        if (Objects.isNull(redisCilent)) {
-            redisCilent = (RedisCilent)ApplicationContextUtil.getBeanByName("redisCilent");
-        }
         String handleResult = "";
         String ocrMenuContentKey = WeChatUtil.OCR_MENU_CONTENT + weChatMessageDTO.getFromUserName();
         String ocrMenuActionKey = WeChatUtil.OCR_MENU_ACTION + weChatMessageDTO.getFromUserName();
-        if ("文字识别开始".equals(weChatMessageDTO.getContent())) {
+        if (CharacterRecognition.START_OCR.equals(weChatMessageDTO.getContent())) {
             redisCilent.addValueToRedis(ocrMenuActionKey, BooleanEnum.TRUE.value, 1000 * 60 * 60 * 24L);
             if (StringUtils.isNotBlank(redisCilent.getValueByKey(ocrMenuContentKey))
                 && redisCilent.deleteValueByKey(ocrMenuContentKey)) {
@@ -57,10 +53,10 @@ public class CharacterRecognitionHandler implements MessageContentHandler {
                 }
             }
             handleResult = WeChatUtil.OCR_GEGIN_CONTENT;
-        } else if (StringUtils.equalsAny(weChatMessageDTO.getContent(), "文字识别结束")
-            || weChatMessageDTO.getContent().contains("文字识别")) {
+        } else if (StringUtils.equalsAny(weChatMessageDTO.getContent(), CharacterRecognition.END_OCR)
+            || weChatMessageDTO.getContent().contains(CharacterRecognition.OCR)) {
             if (StringUtils.isEmpty(redisCilent.getValueByKey(ocrMenuContentKey))) {
-                handleResult = "大人,您尚未发送文字识别图片。请发送关键词【文字识别开始】";
+                handleResult = CharacterRecognition.DEFAULT_RESULT;
             } else {
                 String afterwords = weChatMessageDTO.getContent().substring(4);
                 String ocrMenuContentCalue = redisCilent.getValueByKey(ocrMenuContentKey);
@@ -81,7 +77,8 @@ public class CharacterRecognitionHandler implements MessageContentHandler {
                     recommendMenuDO.setFromUserName(weChatMessageDTO.getFromUserName());
                     recommendMenuDO.setMenuContent(ocrMenuContentCalue);
                     recommendMenuRepository.saveOrUpdateByID(recommendMenuDO);
-                    handleResult = CommonUtil.recommendMenuByContent("推荐菜谱:" + ocrMenuContentCalue);
+                    handleResult =
+                        CommonUtil.recommendMenuByContent(WeChatUtil.RECOMMENDED_MENU + ":" + ocrMenuContentCalue);
                 }
             }
         }
@@ -90,10 +87,7 @@ public class CharacterRecognitionHandler implements MessageContentHandler {
 
     @Override
     public boolean isMatched(WeChatMessageDTO weChatMessageDTO) {
-        if (StringUtils.equalsAny(weChatMessageDTO.getMsgType(), MsgTypeEnum.TEXT.name, MsgTypeEnum.VOICE.name)) {
-            return true;
-        }
-        return false;
+        return StringUtils.equalsAny(weChatMessageDTO.getMsgType(), MsgTypeEnum.TEXT.name, MsgTypeEnum.VOICE.name);
     }
 
     @Override

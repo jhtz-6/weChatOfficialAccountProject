@@ -9,15 +9,19 @@ import org.myf.wechatofficialaccountproject.domain.service.RecommendDomainServic
 import org.myf.wechatofficialaccountproject.domain.service.SubscribeDomainService;
 import org.myf.wechatofficialaccountproject.domain.service.WeChatDomainService;
 import org.myf.wechatofficialaccountproject.domain.service.factory.MessageTypeHandlerFactory;
+import org.myf.wechatofficialaccountproject.infrastructure.base.entity.WeChatMessageDO;
 import org.myf.wechatofficialaccountproject.infrastructure.base.enums.EventEnum;
 import org.myf.wechatofficialaccountproject.infrastructure.base.enums.MsgTypeEnum;
+import org.myf.wechatofficialaccountproject.infrastructure.base.enums.SystemBelongEnum;
 import org.myf.wechatofficialaccountproject.infrastructure.util.helper.CommonUtil;
+import org.myf.wechatofficialaccountproject.infrastructure.util.helper.ThreadLocalHolder;
 import org.myf.wechatofficialaccountproject.infrastructure.util.helper.WeChatUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -51,20 +55,22 @@ public class WeChatApplicationServiceImpl implements WeChatApplicationService {
     }
 
     @Override
-    public String handleMsgbyMap(Map<String, String> map) {
+    public String handleMsgByMap(Map<String, String> map) {
         WeChatMessageDTO weChatMessageDTO = convertMapToWeChatMessageDTO(map);
         String handleMsgResult = "";
         try {
             weChatMessageDTO.setType("receive");
-            weChatSaveThreadPoolExecutor.submit(new WeChatSaveSendTask(weChatMessageDTO));
+            weChatSaveThreadPoolExecutor
+                .submit(new WeChatSaveSendTask(weChatMessageDTO, ThreadLocalHolder.BELONGER_THREAD_LOCAL.get()));
             replaceCharacter(weChatMessageDTO);
             handleMsgResult = messageTypeHandlerFactory.createMessageTypeHandler(weChatMessageDTO).handleMessageChain();
             if (StringUtils.isEmpty(handleMsgResult)) {
                 handleMsgResult = "服务处理异常,请稍后再试或联系管理员处理";
             }
-            String currentPersonNum =
-                weChatDomainService.getCurrentPersonNum("current_person_" + weChatMessageDTO.getFromUserName(),
-                    weChatMessageDTO.getFromUserName(), WeChatUtil.CURRENT_PERSON_TIMEOUT);;
+            String currentPersonNum = weChatDomainService.getCurrentPersonNum(
+                ThreadLocalHolder.BELONGER_THREAD_LOCAL.get() + WeChatUtil.CURRENT_PERSON_KEY
+                    + weChatMessageDTO.getFromUserName(),
+                weChatMessageDTO.getFromUserName(), WeChatUtil.CURRENT_PERSON_TIMEOUT);
             handleMsgResult = "当前在线人数:" + currentPersonNum + "\n" + handleMsgResult;
         } catch (RejectedExecutionException rejectedExecutionException) {
             if (StringUtils.isBlank(handleMsgResult)) {
@@ -87,14 +93,20 @@ public class WeChatApplicationServiceImpl implements WeChatApplicationService {
 
     class WeChatSaveSendTask implements Callable<Void> {
         WeChatMessageDTO weChatMessageDTO;
+        SystemBelongEnum systemBelongEnum;
 
-        public WeChatSaveSendTask(WeChatMessageDTO weChatMessageDTO) {
+        public WeChatSaveSendTask(WeChatMessageDTO weChatMessageDTO, SystemBelongEnum systemBelongEnum) {
             this.weChatMessageDTO = weChatMessageDTO;
+            this.systemBelongEnum = systemBelongEnum;
         }
 
         @Override
-        public Void call() throws Exception {
-            weChatDomainService.saveWeChatMessageDO(weChatDomainService.convertDtoToDo(weChatMessageDTO));
+        public Void call() {
+            WeChatMessageDO weChatMessageDO = weChatDomainService.convertDtoToDo(weChatMessageDTO);
+            if (Objects.nonNull(systemBelongEnum)) {
+                weChatMessageDO.setBelonger(systemBelongEnum);
+            }
+            weChatDomainService.saveWeChatMessageDO(weChatMessageDO);
             return null;
         }
     }
@@ -182,6 +194,7 @@ public class WeChatApplicationServiceImpl implements WeChatApplicationService {
         weChatSendMessageDTO.setToUserName(weChatMessageDTO.getFromUserName());
         weChatSendMessageDTO.setMsgType(MsgTypeEnum.TEXT.name);
         weChatSendMessageDTO.setMsgId(weChatMessageDTO.getMsgId());
-        weChatSaveThreadPoolExecutor.submit(new WeChatSaveSendTask(weChatSendMessageDTO));
+        weChatSaveThreadPoolExecutor
+            .submit(new WeChatSaveSendTask(weChatSendMessageDTO, ThreadLocalHolder.BELONGER_THREAD_LOCAL.get()));
     }
 }

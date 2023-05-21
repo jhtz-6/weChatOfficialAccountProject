@@ -11,10 +11,12 @@ import org.apache.http.impl.client.HttpClients;
 import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
+import org.myf.wechatofficialaccountproject.application.dto.AccompanyDTO;
 import org.myf.wechatofficialaccountproject.application.dto.MenuDTO;
-import org.myf.wechatofficialaccountproject.infrastructure.base.enums.AccompanyEnum;
 import org.myf.wechatofficialaccountproject.infrastructure.util.entity.GameFishDTO;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.BeanWrapper;
+import org.springframework.beans.BeanWrapperImpl;
 
 import javax.servlet.ServletInputStream;
 import java.io.IOException;
@@ -51,8 +53,27 @@ public final class CommonUtil {
         return map;
     }
 
-    public static void copyProperties(Object source, Object target) {
+    public static void copyPropertiesWithNull(Object source, Object target) {
         BeanUtils.copyProperties(source, target);
+    }
+
+    public static void copyPropertiesExceptNull(Object source, Object target) {
+        BeanUtils.copyProperties(source, target, getNullPropertyNames(source));
+    }
+
+    private static String[] getNullPropertyNames(Object source) {
+        BeanWrapper src = new BeanWrapperImpl(source);
+        java.beans.PropertyDescriptor[] pds = src.getPropertyDescriptors();
+
+        Set<String> emptyNames = new HashSet<>();
+        for (java.beans.PropertyDescriptor pd : pds) {
+            Object srcValue = src.getPropertyValue(pd.getName());
+            if (srcValue == null) {
+                emptyNames.add(pd.getName());
+            }
+        }
+        String[] result = new String[emptyNames.size()];
+        return emptyNames.toArray(result);
     }
 
     public static Date getDateTimeByTimeStamp(String timeStamp) {
@@ -177,11 +198,11 @@ public final class CommonUtil {
         return gameFishResult;
     }
 
-    public static String conactAccompany(AccompanyEnum accompany) {
-        if (Objects.isNull(accompany)) {
+    public static String conactAccompany(AccompanyDTO accompanyDTO) {
+        if (Objects.isNull(accompanyDTO)) {
             return null;
         }
-        return accompany.toString();
+        return accompanyDTO.toString();
     }
 
     public static String conactMenuOneUserWithCostPerformance(MenuDTO menuDTO) {
@@ -232,7 +253,7 @@ public final class CommonUtil {
             content = content.replaceAll(" ", ";");
             String copycontent = content;
             Integer subStr;
-            if (content.startsWith("推荐菜谱")) {
+            if (content.startsWith(WeChatUtil.RECOMMENDED_MENU)) {
                 if (':' == content.charAt(4) || '：' == content.charAt(4)) {
                     subStr = 5;
                 } else {
@@ -266,7 +287,8 @@ public final class CommonUtil {
 
             String bteweenResult = "";
             Integer maxNum = 0;
-            List<MenuDTO> menuDTOList = Lists.newArrayList(WeChatUtil.MENU_LIST);
+            List<MenuDTO> menuDTOList =
+                Lists.newArrayList(WeChatUtil.MENU_LIST_MAP.get(ThreadLocalHolder.BELONGER_THREAD_LOCAL.get()));
             if (content.startsWith("推荐王爷性价比菜谱") || content.startsWith("推荐皇帝性价比菜谱") || content.startsWith("推荐贵妃性价比菜谱")
                 || content.startsWith("推荐太医性价比菜谱")) {
                 String belongUser = content.substring(2, 4);
@@ -476,6 +498,22 @@ public final class CommonUtil {
             return true;
         }
         return false;
+    }
+
+    private final static String PHOTO_IP = "https://110.40.208.47:8089/photo/";
+
+    public static String getPhotoUrl() {
+        Integer randomNumber = getRandomNumber(1, 10);
+        return PHOTO_IP + randomNumber + ".jpg";
+    }
+
+    private static int getRandomNumber(int min, int max) {
+        Random random = new Random();
+        return random.nextInt(max - min + 1) + min;
+    }
+
+    public static void main(String[] args) {
+        System.out.println(getRandomNumber(1, 10));
     }
 
 }

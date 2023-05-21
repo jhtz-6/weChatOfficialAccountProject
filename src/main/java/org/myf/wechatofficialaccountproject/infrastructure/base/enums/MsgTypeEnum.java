@@ -14,6 +14,14 @@ public enum MsgTypeEnum {
     public String name;
     public String value;
 
+    public String getName() {
+        return name;
+    }
+
+    public String getValue() {
+        return value;
+    }
+
     public static MsgTypeEnum getMsgTypeEnumByName(String name) {
         for (MsgTypeEnum msgTypeEnum : MsgTypeEnum.values()) {
             if (msgTypeEnum.name.equals(name)) {

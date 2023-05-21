@@ -27,7 +27,7 @@ public class WeChatRepositoryImpl implements WeChatRepository {
         }
         WeChatMessageDO preWeChatMessageDO = weChatMessageMapper.selectById(weChatMessageDO.getId());
         if (Objects.nonNull(preWeChatMessageDO)) {
-            CommonUtil.copyProperties(weChatMessageDO, preWeChatMessageDO);
+            CommonUtil.copyPropertiesExceptNull(weChatMessageDO, preWeChatMessageDO);
             weChatMessageMapper.updateById(preWeChatMessageDO);
             return;
         } else {

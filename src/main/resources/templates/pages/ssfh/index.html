@@ -1,0 +1,1395 @@
+<!DOCTYPE html>
+<html xmlns:th="http://java.sun.com/jsf/html">
+<head>
+    <meta charset="UTF-8">
+    <!-- import CSS -->
+    <link rel="shortcut icon" href="https://110.40.208.47:8089/photo/shortcut.jpg">
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <!-- import Vue before Element -->
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.min.js"></script>    <!-- import JavaScript -->
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <title>盛世芳华</title>
+</head>
+<style>
+    .el-table .warning-row {
+        background: oldlace;
+    }
+
+    .el-table .success-row {
+        background: #f0f9eb;
+    }
+</style>
+<body style="background-color: #f6da1847">
+<div id="app" style="margin-left: 10%;margin-right: 10%;">
+    <!--<el-button @click="visible = true">Button</el-button>-->
+    <!--用户头像-->
+    <van-image
+            round
+            width="2.5rem"
+            height="2.5rem"
+
+    ></van-image><span style="cursor:pointer;color:#f4b400;font-size:100% " @click="userClick"> <el-avatar :src="userPhoto">
+</el-avatar>{{userName}}</span>&nbsp&nbsp&nbsp&nbsp&nbsp <span style="color:rgb(244 0 158);font-size:100% " >
+    盛世芳华(数据更改不会立刻生效),需要数据同步至公众号请点击:</span>
+    <template>
+        <el-button type="text" roundButton="true" @click="synchronousData">同步数据</el-button>
+    </template>
+    <el-tabs type="border-card" cur v-model="activeName" :before-leave="tabChange" @disabled="distabChange" >
+        <el-tab-pane label="菜谱" name="菜谱">
+            <!--            <el-dialog :visible.sync="visible" title="Hello world">
+                            <p>Try Element</p>
+                        </el-dialog>-->
+
+            <template><p style="color : red">待完善的菜谱 &nbsp&nbsp<el-button round type="primary"
+              @click="foodInsert">添加</el-button>
+            </p>
+                <el-table
+                        :data="needUpdateFoodList"
+                        style="width: 100%"
+                        stripe
+                        max-height="500">
+                    <el-table-column
+                            fixed
+                            prop="belongUser"
+                            label="归属者"
+                            sortable
+                            width="100">
+                    </el-table-column>
+                    <el-table-column
+                            prop="category"
+                            label="分类"
+                            sortable
+                            width="80">
+                    </el-table-column>
+
+                    <el-table-column
+                            prop="food"
+                            label="菜名"
+                            width="120">
+                    </el-table-column>
+                    <el-table-column
+                            prop="rawMaterial"
+                            label="制作方法"
+                            width="200">
+                    </el-table-column>
+                    <el-table-column
+                            prop="minNum"
+                            label="好感度最小值"
+                            sortable
+                            width="100">
+                    </el-table-column>
+                    <el-table-column
+                            prop="maxNum"
+                            label="好感度最大值"
+                            sortable
+                            width="100">
+                    </el-table-column>
+                    <el-table-column
+                            prop="sfyx"
+                            label="是否有效"
+                            sortable
+                            width="100">
+                        <template slot-scope="scope">
+                            <span v-if="scope.row.sfyx==item.name" v-for="item in sfyxList" :key="item.name">
+                              {{item.value}}
+                         </span>
+                        </template>
+                    </el-table-column>
+                    <el-table-column
+                            prop="updateTimeStr"
+                            label="更新时间"
+                            sortable
+                            width="180">
+                    </el-table-column>
+                    <el-table-column
+                            fixed="right"
+                            label="操作"
+                            width="100">
+                        <template slot-scope="scope">
+                            <el-button @click="foodView(scope.$index,scope.row)" type="text" size="small">查看</el-button>
+                            <el-button type="text" @click="foodUpdate(scope.$index,scope.row)" size="small">编辑</el-button>
+                        </template>
+                    </el-table-column>
+                </el-table>
+            </template>
+
+            <template><p style="color : green">所有的菜谱</p>
+                <el-table
+                        :data="allFoodList"
+                        style="width: 100%"
+                        stripe
+                        max-height="500">
+                    <el-table-column
+                            fixed
+                            prop="belongUser"
+                            label="归属者"
+                            sortable
+                            width="100">
+                    </el-table-column>
+                    <el-table-column
+                            prop="category"
+                            label="分类"
+                            sortable
+                            width="100">
+                    </el-table-column>
+                    <el-table-column
+                            prop="food"
+                            label="菜名"
+                            width="120">
+                    </el-table-column>
+                    <el-table-column
+                            prop="rawMaterial"
+                            label="制作方法"
+                            width="200">
+                    </el-table-column>
+                    <el-table-column
+                            prop="minNum"
+                            label="好感度最小值"
+                            sortable
+                            width="100">
+                    </el-table-column>
+                    <el-table-column
+                            prop="maxNum"
+                            label="好感度最大值"
+                            sortable
+                            width="100">
+                    </el-table-column>
+                    <el-table-column
+                            prop="sfyx"
+                            label="是否有效"
+                            sortable
+                            width="100">
+                        <template slot-scope="scope">
+                            <span v-if="scope.row.sfyx==item.name" v-for="item in sfyxList" :key="item.name">
+                              {{item.value}}
+                         </span>
+                        </template>
+                    </el-table-column>
+                    <el-table-column
+                            prop="updateTimeStr"
+                            label="更新时间"
+                            sortable
+                            width="180">
+                    </el-table-column>
+                    <el-table-column
+                            fixed="right"
+                            label="操作"
+                            width="100">
+                        <template slot-scope="scope">
+                            <el-button @click="foodView(scope.$index,scope.row)" type="text" size="small">查看</el-button>
+                            <el-button type="text" @click="foodUpdate(scope.$index,scope.row)" size="small">编辑</el-button>
+                        </template>
+                    </el-table-column>                </el-table>
+            </template>
+
+
+            <el-dialog title="新增菜谱(请谨慎添加)" :visible.sync=
+                    "insertFoodFormVisible">
+                <el-form :model="insertFood"  ref="insertFood">
+                    <el-form-item label="归属者:"  prop="belongUser" :label-width="formLabelWidth" required = true >
+                        <el-select v-model="insertFood.belongUser" placeholder="请选择"  width="50" >
+                            <el-option
+                                    v-for="item in belongUserList"
+                                    :key="item.name"
+                                    :label="item.value"
+                                    :value="item.name">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="分类:" prop="category" :label-width="formLabelWidth" required = true><!--:disabled="food.category == null ? false : true"-->
+                        <el-select v-model="insertFood.category" placeholder="请选择"  width="50" >
+                            <el-option
+                                    v-for="item in catrgoryList"
+                                    :key="item.name"
+                                    :label="item.value"
+                                    :value="item.name">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+
+                    <el-form-item label="菜名:" prop="food" :label-width="formLabelWidth" required = true>
+                        <el-input v-model="insertFood.food"   ></el-input>
+                    </el-form-item>
+                    <el-form-item label="是否有效:" prop="sfyx"  :label-width="formLabelWidth ">
+                        <el-input v-model="insertFood.sfyx" disabled = true >1</el-input>
+                    </el-form-item>
+                    <el-form-item label="制作方法:" prop="rawMaterial" :label-width="formLabelWidth" required = true>
+                        <el-input v-model="insertFood.rawMaterial"  ></el-input>
+                    </el-form-item>
+
+                    <el-form-item label="好感度最小值(数字):" prop="minNum" :label-width="formLabelWidth" :rules="[
+                    { type: 'number', message: '好感度最小值必须为数字' ,required :true }]">
+                        <el-input v-model.number="insertFood.minNum"  ></el-input>
+                    </el-form-item>
+
+                    <el-form-item label="好感度最大值(数字):" prop="maxNum" :label-width="formLabelWidth" :rules="[
+                    { type: 'number', message: '好感度最大值必须为数字' ,required :true}]">
+                        <el-input v-model.number="insertFood.maxNum" ></el-input>
+                    </el-form-item>
+
+                </el-form>
+                <div slot="footer" class="dialog-footer">
+                    <el-button @click="resetForm('insertFood')">取 消</el-button>
+                    <el-button type="primary" @click="insertFoodData('insertFood')">确 定</el-button>
+                </div>
+            </el-dialog>
+
+            <el-dialog title="编辑菜谱(请谨慎编辑)" :visible.sync=
+                    "updateFoodFormVisible">
+                <el-form :model="updateFood"  ref="updateFood">
+                    <el-form-item label="归属者:"  prop="belongUser" :label-width="formLabelWidth"  >
+                        <el-select v-model="updateFood.belongUser" placeholder="请选择"  width="50" >
+                            <el-option
+                                    v-for="item in belongUserList"
+                                    :key="item.name"
+                                    :label="item.value"
+                                    :value="item.name">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="分类:" prop="category" :label-width="formLabelWidth"><!--:disabled="food.category == null ? false : true"-->
+                        <el-select v-model="updateFood.category" placeholder="请选择"  width="50" >
+                            <el-option
+                                    v-for="item in catrgoryList"
+                                    :key="item.name"
+                                    :label="item.value"
+                                    :value="item.name">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+
+                    <el-form-item label="菜名:" prop="food" :label-width="formLabelWidth" >
+                        <el-input v-model="updateFood.food" disabled=true></el-input>
+                    </el-form-item>
+
+                    <el-form-item label="制作方法:" prop="rawMaterial" :label-width="formLabelWidth">
+                        <el-input v-model="updateFood.rawMaterial"  ></el-input>
+                    </el-form-item>
+
+                    <el-form-item label="好感度最小值(数字):" prop="minNum" :label-width="formLabelWidth" :rules="[
+                    { type: 'number', message: '好感度最小值必须为数字' }]">
+                        <el-input v-model.number="updateFood.minNum"  ></el-input>
+                    </el-form-item>
+
+                    <el-form-item label="好感度最大值(数字):" prop="maxNum" :label-width="formLabelWidth" :rules="[
+                    { type: 'number', message: '好感度最大值必须为数字' }]">
+                        <el-input v-model.number="updateFood.maxNum" ></el-input>
+                    </el-form-item>
+                    <el-form-item label="是否有效(无效的数据将不能通过公众号查询到):" prop="sfyx"  :label-width="formLabelWidth ">
+                        <el-select v-model="updateFood.sfyx" placeholder="请选择"  width="50" >
+                            <el-option
+                                    v-for="item in sfyxList"
+                                    :key="item.name"
+                                    :label="item.value"
+                                    :value="item.name">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                </el-form>
+                <div slot="footer" class="dialog-footer">
+                    <el-button @click="resetForm('updateFood')">取 消</el-button>
+                    <el-button type="primary" @click="updateFoodData('updateFood')">确 定</el-button>
+                </div>
+            </el-dialog>
+
+
+            <el-dialog title="查看菜谱" :visible.sync="viewFoodFormVisible">
+                <el-form :model="food">
+                    <el-form-item label="归属者:" :label-width="formLabelWidth"  >
+                        <el-input v-model="food.belongUser" autocomplete="off" disabled=true></el-input>
+                    </el-form-item>
+                    <el-form-item label="分类:" :label-width="formLabelWidth">
+                        <el-input v-model="food.category" autocomplete="off" disabled=true></el-input>
+                    </el-form-item>
+
+                    <el-form-item label="菜名:" :label-width="formLabelWidth">
+                        <el-input v-model="food.food" autocomplete="off" disabled=true></el-input>
+                    </el-form-item>
+
+                    <el-form-item label="制作方法:" :label-width="formLabelWidth">
+                        <el-input v-model="food.rawMaterial" autocomplete="off" disabled=true></el-input>
+                    </el-form-item>
+
+                    <el-form-item label="好感度最小值(数字):" :label-width="formLabelWidth">
+                        <el-input v-model="food.minNum" autocomplete="off" disabled=true></el-input>
+                    </el-form-item>
+
+                    <el-form-item label="好感度最大值(数字):" :label-width="formLabelWidth">
+                        <el-input v-model="food.maxNum" autocomplete="off" disabled=true></el-input>
+                    </el-form-item>
+                </el-form>
+                <div slot="footer" class="dialog-footer">
+                    <el-button type="primary" @click="viewFoodFormVisible = false">确 定</el-button>
+                </div>
+            </el-dialog>
+
+
+
+        </el-tab-pane>
+        <el-tab-pane label="关键词" name="关键词">
+
+            <template><p style="color : green">所有的关键词&nbsp&nbsp<!--(关键词类型:精确:用户输入的内容必须等于关键词,才会返回内容;模糊:
+                用户输入的内容包含关键词,就会返回内容) &nbsp&nbsp--><el-button  type="primary"
+                                                          @click="keyWordInsert">添加关键词</el-button>
+                <el-button  type="primary" @click="keyWordExport">导出</el-button>
+                <el-upload
+                        class="upload-demo"
+                        action="keyWordImport" show-file-list="false"
+                           :before-upload="checkImport" :on-error="importError" :on-success="importSuccess"	>
+                    <el-button size="small" type="primary">点击上传</el-button>
+                <div slot ="tip" class="el-upload__tip">只能上传excel文件</div>
+                </el-upload>
+            </p>
+                <el-table
+                        :data="wechatKeyWordsDTOList"
+                        style="width: 100%"
+                        stripe
+                        max-height="800">
+                    <el-table-column
+                            fixed
+                            prop="keyName"
+                            label="关键词"
+                            sortable
+                            width="100">
+                    </el-table-column>
+                    <el-table-column
+                            prop="keyType"
+                            label="关键词类型"
+                            width="120">
+                        <template slot-scope="scope">
+                            <span v-if="scope.row.keyType==item.name" v-for="item in keyTypeEnumList" :key="item.name">
+                              {{item.value}}
+                         </span>
+                        </template>
+                    </el-table-column>
+                    <el-table-column
+                            prop="valueContent"
+                            label="对应的返回结果"
+                            sortable
+                            width="800">
+                    </el-table-column>
+                    <el-table-column
+                            prop="updateTimeStr"
+                            label="更新时间"
+                            sortable
+                            width="180">
+                    </el-table-column>
+
+                    <el-table-column
+                            prop="belonger"
+                            label="所属者"
+                            width="100">
+                    </el-table-column>
+                    <el-table-column
+                            fixed="right"
+                            label="操作"
+                            width="100">
+                        <template slot-scope="scope">
+                            <el-button type="text" @click="keyWordUpdate(scope.$index,scope.row)" size="small">编辑</el-button>
+                        </template>
+                    </el-table-column>                </el-table>
+            </template>
+
+            <el-dialog title="编辑关键词(请谨慎编辑,需要删除某条数据只需要把关键词置为空即可)" :visible.sync=
+                    "updateKeyWordFormVisible">
+                <el-form :model="updateKeyWord"  ref="updateKeyWord">
+                    <el-form-item label="关键词:"  prop="keyName"  width="50" >
+                        <el-input v-model="updateKeyWord.keyName" :disabled="updateKeyWord.keyName == '关注回复' ? true : false"></el-input>
+                    </el-form-item>
+                    <el-form-item label="对应的返回结果:" prop="valueContent" width="300" ><!--:disabled="food.category == null ? false : true"-->
+                        <el-input v-model="updateKeyWord.valueContent"  type="textarea" autosize></el-input>
+                    </el-form-item>
+
+                    <el-form-item label="更新时间:" prop="updateTimeStr" :label-width="formLabelWidth"  width="50" >
+                        <el-input v-model="updateKeyWord.updateTimeStr" :disabled=true  ></el-input>
+                    </el-form-item>
+
+                    <el-form-item label="关键词类型:" prop="keyType" :label-width="formLabelWidth"  width="50" >
+<!--
+                        <el-input v-model="updateKeyWord.keyType" autocomplete="off" ></el-input>
+-->
+                        <el-select v-model="updateKeyWord.keyType" placeholder="请选择"  width="50" >
+                            <el-option
+                                    v-for="item in keyTypeEnumList"
+                                    :key="item.name"
+                                    :label="item.value"
+                                    :value="item.name">
+                            </el-option>
+                        </el-select>
+
+                    </el-form-item>
+
+                </el-form>
+                <div slot="footer" class="dialog-footer">
+                    <el-button @click="resetForm('updateKeyWord')">取 消</el-button>
+                    <el-button type="primary" @click="updateKeyWordData('updateKeyWord')">确 定</el-button>
+                </div>
+            </el-dialog>
+
+
+            <el-dialog title="添加关键词(请谨慎添加)" :visible.sync=
+                    "insertKeyWordFormVisible">
+                <el-form :model="insertKeyWord"  ref="insertKeyWord">
+                    <el-form-item label="关键词:"  prop="keyName"  width="50" required = true >
+                        <el-input v-model="insertKeyWord.keyName" ></el-input>
+                    </el-form-item>
+                    <el-form-item label="对应的返回结果:" prop="valueContent" width="300" required = true><!--:disabled="food.category == null ? false : true"-->
+                        <el-input v-model="insertKeyWord.valueContent"  type="textarea" autosize></el-input>
+                    </el-form-item>
+
+                    <el-form-item label="关键词类型:" prop="keyType" :label-width="formLabelWidth" required = true width="50" >
+                        <!--
+                                                <el-input v-model="updateKeyWord.keyType" autocomplete="off" ></el-input>
+                        -->
+                        <el-select v-model="insertKeyWord.keyType" placeholder="请选择"  width="50" >
+                            <el-option
+                                    v-for="item in keyTypeEnumList"
+                                    :key="item.name"
+                                    :label="item.value"
+                                    :value="item.name">
+                            </el-option>
+                        </el-select>
+
+                    </el-form-item>
+                    <el-form-item label="是否有效:"  prop="isValid"  width="50"  >
+                        <el-input v-model="insertKeyWord.isValid" :disabled=true  >TRUE</el-input>
+                    </el-form-item>
+
+                </el-form>
+                <div slot="footer" class="dialog-footer">
+                    <el-button @click="resetForm('insertKeyWord')">取 消</el-button>
+                    <el-button type="primary" @click="insertKeyWordData('insertKeyWord')">确 定</el-button>
+                </div>
+            </el-dialog>
+
+
+        </el-tab-pane>
+
+
+
+        <el-tab-pane label="随从" name="随从">
+
+            <template><p style="color : blueviolet">随从相关&nbsp&nbsp<el-button plain type="primary"
+                    @click="AccompanyInsert">添加随从</el-button></p>
+
+                <el-dialog title="添加随从(请小心添加)" :visible.sync=
+                        "insertAccompanyFormVisible">
+                    <el-form :model="insertAccompany"  ref="insertAccompany">
+                        <el-form-item label="随从名字:"  prop="characterName"   required = true>
+                            <el-input v-model="insertAccompany.characterName" autosize ></el-input>
+                        </el-form-item>
+                        <el-form-item label="是否为精英:" prop="isElite" width="300" required = true>
+                            <el-select v-model="insertAccompany.isElite" placeholder="请选择"  width="50" >
+                                <el-option
+                                        v-for="item in booleanEnumList"
+                                        :key="item.name"
+                                        :label="item.value"
+                                        :value="item.name">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                        <el-form-item label="随从类型:" prop="characterType" :label-width="formLabelWidth"  width="50" required = true>
+                            <el-select v-model="insertAccompany.characterType" placeholder="请选择"  width="50" >
+                                <el-option
+                                        v-for="item in characterTypeEnumList"
+                                        :key="item.name"
+                                        :label="item.value"
+                                        :value="item.name">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                        <el-form-item label="特点:" prop="characterristic" :label-width="formLabelWidth"  width="50"  >
+                            <el-input v-model="insertAccompany.characterristic"  ></el-input>
+                        </el-form-item>
+                        <el-form-item label="系别:" prop="department" :label-width="formLabelWidth"  width="50" required = true>
+                            <el-select v-model="insertAccompany.department" placeholder="请选择"  width="50" >
+                                <el-option
+                                        v-for="item in departmentEnumList"
+                                        :key="item.name"
+                                        :label="item.value"
+                                        :value="item.name">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                        <el-form-item label="玉佩:" prop="jadePendant" :label-width="formLabelWidth"  width="50" >
+                            <el-input v-model="insertAccompany.jadePendant"   ></el-input>
+                        </el-form-item>
+                        <el-form-item label="评价:" prop="evaluate" :label-width="formLabelWidth"  width="50" >
+                            <el-input v-model="insertAccompany.evaluate"  type = "textarea" autosize ></el-input>
+                        </el-form-item>
+                        <el-form-item label="视频链接:" prop="url" :label-width="formLabelWidth"  width="50" >
+                            <el-input v-model="insertAccompany.url" type = "textarea" autosize ></el-input>
+                        </el-form-item>
+
+                    </el-form>
+                    <div slot="footer" class="dialog-footer">
+                        <el-button @click="resetForm('insertAccompany')">取 消</el-button>
+                        <el-button type="primary" @click="insertAccompanyData('insertAccompany')">确 定</el-button>
+                    </div>
+                </el-dialog>
+
+                <el-table
+                        :data="accompanyDTOList"
+                        style="width: 100%"
+                        stripe
+                        max-height="800">
+                    <el-table-column
+                            fixed
+                            prop="characterName"
+                            label="随从名字"
+                            sortable
+                            width="100">
+                    </el-table-column>
+                    <el-table-column
+                            prop="isElite"
+                            label="是否为精英"
+                            sortable
+                            width="100">
+                        <template slot-scope="scope">
+                            <span v-if="scope.row.isElite">是</span>
+                            <span v-else>否</span>
+                        </template>
+                    </el-table-column>
+                    <el-table-column
+                            prop="characterType"
+                            label="随从类型"
+                            sortable
+                            width="100">
+                        <template slot-scope="scope">
+                            <span v-if="scope.row.characterType==item.name" v-for="item in characterTypeEnumList" :key="item.name">
+                              {{item.value}}
+                         </span>
+                        </template>
+                    </el-table-column>
+
+                    <el-table-column
+                            prop="characterristic"
+                            label="特点"
+                            width="120">
+                    </el-table-column>
+                    <el-table-column
+                            prop="department"
+                            label="系别"
+                            width="100">
+                        <template slot-scope="scope">
+                            <span v-if="scope.row.department==item.name" v-for="item in departmentEnumList" :key="item.name">
+                              {{item.value}}
+                         </span>
+                        </template>
+                    </el-table-column>
+<!--                    <el-table-column
+                            prop="score"
+                            label="得分"
+                            width="50">
+                    </el-table-column>-->
+                    <el-table-column
+                            prop="jadePendant"
+                            label="玉佩"
+                            width="100">
+                    </el-table-column>
+                    <el-table-column
+                            prop="evaluate"
+                            label="评价"
+                            width="300">
+                    </el-table-column>
+                    <el-table-column
+                            prop="url"
+                            label="视频链接"
+                            width="200">
+                    </el-table-column>
+                    <el-table-column
+                            prop="updateTimeStr"
+                            label="更新时间"
+                            sortable
+                            width="180">
+                    </el-table-column>
+                    <el-table-column
+                            fixed="right"
+                            label="操作"
+                            width="100">
+                        <template slot-scope="scope">
+                            <el-button type="text" @click="AccompanyUpdate(scope.$index,scope.row)" size="small">编辑</el-button>
+                        </template>
+                    </el-table-column>
+                </el-table>
+            </template>
+
+            <el-dialog title="随从编辑(请小心编辑)" :visible.sync=
+                    "updateAccompanyFormVisible">
+                <el-form :model="updateAccompany"  ref="updateAccompany">
+                    <el-form-item label="随从名字:"  prop="characterName"   >
+                        <el-input v-model="updateAccompany.characterName" autosize ></el-input>
+                    </el-form-item>
+                    <el-form-item label="是否为精英:" prop="isElite" width="300" >
+                        <el-select v-model="updateAccompany.isElite" placeholder="请选择"  width="50" >
+                            <el-option
+                                    v-for="item in booleanEnumList"
+                                    :key="item.name"
+                                    :label="item.value"
+                                    :value="item.name">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="随从类型:" prop="characterType" :label-width="formLabelWidth"  width="50" >
+                        <el-select v-model="updateAccompany.characterType" placeholder="请选择"  width="50" >
+                            <el-option
+                                    v-for="item in characterTypeEnumList"
+                                    :key="item.name"
+                                    :label="item.value"
+                                    :value="item.name">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="更新时间:" prop="updateTimeStr" :label-width="formLabelWidth"  width="50" >
+                        <el-input v-model="updateAccompany.updateTimeStr" :disabled=true autocomplete="off" ></el-input>
+                    </el-form-item>
+                    <el-form-item label="特点:" prop="characterristic" :label-width="formLabelWidth"  width="50" >
+                        <el-input v-model="updateAccompany.characterristic"   ></el-input>
+                    </el-form-item>
+                    <el-form-item label="系别:" prop="department" :label-width="formLabelWidth"  width="50" >
+                        <el-select v-model="updateAccompany.department" placeholder="请选择"  width="50" >
+                            <el-option
+                                    v-for="item in departmentEnumList"
+                                    :key="item.name"
+                                    :label="item.value"
+                                    :value="item.name">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="玉佩:" prop="jadePendant" :label-width="formLabelWidth"  width="50" >
+                        <el-input v-model="updateAccompany.jadePendant"  ></el-input>
+                    </el-form-item>
+                    <el-form-item label="评价:" prop="evaluate" :label-width="formLabelWidth"  width="50" >
+                        <el-input v-model="updateAccompany.evaluate"  type = "textarea" autosize  ></el-input>
+                    </el-form-item>
+                    <el-form-item label="视频链接:" prop="url" :label-width="formLabelWidth"  width="50" >
+                        <el-input v-model="updateAccompany.url" type = "textarea" autosize  ></el-input>
+                    </el-form-item>
+                    <el-form-item label="是否有效(选择否,则不能通过公众号查询到该条数据信息):"  prop="isValid"  width="50"  >
+                        <el-select v-model="updateAccompany.isValid" placeholder="请选择"  width="50" >
+                            <el-option
+                                    v-for="item in booleanEnumList"
+                                    :key="item.name"
+                                    :label="item.value"
+                                    :value="item.name">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                </el-form>
+                <div slot="footer" class="dialog-footer">
+                    <el-button @click="resetForm('updateAccompany')">取 消</el-button>
+                    <el-button type="primary" @click="updateAccompanyData('updateAccompany')">确 定</el-button>
+                </div>
+            </el-dialog>
+
+        </el-tab-pane>
+        <el-tab-pane label="学习资料" name="学习资料">学习资料</el-tab-pane>
+    </el-tabs>
+
+    <el-dialog title="登录" :visible.sync=
+            "loginFormVisible" >
+        <el-form :model="loginForm" ref="loginForm" status-icon :rules="loginForm" >
+            <el-form-item label="账号:" :label-width="formLabelWidth"  :rules="[
+      { required: true, message: '账号不能为空'}    ]">
+                <el-input v-model="loginForm.loginName" ></el-input>
+            </el-form-item>
+            <el-form-item label="密码:" :label-width="formLabelWidth" :rules="[
+      { required: true, message: '密码不能为空'}    ]">
+                <el-input v-model="loginForm.loginPassword"  ></el-input>
+            </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+            <el-button @click="loginFormVisible = false">取 消</el-button>
+            <el-button type="primary" @click="submitLoginForm">确 定</el-button>
+        </div>
+    </el-dialog>
+
+</div>
+
+
+
+
+
+</body>
+
+<script th:inline="javascript">
+    new Vue({
+        el: '#app',
+
+        methods: {
+            importError(error,file){
+                this.importing.close();
+                this.$message({
+                    message: file.name +"上传失败:"+ error,
+                    center: true,
+                    type: 'error'
+                });
+            },
+            importSuccess(response,file){
+                this.importing.close();
+                if(response.result == true){
+                    this.$message({
+                        type: 'success',
+                        center: true,
+                        message: file.name +"上传成功",
+                    });
+                }else{
+                    this.$message({
+                        message: file.name +"上传失败:"+response.errorMessage.message,
+                        center: true,
+                        type: 'error'
+                    });
+                }
+            },
+
+            checkImport(file){
+
+                if(file.name.endsWith("xlsx") || file.name.endsWith("xls")){
+                    this.importing = this.$loading({
+                        lock: true,
+                        text: 'excel导入中',
+                        spinner: 'el-icon-loading',
+                        background: 'rgba(0, 0, 0, 0.7)'
+                    });
+                    return true;
+                }
+                this.$message({
+                    message: "只能上传excel",
+                    type: 'error'
+                });
+                return false;
+            },
+            keyWordExport(){
+                window.location.href ="keyWordExport";
+            },
+            synchronousData(){
+                this.$confirm('此操作将同步系统所有数据至公众号,请确认数据的准确性, 是否同步?', '须知', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    const loading = this.$loading({
+                        lock: true,
+                        text: '数据同步中',
+                        spinner: 'el-icon-loading',
+                        background: 'rgba(0, 0, 0, 0.7)'
+                    });
+                    axios({
+                        url: 'synchronousData',
+                        method: 'get',
+                        transformRequest: [function (data) {
+                            data = JSON.stringify(data)
+                            return data
+                        }],
+                        headers: {
+                            'Content-Type': 'application/json;charset=UTF-8'
+                        }
+                    }).then(response =>{
+                        loading.close();
+                        if(response.data.result == true){
+                            this.$message({
+                                type: 'success',
+                                message: '同步数据至公众号成功!'
+                            });
+                        }else{
+                            this.$message({
+                                message: response.data.errorMessage,
+                                type: 'error'
+                            });
+                        }
+
+                    });
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '已取消同步'
+                    });
+                });
+            },
+            submitLoginForm(){
+                if( this.loginForm.loginName == null || this.loginForm.loginName==''){
+                    this.$message({
+                        message: "账号不能为空",
+                        type: 'warning'
+                    });
+                    return false;
+                };
+                if( this.loginForm.loginPassword == null || this.loginForm.loginPassword==''){
+                    this.$message({
+                        message: "密码不能为空",
+                        type: 'warning'
+                    });
+                    return false;
+                };
+                axios({
+                    url: 'login',
+                    method: 'post',
+                    data: this.loginForm,
+                    transformRequest: [function (data) {
+                        data = JSON.stringify(data)
+                        return data
+                    }],
+                    headers: {
+                        'Content-Type': 'application/json;charset=UTF-8'
+                    }
+                }).then(response =>{
+                    if(response.data.result == true){
+                        this.userPhoto=response.data.userPhoto;this.userName=response.data.userName;
+                        this.loginFormVisible=false;
+                    }else{
+                        this.$message({
+                            message: response.data.errorMessage,
+                            type: 'warning'
+                        });
+                    }
+
+                });
+            },
+            userClick(){
+                if(this.userName != "游客(点击登录)"){
+                    this.$message({
+                        message: '您已登录~~',
+                        type: 'warning'
+                    });
+                }else{
+                    this.loginFormVisible=true;
+                }
+            },
+            tabChange(newActiveName, oldActiveName){
+                if(newActiveName == "关键词"){
+                    this.queryKeyWordData();
+                }else if(newActiveName == "随从"){
+                    this.queryAccompanyData();
+                }else if(newActiveName == "学习资料"){
+                    this.$message({
+                        message: '您不是我的主人,尚无权限访问:'+newActiveName,
+                        type: 'warning'
+                    });
+                    return false;
+                }
+            },
+            distabChange(name,title){
+            },
+            open1() {
+                this.$message('这是一条消息提示');
+            },
+            updateSuccess() {
+                this.$message({
+                    message: '更新成功',
+                    type: 'success'
+                });
+            },
+
+            open3() {
+                this.$message({
+                    message: '警告哦，这是一条警告消息',
+                    type: 'warning'
+                });
+            },
+
+            open4() {
+                this.$message.error('错了哦，这是一条错误消息');
+            },
+            handleClick(row) {
+                console.log(row);
+            },
+            tableRowClassName({row, rowIndex}) {
+                if (rowIndex === 1) {
+                    return 'warning-row';
+                } else if (rowIndex === 3) {
+                    return 'success-row';
+                }
+                return '';
+            },
+
+            /**
+             * 实现数组和对象的深copy
+             * @param {*} obj 传入的对象
+             * @returns 返回一个新的对象
+             */
+             deepCopy(obj){
+                let type = Object.prototype.toString.call(obj)
+                if(type == "[object Array]"){
+                    let backObj = [];
+                    for(let val of obj){
+                        backObj.push(this.deepCopy(val))
+                    };
+                    return backObj;
+                }
+                if(type == "[object Object]"){
+                    let backObj = {};
+                    for(let key in obj){
+                        if(obj.hasOwnProperty(key)){
+                            backObj[key] = this.deepCopy(obj[key])
+                        }
+                    };
+                    return backObj;
+                }
+                return obj;
+            },
+
+            AccompanyUpdate(index, row){
+                this.updateAccompanyFormVisible=true;
+                this.updateAccompany = this.deepCopy(row);
+            },
+            keyWordUpdate(index, row) {
+                this.updateKeyWordFormVisible=true;
+                this.updateKeyWord = this.deepCopy(row);
+            },
+
+            foodView(index, row) {
+                this.viewFoodFormVisible=true;
+                this.food = row
+            },
+            AccompanyInsert(){
+                this.insertAccompanyFormVisible=true;
+            },
+            keyWordInsert(){
+                this.insertKeyWordFormVisible=true;
+            },
+            foodInsert(){
+                this.insertFoodFormVisible=true;
+            },
+            foodUpdate(index, row) {
+                    this.updateFoodFormVisible=true;
+                    this.updateFood = this.deepCopy(row);
+            },
+            resetForm(formName) {
+                    this.$refs[formName].resetFields();
+                    if(this.updateFoodFormVisible){
+                        this.updateFoodFormVisible = false
+                    }else if(this.updateKeyWordFormVisible){
+                        this.updateKeyWordFormVisible =false
+                    }else if(this.updateAccompanyFormVisible){
+                        this.updateAccompanyFormVisible = false
+                    }else if(this.insertFoodFormVisible){
+                        this.insertFoodFormVisible = false
+                    }else if(this.insertKeyWordFormVisible){
+                        this.insertKeyWordFormVisible = false
+                    }else if(this.insertAccompanyFormVisible){
+                        this.insertAccompanyFormVisible = false
+                    }
+            },
+            insertAccompanyData(formName){
+                this.$refs[formName].validate((valid) => {
+                    if (valid) {
+                        axios({
+                            url: 'updateAccompanyData',
+                            method: 'post',
+                            data: this.insertAccompany,
+                            transformRequest: [function (data) {
+                                data = JSON.stringify(data)
+                                return data
+                            }],
+                            headers: {
+                                'Content-Type': 'application/json;charset=UTF-8'
+                            }
+                        }).then(response =>{
+                            if(response.data.result == true){
+                                this.insertAccompanyFormVisible=false;
+                                this.queryAccompanyData();
+                                this.$message({
+                                    message: '添加成功',
+                                    type: 'success'
+                                });
+                            }else if(response.data.result == false){
+                                this.$message({
+                                    message: response.data.errorMessage,
+                                    type: 'error'
+                                });
+                            }else {
+                                this.$message({
+                                    message: response.data,
+                                    type: 'error'
+                                });
+                            }
+                        })
+                    } else {
+                        this.$message({
+                            message: '提交失败,数据不符合规则',
+                            type: 'warning'
+                        });
+                        return false;
+                    }
+                });
+            },
+            updateAccompanyData(formName){
+                this.$refs[formName].validate((valid) => {
+                    if (valid) {
+                        axios({
+                            url: 'updateAccompanyData',
+                            method: 'post',
+                            data: this.updateAccompany,
+                            transformRequest: [function (data) {
+                                data = JSON.stringify(data)
+                                return data
+                            }],
+                            headers: {
+                                'Content-Type': 'application/json;charset=UTF-8'
+                            }
+                        }).then(response =>{
+                            if(response.data.result == true){
+                                this.updateAccompanyFormVisible=false;
+                                this.queryAccompanyData();
+                                this.$message({
+                                    message: '更新成功',
+                                    type: 'success'
+                                });
+                            }else if(response.data.result == false){
+                                this.$message({
+                                    message: response.data.errorMessage,
+                                    type: 'error'
+                                });
+                            }else {
+                                this.$message({
+                                    message: response.data,
+                                    type: 'error'
+                                });
+                            }
+                        })
+                    } else {
+                        this.$message({
+                            message: '提交失败,数据不符合规则',
+                            type: 'warning'
+                        });
+                        return false;
+                    }
+                });
+            },
+            insertKeyWordData(formName){
+                this.$refs[formName].validate((valid) => {
+                    if (valid) {
+                        axios({
+                            url: 'updateKeyWordData',
+                            method: 'post',
+                            data: this.insertKeyWord,
+                            transformRequest: [function (data) {
+                                data = JSON.stringify(data)
+                                return data
+                            }],
+                            headers: {
+                                'Content-Type': 'application/json;charset=UTF-8'
+                            }
+                        }).then(response =>{
+                            if(response.data.result == true){
+                                this.insertKeyWordFormVisible=false;
+                                this.queryKeyWordData();
+                                this.$message({
+                                    message: '更新成功',
+                                    type: 'success'
+                                });
+                            }else if(response.data.result == false){
+                                this.$message({
+                                    message: response.data.errorMessage,
+                                    type: 'error'
+                                });
+                            }else {
+                                this.$message({
+                                    message: response.data,
+                                    type: 'error'
+                                });
+                            }
+                        })
+                    } else {
+                        this.$message({
+                            message: '提交失败,数据不符合规则',
+                            type: 'warning'
+                        });
+                        return false;
+                    }
+                });
+            },
+            updateKeyWordData(formName) {
+                this.$refs[formName].validate((valid) => {
+                    if (valid) {
+                        axios({
+                            url: 'updateKeyWordData',
+                            method: 'post',
+                            data: this.updateKeyWord,
+                            transformRequest: [function (data) {
+                                data = JSON.stringify(data)
+                                return data
+                            }],
+                            headers: {
+                                'Content-Type': 'application/json;charset=UTF-8'
+                            }
+                        }).then(response =>{
+                            if(response.data.result == true){
+                                this.updateKeyWordFormVisible=false;
+                                this.queryKeyWordData();
+                                this.$message({
+                                    message: '更新成功',
+                                    type: 'success'
+                                });
+                            }else if(response.data.result == false){
+                                this.$message({
+                                    message: response.data.errorMessage,
+                                    type: 'error'
+                                });
+                            }else {
+                                this.$message({
+                                    message: response.data,
+                                    type: 'error'
+                                });
+                            }
+                        })
+                    } else {
+                        this.$message({
+                            message: '提交失败,数据不符合规则',
+                            type: 'warning'
+                        });
+                        return false;
+                    }
+                });
+            },
+            insertFoodData(formName){
+                this.$refs[formName].validate((valid) => {
+                    if (valid) {
+                        axios({
+                            url: 'updateFoodData',
+                            method: 'post',
+                            data: this.insertFood,
+                            transformRequest: [function (data) {
+                                data = JSON.stringify(data)
+                                return data
+                            }],
+                            headers: {
+                                'Content-Type': 'application/json;charset=UTF-8'
+                            }
+                        }).then(response =>{
+                            if(response.data.result == true){
+                                this.insertFoodFormVisible=false;
+                                this.queryAllData();
+                                this.$message({
+                                    message: '添加成功',
+                                    type: 'success'
+                                });
+                            }else if(response.data.result == false){
+                                this.$message({
+                                    message: response.data.errorMessage,
+                                    type: 'error'
+                                });
+                            }else{
+                                this.$message({
+                                    message: response.data,
+                                    type: 'error'
+                                });
+                            }
+                        })
+                    } else {
+                        this.$message({
+                            message: '提交失败,数据不符合规则',
+                            type: 'warning'
+                        });
+                        return false;
+                    }
+                });
+            },
+            <!--更新菜谱-->
+            updateFoodData(formName) {
+                this.$refs[formName].validate((valid) => {
+                    if (valid) {
+                        axios({
+                            url: 'updateFoodData',
+                            method: 'post',
+                            data: this.updateFood,
+                            transformRequest: [function (data) {
+                                data = JSON.stringify(data)
+                                return data
+                            }],
+                            headers: {
+                                'Content-Type': 'application/json;charset=UTF-8'
+                            }
+                        }).then(response =>{
+                            if(response.data.result == true){
+                                this.updateFoodFormVisible=false;
+                                this.queryAllData();
+                                this.$message({
+                                    message: '更新成功',
+                                    type: 'success'
+                                });
+                            }else if(response.data.result == false){
+                                this.$message({
+                                    message: response.data.errorMessage,
+                                    type: 'error'
+                                });
+                            }else{
+                                this.$message({
+                                    message: response.data,
+                                    type: 'error'
+                                });
+                            }
+                        })
+                    } else {
+                        this.$message({
+                            message: '提交失败,数据不符合规则',
+                            type: 'warning'
+                        });
+                        return false;
+                    }
+                });
+                },
+            queryAccompanyData(){
+                /*发送ajax请求*/
+                axios.get('queryAccompanyData')
+                    .then(response =>{
+                            this.accompanyDTOList=response.data;
+                            for(var i =0; i<this.accompanyDTOList.length; i++){
+                                this.accompanyDTOList[i].updateTimeStr =
+                                    new Date(this.accompanyDTOList[i].updateTime).toLocaleString();
+                            }
+                        }
+                    ).catch(function (error) { // 请求失败处理
+                    console.log(error);
+                });
+                axios.get('queryDepartmentEnum')
+                    .then(response =>{
+                            this.departmentEnumList=response.data;
+                        }
+                    ).catch(function (error) { // 请求失败处理
+                    console.log(error);
+                });
+                axios.get('queryCharacterTypeEnum')
+                    .then(response =>{
+                            this.characterTypeEnumList=response.data;
+                        }
+                    ).catch(function (error) { // 请求失败处理
+                    console.log(error);
+                });
+                axios.get('queryBooleanEnum')
+                    .then(response =>{
+                            this.booleanEnumList=response.data;
+                        }
+                    ).catch(function (error) { // 请求失败处理
+                    console.log(error);
+                });
+            },
+            queryKeyWordData(){
+                /*发送ajax请求*/
+                axios.get('queryKeyWordData')
+                    .then(response =>{
+                        debugger
+                            this.wechatKeyWordsDTOList=response.data;
+                            for(var i =0; i<this.wechatKeyWordsDTOList.length; i++){
+                                this.wechatKeyWordsDTOList[i].updateTimeStr =
+                                    new Date(this.wechatKeyWordsDTOList[i].updateTime).toLocaleString();
+                            }
+                        }
+                    ).catch(function (error) { // 请求失败处理
+                        console.log(error);
+                    });
+                axios.get('queryKeyTypeEnum')
+                    .then(response =>{
+                            this.keyTypeEnumList=response.data;
+                        }
+                    ).catch(function (error) { // 请求失败处理
+                    console.log(error);
+                });
+            },
+            queryAllData(){
+                /*发送ajax请求*/
+                axios.get('queryAllData')
+                    .then(response =>{
+                            this.allFoodList=response.data;
+                            var arrarFood=[];
+                            for(var i =0; i<this.allFoodList.length; i++){
+                                this.allFoodList[i].updateTimeStr = new Date(this.allFoodList[i].updateTime).toLocaleString();
+                                if(this.allFoodList[i].category == null || this.allFoodList[i].maxNum == null ||
+                                    this.allFoodList[i].minNum == null){
+                                    arrarFood.push(this.allFoodList[i]);
+                                }
+                            }
+                            this.needUpdateFoodList=arrarFood;
+                        }
+                    ).catch(function (error) { // 请求失败处理
+                        console.log(error);
+                    });
+                axios.get('queryBelongUserList')
+                    .then(response =>{
+                            this.belongUserList=response.data;
+                        }
+                    ).catch(function (error) { // 请求失败处理
+                });
+                axios.get('queryCatrgoryList')
+                    .then(response =>{
+                            this.catrgoryList=response.data;
+                        }
+                    ).catch(function (error) { // 请求失败处理
+                });
+            },
+
+            /*检查是否登录*/
+            checkLogin(){
+                /*发送ajax请求*/
+                axios.get('checkLogin')
+                    .then(response =>{
+                            this.userName=response.data.userName;
+                            this.userPhoto=response.data.userPhoto;
+
+                        }
+                    )
+                    .catch(function (error) { // 请求失败处理
+                        console.log(error);
+                    });
+            }
+
+
+        },
+
+        data() {
+            return {
+                importing : "",
+                updateIndex : '',
+                updateKeyWord : {},
+                insertFood:{"sfyx":"1","rawMaterial":"","food":"","belongUser":"","category":"","minNum":"","maxNum":""},
+                sfyxList:[{"name":"1","value":"有效"},{"name":"0","value":"无效"}],
+                insertKeyWord :{"isValid":"TRUE","keyName":"","valueContent":"","keyType":""},
+                insertAccompany :{"isValid":"true","characterName":"","isElite":"","characterType":"","characterristic":"",
+                "department":"","jadePendant":"","evaluate":"","url":""},
+                updateAccompany :{},
+                updateFood: {
+                    maxNum : '',
+                    minNum : ''
+                },
+                userPhoto:'',
+                loginForm:{
+                    loginName:'',
+                    loginPassword:''
+                },
+                loginFormVisible:false,
+                userName:'',
+                visible: false,
+                activeName: '菜谱',
+                allFoodList:[],
+                wechatKeyWordsDTOList:[],
+                accompanyDTOList:[],
+                keyTypeEnumList :[],
+                departmentEnumList:[],
+                catrgoryList :[],
+                belongUserList:[],
+                characterTypeEnumList:[],
+                booleanEnumList : [],
+                needUpdateFoodList:[],
+                updateFoodFormVisible  : false,
+                insertFoodFormVisible : false,
+                insertKeyWordFormVisible : false,
+                insertAccompanyFormVisible : false,
+                updateAccompanyFormVisible  : false,
+                updateKeyWordFormVisible : false,
+                viewFoodFormVisible  : false,
+                food:{
+                },
+                formLabelWidth: '120px'
+            }
+        },
+
+        mounted () {
+            this.queryAllData();
+            this.checkLogin();
+        }
+
+
+    })
+</script>
+</html>

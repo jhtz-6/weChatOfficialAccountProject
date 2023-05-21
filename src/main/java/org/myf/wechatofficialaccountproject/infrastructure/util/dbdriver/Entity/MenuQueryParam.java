@@ -1,6 +1,7 @@
 package org.myf.wechatofficialaccountproject.infrastructure.util.dbdriver.Entity;
 
 import lombok.Data;
+import org.myf.wechatofficialaccountproject.infrastructure.base.enums.SystemBelongEnum;
 
 /**
  * @Author: myf
@@ -11,5 +12,9 @@ import lombok.Data;
 public class MenuQueryParam extends BaseQueryParam {
 
     private String food;
+
+    private String sfyx;
+
+    private SystemBelongEnum belonger;
 
 }

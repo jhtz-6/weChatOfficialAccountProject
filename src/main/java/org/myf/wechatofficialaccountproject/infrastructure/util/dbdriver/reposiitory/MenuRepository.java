@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * @author myf
  */
-public interface MenuRepository {
+public interface MenuRepository extends BaseRepository{
 
     /**
      * selectListByParam
@@ -17,4 +17,12 @@ public interface MenuRepository {
      * @return
      */
     List<MenuDO> selectListByParam(MenuQueryParam menuQueryParam);
+
+    /**
+     * 保存或更新数据
+     *
+     * @param menuDO
+     * @return
+     */
+    int saveOrUpdateById(MenuDO menuDO);
 }

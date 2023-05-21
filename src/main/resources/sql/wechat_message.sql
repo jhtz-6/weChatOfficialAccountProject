@@ -1,16 +1,17 @@
 /*
  Navicat Premium Data Transfer
 
- Source Server         : txy
+ Source Server         : localhost
  Source Server Type    : MySQL
- Source Server Version : 80029
+ Source Server Version : 50537
+ Source Host           : localhost:3306
  Source Schema         : myf
 
  Target Server Type    : MySQL
- Target Server Version : 80029
+ Target Server Version : 50537
  File Encoding         : 65001
 
- Date: 14/03/2023 22:24:39
+ Date: 21/05/2023 19:56:17
 */
 
 SET NAMES utf8mb4;
@@ -34,7 +35,8 @@ CREATE TABLE `wechat_message`  (
   `pic_url` varchar(3000) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
   `media_id` varchar(2000) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
   `format` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
+  `belonger` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 72 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 6285 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = DYNAMIC;
 
 SET FOREIGN_KEY_CHECKS = 1;

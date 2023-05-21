@@ -1,6 +1,7 @@
 package org.myf.wechatofficialaccountproject.application.dto;
 
 import lombok.Data;
+import org.myf.wechatofficialaccountproject.infrastructure.base.enums.SystemBelongEnum;
 
 /**
  * @Author: myf
@@ -15,4 +16,7 @@ public class FoodDTO {
     private String foodName;
 
     private String sfyx = "1";
+
+    private SystemBelongEnum belonger;
+
 }

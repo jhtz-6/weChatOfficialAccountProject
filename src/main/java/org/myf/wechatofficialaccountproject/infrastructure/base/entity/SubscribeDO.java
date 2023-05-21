@@ -2,8 +2,8 @@ package org.myf.wechatofficialaccountproject.infrastructure.base.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
+import org.myf.wechatofficialaccountproject.infrastructure.base.enums.SystemBelongEnum;
 
-import java.util.Date;
 
 /**
  * @Author: myf
@@ -22,4 +22,7 @@ public class SubscribeDO extends BaseDO {
 
     @TableField("area")
     private String area;
+
+    @TableField("belonger")
+    private SystemBelongEnum belonger;
 }

@@ -4,6 +4,7 @@ import com.alibaba.excel.annotation.ExcelIgnore;
 import com.alibaba.excel.annotation.ExcelProperty;
 import com.alibaba.excel.annotation.write.style.ColumnWidth;
 import lombok.Data;
+import org.myf.wechatofficialaccountproject.infrastructure.base.enums.SystemBelongEnum;
 
 import java.util.Date;
 
@@ -52,4 +53,8 @@ public class MenuDTO {
 
     @ExcelProperty("性价比分数")
     private Double costPerformance;
+
+    @ExcelIgnore
+    private SystemBelongEnum belonger;
+
 }

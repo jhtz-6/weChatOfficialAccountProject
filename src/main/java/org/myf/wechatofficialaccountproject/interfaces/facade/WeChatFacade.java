@@ -11,10 +11,10 @@ import com.google.common.collect.Maps;
 import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.myf.wechatofficialaccountproject.application.dto.MaterialDTO;
 import org.myf.wechatofficialaccountproject.application.dto.MenuDTO;
-import org.myf.wechatofficialaccountproject.application.dto.WeChatMessageDTO;
 import org.myf.wechatofficialaccountproject.application.dto.WeChatMessageResponse;
 import org.myf.wechatofficialaccountproject.application.service.WeChatApplicationService;
 import org.myf.wechatofficialaccountproject.infrastructure.base.enums.MsgTypeEnum;
+import org.myf.wechatofficialaccountproject.infrastructure.base.enums.SystemBelongEnum;
 import org.myf.wechatofficialaccountproject.infrastructure.util.helper.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,6 +49,17 @@ public class WeChatFacade {
 
     @PostMapping("/msg")
     public void msg(HttpServletRequest request, HttpServletResponse response) {
+        ThreadLocalHolder.BELONGER_THREAD_LOCAL.set(SystemBelongEnum.LEADER);
+        handleOriginalMsg(request,response);
+    }
+
+    @PostMapping("/YnssMsg")
+    public void YnssMsg(HttpServletRequest request, HttpServletResponse response) {
+        ThreadLocalHolder.BELONGER_THREAD_LOCAL.set(SystemBelongEnum.YNSS);
+        handleOriginalMsg(request,response);
+    }
+
+    private void handleOriginalMsg(HttpServletRequest request, HttpServletResponse response){
         WeChatMessageResponse weChatMessageResponse = new WeChatMessageResponse();
         Map<String, String> map = Maps.newHashMap();
         response.setCharacterEncoding("utf-8");
@@ -56,18 +67,19 @@ public class WeChatFacade {
         try {
             map = CommonUtil.convertServerletInputStreamToMap(request.getInputStream());
             buildResponse(weChatMessageResponse, map);
-            weChatMessageResponse.setContent(weChatApplicationService.handleMsgbyMap(map));
+            weChatMessageResponse.setContent(weChatApplicationService.handleMsgByMap(map));
             response.getWriter().write(buildResponseWrite(weChatMessageResponse, weChatMessageResponse.getContent()));
         } catch (IOException ioException) {
             LOGGER.error("weChatMessageResponse:{},map:{}", JSON.toJSONString(weChatMessageResponse),
-                JSON.toJSONString(map), ioException);
+                    JSON.toJSONString(map), ioException);
         } catch (Exception e) {
             try {
                 response.getWriter().write(buildResponseWrite(weChatMessageResponse, e.getMessage()));
             } catch (IOException ex) {
+                LOGGER.error("An error occurred while writing the response", ex);
             }
             LOGGER.error("weChatMessageResponse:{},map:{}", JSON.toJSONString(weChatMessageResponse),
-                JSON.toJSONString(map), e);
+                    JSON.toJSONString(map), e);
         }
     }
 
@@ -77,7 +89,8 @@ public class WeChatFacade {
         response.setCharacterEncoding("utf-8");
         String fileName = URLEncoder.encode("盛世芳华菜谱及价格", "UTF-8").replaceAll("\\+", "%20");
         response.setHeader("Content-disposition", "attachment;filename*=utf-8''" + fileName + ".xlsx");
-        List<MenuDTO> menuList = Lists.newArrayList(WeChatUtil.MENU_LIST);
+        //默认导出leader数据
+        List<MenuDTO> menuList = Lists.newArrayList(WeChatUtil.MENU_LIST_MAP.get(SystemBelongEnum.LEADER));
         List<MaterialDTO> materials = Lists.newArrayList(WeChatUtil.MATERIAL_LIST);
         materials = materials.stream().filter(x -> Objects.nonNull(x.getPrice())).collect(Collectors.toList());
         WriteCellStyle headWriteCellStyle = new WriteCellStyle();

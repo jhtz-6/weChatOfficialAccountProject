@@ -19,6 +19,7 @@ import org.myf.wechatofficialaccountproject.infrastructure.util.entity.BaiduOcrR
 import org.myf.wechatofficialaccountproject.infrastructure.util.entity.BaiduOcrWordsResult;
 import org.myf.wechatofficialaccountproject.infrastructure.util.entity.TuLingResponse;
 import org.myf.wechatofficialaccountproject.infrastructure.util.helper.CommonUtil;
+import org.myf.wechatofficialaccountproject.infrastructure.util.helper.ThreadLocalHolder;
 import org.myf.wechatofficialaccountproject.infrastructure.util.helper.TuLingUtil;
 import org.myf.wechatofficialaccountproject.infrastructure.util.helper.WeChatUtil;
 import org.slf4j.Logger;
@@ -78,7 +79,7 @@ public class WeChatDomainServiceImpl implements WeChatDomainService {
     public String handleWeChatMessageDTO(WeChatMessageDTO weChatMessageDTO) {
         WeChatMessage weChatMessage = new WeChatMessage(weChatMessageDTO.getFromUserName(),
             MsgTypeEnum.getMsgTypeEnumByName(weChatMessageDTO.getMsgType()), weChatMessageDTO.getPicUrl(),
-            weChatMessageDTO.getContent());
+            weChatMessageDTO.getContent(), WeChatUtil.MENU_LIST_MAP.get(ThreadLocalHolder.BELONGER_THREAD_LOCAL.get()));
         String handKeyWordResult = weChatMessage.handKeyWord();
         if (StringUtils.isNotBlank(handKeyWordResult)) {
             return handKeyWordResult;
@@ -238,7 +239,7 @@ public class WeChatDomainServiceImpl implements WeChatDomainService {
                 if (CollectionUtils.isNotEmpty(menuList)) {
                     for (int i = 0; i < menuList.size(); i++) {
                         MenuDTO menuDTO = new MenuDTO();
-                        CommonUtil.copyProperties(menuList.get(i), menuDTO);
+                        CommonUtil.copyPropertiesWithNull(menuList.get(i), menuDTO);
                         handleImageResult =
                             handleImageResult + (i + 1) + "、" + CommonUtil.conactMenuOneUserWithCost(menuDTO) + "\n";
                     }
@@ -267,7 +268,9 @@ public class WeChatDomainServiceImpl implements WeChatDomainService {
     @Override
     public String getCurrentPersonNum(String setKey, String value, Long timeOut) {
         redisCilent.addValueToRedis(setKey, value, timeOut);
-        return redisCilent.getAllKeys("current_person_*").size() + "";
+        return redisCilent
+            .getAllKeys(ThreadLocalHolder.BELONGER_THREAD_LOCAL.get() + WeChatUtil.CURRENT_PERSON_KEY + "*").size()
+            + "";
     }
 
     @Override

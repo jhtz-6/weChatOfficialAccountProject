@@ -1,16 +1,17 @@
 /*
  Navicat Premium Data Transfer
 
- Source Server         : txy
+ Source Server         : localhost
  Source Server Type    : MySQL
- Source Server Version : 80029
+ Source Server Version : 50537
+ Source Host           : localhost:3306
  Source Schema         : myf
 
  Target Server Type    : MySQL
- Target Server Version : 80029
+ Target Server Version : 50537
  File Encoding         : 65001
 
- Date: 14/03/2023 22:24:09
+ Date: 21/05/2023 19:55:12
 */
 
 SET NAMES utf8mb4;
@@ -28,12 +29,13 @@ CREATE TABLE `menu`  (
   `update_time` datetime NULL DEFAULT NULL,
   `sfyx` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
   `category` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
-  `min_num` int NULL DEFAULT NULL,
-  `max_num` int NULL DEFAULT NULL,
+  `min_num` int(11) NULL DEFAULT NULL,
+  `max_num` int(11) NULL DEFAULT NULL,
+  `belonger` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '表明该条数据归谁所有',
   `belong_user` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
   `price` float NULL DEFAULT NULL,
   `cost_performance` float NULL DEFAULT NULL,
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 272 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 275 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = DYNAMIC;
 
 SET FOREIGN_KEY_CHECKS = 1;

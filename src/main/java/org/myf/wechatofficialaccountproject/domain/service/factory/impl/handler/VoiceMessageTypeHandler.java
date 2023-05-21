@@ -1,4 +1,4 @@
-package org.myf.wechatofficialaccountproject.domain.service.factory.impl;
+package org.myf.wechatofficialaccountproject.domain.service.factory.impl.handler;
 
 import lombok.AllArgsConstructor;
 import org.myf.wechatofficialaccountproject.application.dto.WeChatMessageDTO;
@@ -8,16 +8,19 @@ import org.myf.wechatofficialaccountproject.infrastructure.util.helper.Applicati
 
 /**
  * @Author: myf
- * @CreateTime: 2023-04-17 11:10
- * @Description: 事件类型消息处理器
+ * @CreateTime: 2023-04-17  11:09
+ * @Description: 语音消息处理器
  */
 @AllArgsConstructor
-public class EventMessageTypeHandler implements MessageTypeHandler {
+public class VoiceMessageTypeHandler implements MessageTypeHandler {
+
     private WeChatMessageDTO weChatMessageDTO;
-    static final MessageContentHandlerChain eventMessageContentHandlerChain = (MessageContentHandlerChain)
-            ApplicationContextUtil.getBeanByName("eventMessageContentHandlerChain");
+
+    static final MessageContentHandlerChain voiceMessageContentHandlerChain = (MessageContentHandlerChain)
+            ApplicationContextUtil.getBeanByName("voiceMessageContentHandlerChain");
+
     @Override
     public String handleMessageChain() {
-        return eventMessageContentHandlerChain.handleMessageContentByChain(weChatMessageDTO, null);
+        return voiceMessageContentHandlerChain.handleMessageContentByChain(weChatMessageDTO,null);
     }
 }

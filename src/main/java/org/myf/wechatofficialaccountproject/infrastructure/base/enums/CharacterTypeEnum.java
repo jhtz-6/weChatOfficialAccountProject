@@ -6,7 +6,7 @@ package org.myf.wechatofficialaccountproject.infrastructure.base.enums;
  */
 public enum CharacterTypeEnum {
 
-    SOLDIER("soldier", "战士"), GUARD("guard", "护卫"), ARTIST("artist", "艺师"), ADVISER("adviser", "谋士");
+    SOLDIER("SOLDIER", "战士"), GUARD("GUARD", "护卫"), ARTIST("ARTIST", "艺师"), ADVISER("ADVISER", "谋士");
 
     private String enName;
 
