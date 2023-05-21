@@ -63,9 +63,9 @@
 
 对简单关键字处理器进行了拆分:依赖于游戏内容的那一部分拆分到了复杂关键字处理器中
 
-![https://raw.githubusercontent.com/jhtz-6/weChatOfficialAccountProject/master/src/main/resources/static/photo/%E5%BE%AE%E4%BF%A1%E5%85%AC%E4%BC%97%E5%8F%B7%E9%A1%B9%E7%9B%AE%E5%A4%84%E7%90%86%E5%99%A8%E6%B5%81%E7%A8%8B.png]()
+![](https://raw.githubusercontent.com/jhtz-6/weChatOfficialAccountProject/master/src/main/resources/static/photo/%E5%BE%AE%E4%BF%A1%E5%85%AC%E4%BC%97%E5%8F%B7%E9%A1%B9%E7%9B%AE%E5%A4%84%E7%90%86%E5%99%A8%E6%B5%81%E7%A8%8B.png)
 
-构造了系统页面(http://localhost:8088/xwxsb/ssfh/login),管理员账号(带有类型信息)登录系统可以看到该类型账号的数据,进行维护后,可同步至数据库,然后用户使用与该管理员账号类型关联的微信公众号发消息时就可以得到维护后的内容。
+构造了系统页面(http://localhost:8088/xwxsb/ssfh/login), 管理员账号(带有类型信息)登录系统可以看到该类型账号的数据,进行维护后,可同步至数据库,然后用户使用与该管理员账号类型关联的微信公众号发消息时就可以得到维护后的内容。
 
 系统可以很方便的添加管理员账号和微信公众号的绑定;管理员账号类型对应的处理器信息是存放在数据库中,可以动态地修改账号和微信公众号的功能权限。
 
