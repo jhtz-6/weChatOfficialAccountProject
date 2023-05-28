@@ -10,6 +10,7 @@ import org.jetbrains.annotations.Nullable;
 import org.myf.wechatofficialaccountproject.application.dto.WeChatMessageDTO;
 import org.myf.wechatofficialaccountproject.domain.service.ChatgptMessageDomainService;
 import org.myf.wechatofficialaccountproject.infrastructure.base.enums.BooleanEnum;
+import org.myf.wechatofficialaccountproject.infrastructure.util.entity.OpenAiResponse;
 import org.myf.wechatofficialaccountproject.infrastructure.util.helper.ApplicationContextUtil;
 import org.myf.wechatofficialaccountproject.infrastructure.util.helper.OpenAiUtil;
 import org.myf.wechatofficialaccountproject.infrastructure.util.helper.WeChatUtil;
@@ -29,7 +30,7 @@ public class OpenAiEventSourceListener extends EventSourceListener {
     private static final Logger LOGGER = LoggerFactory.getLogger(OpenAiEventSourceListener.class);
 
     static final ThreadLocal<List<OpenAiResponse>> OPENAI_RESPONSE_LIST_THREADLOCAL = new ThreadLocal<>();
-    static final RedisCilent REDIS_CILENT = (RedisCilent)ApplicationContextUtil.getBeanByName("redisCilent");
+    static final RedisClient REDIS_CILENT = (RedisClient)ApplicationContextUtil.getBeanByName("redisClient");
     static final ChatgptMessageDomainService chatgptMessageDomainService =
         (ChatgptMessageDomainService)ApplicationContextUtil.getBeanByName("chatgptMessageDomainServiceImpl");
 
@@ -76,17 +77,7 @@ public class OpenAiEventSourceListener extends EventSourceListener {
 
             String openAiText = getOpenAiText();
             LOGGER.info("openAiText:" + openAiText);
-            // 数据落库
-            chatgptMessageDomainService.handleByOpenAiResult(weChatMessageDTO, openAiText);
-            if (Objects.nonNull(countDownLatch)) {
-                // 数据放到redis
-                REDIS_CILENT.addValueToRedis(WeChatUtil.CHATGPT + "-" + weChatMessageDTO.getFromUserName(), openAiText,
-                    null);
-                if (1 == countDownLatch.getCount()) {
-                    countDownLatch.countDown();
-                }
-                REDIS_CILENT.deleteValueByKey(WeChatUtil.CHATGPT_PROCESS + "-" + weChatMessageDTO.getFromUserName());
-            }
+            handlerResult(openAiText);
         } catch (Exception e) {
             if (StringUtils
                 .isBlank(REDIS_CILENT.getValueByKey(WeChatUtil.CHATGPT + "-" + weChatMessageDTO.getFromUserName()))) {
@@ -99,14 +90,26 @@ public class OpenAiEventSourceListener extends EventSourceListener {
 
     @Override
     public void onFailure(EventSource eventSource, @Nullable Throwable t, @Nullable Response response) {
-        if (StringUtils.isNotBlank(
-            REDIS_CILENT.getValueByKey(WeChatUtil.CHATGPT_PROCESS + "-" + weChatMessageDTO.getFromUserName()))) {
-            REDIS_CILENT.deleteValueByKey(WeChatUtil.CHATGPT_PROCESS + "-" + weChatMessageDTO.getFromUserName());
-        }
+        handlerResult(response.message());
         LOGGER.error("response {},t {}", response, t);
     }
 
-    public static String getOpenAiText() {
+
+    private void handlerResult(String openAiText){
+        // 数据落库
+        chatgptMessageDomainService.handleByOpenAiResult(weChatMessageDTO, openAiText);
+        if (Objects.nonNull(countDownLatch)) {
+            // 数据放到redis
+            REDIS_CILENT.addValueToRedis(WeChatUtil.CHATGPT + "-" + weChatMessageDTO.getFromUserName(), openAiText,
+                    null);
+            if (1 == countDownLatch.getCount()) {
+                countDownLatch.countDown();
+            }
+            REDIS_CILENT.deleteValueByKey(WeChatUtil.CHATGPT_PROCESS + "-" + weChatMessageDTO.getFromUserName());
+        }
+    }
+
+    protected static String getOpenAiText() {
         StringBuilder openAiText = new StringBuilder();
         for (OpenAiResponse openAiResponse : OPENAI_RESPONSE_LIST_THREADLOCAL.get()) {
             openAiText.append(BuildResultTextByRes(openAiResponse));
@@ -114,7 +117,7 @@ public class OpenAiEventSourceListener extends EventSourceListener {
         return String.valueOf(openAiText);
     }
 
-    private static String BuildResultTextByRes(OpenAiResponse openAiResponse) {
+    protected static String BuildResultTextByRes(OpenAiResponse openAiResponse) {
         String model = openAiResponse.getModel();
         switch (model) {
             case "gpt-3.5-turbo-0301":

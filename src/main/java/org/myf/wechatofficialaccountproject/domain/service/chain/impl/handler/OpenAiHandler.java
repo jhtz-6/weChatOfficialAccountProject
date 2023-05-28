@@ -6,13 +6,14 @@ import org.myf.wechatofficialaccountproject.domain.service.chain.MessageContentH
 import org.myf.wechatofficialaccountproject.infrastructure.base.enums.BooleanEnum;
 import org.myf.wechatofficialaccountproject.infrastructure.base.enums.MsgTypeEnum;
 import org.myf.wechatofficialaccountproject.infrastructure.util.client.OpenAiClient;
-import org.myf.wechatofficialaccountproject.infrastructure.util.client.RedisCilent;
+import org.myf.wechatofficialaccountproject.infrastructure.util.client.RedisClient;
 import org.myf.wechatofficialaccountproject.infrastructure.util.helper.CommonUtil;
 import org.myf.wechatofficialaccountproject.infrastructure.util.helper.WeChatUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 import static org.myf.wechatofficialaccountproject.domain.service.chain.MessageContentHandler.OpenAi.*;
 
@@ -24,7 +25,7 @@ import static org.myf.wechatofficialaccountproject.domain.service.chain.MessageC
 @Service
 public class OpenAiHandler implements MessageContentHandler {
     @Autowired
-    RedisCilent redisCilent;
+    RedisClient redisClient;
     @Autowired
     OpenAiClient openAiClient;
 
@@ -32,7 +33,7 @@ public class OpenAiHandler implements MessageContentHandler {
     public String handlerMessageContent(WeChatMessageDTO weChatMessageDTO) {
         // 从redis中取
         String redisOpenAiValue =
-            redisCilent.getValueByKey(WeChatUtil.CHATGPT + "-" + weChatMessageDTO.getFromUserName());
+            redisClient.getValueByKey(WeChatUtil.CHATGPT + "-" + weChatMessageDTO.getFromUserName());
         if (StringUtils.equalsAny(weChatMessageDTO.getContent(), WeChatUtil.CHATGPT, WeChatUtil.CHATGPT_ONE)) {
             if (StringUtils.isEmpty(redisOpenAiValue)) {
                 return DEFAULT_OPENAI_RESULT;
@@ -42,13 +43,13 @@ public class OpenAiHandler implements MessageContentHandler {
                     redisOpenAiValue =
                         redisOpenAiValue.substring(firstGet ? 0 : 550, firstGet ? 550 : redisOpenAiValue.length());
                     if (!firstGet) {
-                        redisCilent.deleteValueByKey(WeChatUtil.CHATGPT + "-" + weChatMessageDTO.getFromUserName());
+                        redisClient.deleteValueByKey(WeChatUtil.CHATGPT + "-" + weChatMessageDTO.getFromUserName());
                         CommonUtil.addValueToChatgptNumMap(weChatMessageDTO.getFromUserName());
                     } else {
                         return NEED_MORE_REQUEST + redisOpenAiValue;
                     }
                 } else {
-                    redisCilent.deleteValueByKey(WeChatUtil.CHATGPT + "-" + weChatMessageDTO.getFromUserName());
+                    redisClient.deleteValueByKey(WeChatUtil.CHATGPT + "-" + weChatMessageDTO.getFromUserName());
                     CommonUtil.addValueToChatgptNumMap(weChatMessageDTO.getFromUserName());
                 }
                 return RESULT + redisOpenAiValue;
@@ -59,14 +60,14 @@ public class OpenAiHandler implements MessageContentHandler {
                 return "您今日请求chatgpt次数(" + WeChatUtil.CHATGPT_NUM + "次)已使用完,请于明天再来!!";
             }
             String redisProcessValue =
-                redisCilent.getValueByKey(WeChatUtil.CHATGPT_PROCESS + "-" + weChatMessageDTO.getFromUserName());
+                redisClient.getValueByKey(WeChatUtil.CHATGPT_PROCESS + "-" + weChatMessageDTO.getFromUserName());
             if (BooleanEnum.FALSE.value.equals(redisProcessValue)) {
                 return IN_PROCESS;
             }
             if (StringUtils.isNotBlank(redisOpenAiValue)) {
                 return NEED_TO_GET_RESULT;
             }
-            return openAiClient.getResultByOpenAi(weChatMessageDTO);
+            return RESULT + openAiClient.getResultByOpenAi(weChatMessageDTO, 4000, TimeUnit.MILLISECONDS);
         }
         return null;
     }

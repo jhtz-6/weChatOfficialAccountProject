@@ -8,6 +8,7 @@ import com.google.common.collect.Sets;
 import com.unfbx.chatgpt.OpenAiStreamClient;
 import org.apache.commons.lang3.StringUtils;
 import org.myf.wechatofficialaccountproject.application.dto.*;
+import org.myf.wechatofficialaccountproject.domain.service.chain.MessageContentHandlerChain;
 import org.myf.wechatofficialaccountproject.infrastructure.base.entity.AccompanyDO;
 import org.myf.wechatofficialaccountproject.infrastructure.base.entity.ConfigurationDO;
 import org.myf.wechatofficialaccountproject.infrastructure.base.entity.UserDO;
@@ -59,10 +60,12 @@ public class InitData {
     public static OpenAiStreamClient OPENAI_STREAM_CLIENT;
     public static Map<String, Map<String, List<HandlerToChainMapping>>> CHAIN_TO_HANDLER_MAP = new HashMap(8);
     private static ReentrantLock UPDATE_DATA_LOCK = new ReentrantLock();
+    private static ReentrantLock UPDATE_CONFIG_LOCK = new ReentrantLock();
 
     @PostConstruct
     public void initStaticData() {
         updateDataToMap(null);
+        updateConfigToMap();
         MaterialQueryParam materialQueryParam = new MaterialQueryParam();
         materialRepository.selectListByParam(materialQueryParam).stream().forEach(x -> {
             MaterialDTO materialDTO = new MaterialDTO();
@@ -78,32 +81,45 @@ public class InitData {
             foodDTO.setFoodName(foodDTO.getFoodName().trim());
             WeChatUtil.FOOD_LIST.add(foodDTO);
         });
-        List<ConfigurationDO> configurationDOList =
-            configurationRepositoryl.selectListByParam(new ConfigurationQueryParam());
-        for (ConfigurationDO configurationDO : configurationDOList) {
-            CONFIGURATION_MAP.put(configurationDO.getName(), configurationDO.getValue());
-        }
-        SSENDER = new SmsSingleSender(Integer.parseInt(CONFIGURATION_MAP.get(WeChatUtil.TENCENT_APPID)),
-            CONFIGURATION_MAP.get(WeChatUtil.TENCENT_APPKEY));
-
-        CLIENT = new AipOcr(WeChatUtil.CONFIGURATION_MAP.get(WeChatUtil.BAIDU_APPID),
-            WeChatUtil.CONFIGURATION_MAP.get(WeChatUtil.BAIDU_APPKEY),
-            WeChatUtil.CONFIGURATION_MAP.get(WeChatUtil.BAIDU_SECRET_KEY));
-
-        OPENAI_STREAM_CLIENT = OpenAiStreamClient.builder().connectTimeout(50).readTimeout(50).writeTimeout(50)
-            .apiKey(WeChatUtil.CONFIGURATION_MAP.get(WeChatUtil.OPENAI_APIKEY))
-            .apiHost(WeChatUtil.CONFIGURATION_MAP.get(WeChatUtil.OPENAI_APIHOST)).build();
-
-        for (SystemBelongEnum systemBelongEnum : SystemBelongEnum.values()) {
-            if (CONFIGURATION_MAP.containsKey(systemBelongEnum.name())) {
-                CHAIN_TO_HANDLER_MAP = JSON.parseObject(CONFIGURATION_MAP.get(systemBelongEnum.name()), Map.class);
-            }
-        }
 
         UserQueryParam userQueryParam = new UserQueryParam();
         List<UserDO> userDOList = userRepository.getListByParam(userQueryParam);
         userDOList.stream().forEach(x -> WeChatUtil.USER_TO_BELONGER_MAP.put(x.getLoginName(), x.getBelonger()));
 
+    }
+
+    public Boolean updateConfigToMap() {
+        UPDATE_CONFIG_LOCK.lock();
+        try {
+            List<ConfigurationDO> configurationDOList =
+                configurationRepositoryl.selectListByParam(new ConfigurationQueryParam());
+            for (ConfigurationDO configurationDO : configurationDOList) {
+                CONFIGURATION_MAP.put(configurationDO.getName(), configurationDO.getValue());
+            }
+            SSENDER = new SmsSingleSender(Integer.parseInt(CONFIGURATION_MAP.get(WeChatUtil.TENCENT_APPID)),
+                CONFIGURATION_MAP.get(WeChatUtil.TENCENT_APPKEY));
+
+            CLIENT = new AipOcr(WeChatUtil.CONFIGURATION_MAP.get(WeChatUtil.BAIDU_APPID),
+                WeChatUtil.CONFIGURATION_MAP.get(WeChatUtil.BAIDU_APPKEY),
+                WeChatUtil.CONFIGURATION_MAP.get(WeChatUtil.BAIDU_SECRET_KEY));
+
+            OPENAI_STREAM_CLIENT = OpenAiStreamClient.builder().connectTimeout(50).readTimeout(50).writeTimeout(50)
+                .apiKey(WeChatUtil.CONFIGURATION_MAP.get(WeChatUtil.OPENAI_APIKEY))
+                .apiHost(WeChatUtil.CONFIGURATION_MAP.get(WeChatUtil.OPENAI_APIHOST)).build();
+
+            for (SystemBelongEnum systemBelongEnum : SystemBelongEnum.values()) {
+                if (CONFIGURATION_MAP.containsKey(systemBelongEnum.name())) {
+                    CHAIN_TO_HANDLER_MAP = JSON.parseObject(CONFIGURATION_MAP.get(systemBelongEnum.name()), Map.class);
+                }
+            }
+            MessageContentHandlerChain.CLASS_TO_HANDLER_MAP = new HashMap<>();
+        } catch (Exception e) {
+            LOGGER.error("updateConfigToMap:", e);
+            return false;
+        } finally {
+            UPDATE_CONFIG_LOCK.unlock();
+        }
+        return true;
     }
 
     /**

@@ -1,7 +1,6 @@
 package org.myf.wechatofficialaccountproject.domain.service.chain;
 
 import org.myf.wechatofficialaccountproject.application.dto.WeChatMessageDTO;
-import org.myf.wechatofficialaccountproject.infrastructure.util.helper.WeChatUtil;
 
 /**
  * @author myf
@@ -17,7 +16,7 @@ public interface MessageContentHandler {
     String handlerMessageContent(WeChatMessageDTO weChatMessageDTO);
 
     /**
-     * 匹配条件,返回才会去执行具体处理方法
+     * 匹配条件,返回true才会去执行具体处理方法
      * 
      * @param weChatMessageDTO
      * @return

@@ -109,6 +109,7 @@ public final class WeChatUtil {
     public static String BAIDU_SECRET_KEY = "BAIDU_SECRET_KEY";
     public static String OPENAI_APIKEY = "OPENAI_APIKEY";
     public static String OPENAI_APIHOST = "OPENAI_APIHOST";
+    public static String IP = "ip";
     public static Map<String, String> CONFIGURATION_MAP = new HashMap<>();
     public static long CURRENT_PERSON_TIMEOUT = 600000L;
     public static String RESPONSE_FORMAT = "<xml>\n" + "<ToUserName><![CDATA[%1$s]]></ToUserName>\n"

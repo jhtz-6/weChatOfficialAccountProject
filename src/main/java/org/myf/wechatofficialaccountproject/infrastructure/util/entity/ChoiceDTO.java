@@ -1,4 +1,4 @@
-package org.myf.wechatofficialaccountproject.infrastructure.util.client;
+package org.myf.wechatofficialaccountproject.infrastructure.util.entity;
 
 import lombok.Data;
 

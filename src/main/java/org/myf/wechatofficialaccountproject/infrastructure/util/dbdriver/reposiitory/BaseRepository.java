@@ -42,4 +42,7 @@ public interface BaseRepository {
     String FOOD_NAME = "foodName";
 
     String SFYX = "sfyx";
+
+    String CREATE_TIME = "create_time";
+
 }

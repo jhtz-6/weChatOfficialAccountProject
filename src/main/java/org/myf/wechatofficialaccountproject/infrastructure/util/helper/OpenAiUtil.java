@@ -3,8 +3,8 @@ package org.myf.wechatofficialaccountproject.infrastructure.util.helper;
 import com.unfbx.chatgpt.entity.chat.ChatCompletion;
 import com.unfbx.chatgpt.entity.completions.Completion;
 import org.apache.commons.lang3.StringUtils;
-import org.myf.wechatofficialaccountproject.infrastructure.util.client.ChoiceDTO;
-import org.myf.wechatofficialaccountproject.infrastructure.util.client.OpenAiResponse;
+import org.myf.wechatofficialaccountproject.infrastructure.util.entity.ChoiceDTO;
+import org.myf.wechatofficialaccountproject.infrastructure.util.entity.OpenAiResponse;
 
 /**
  * @Author: myf

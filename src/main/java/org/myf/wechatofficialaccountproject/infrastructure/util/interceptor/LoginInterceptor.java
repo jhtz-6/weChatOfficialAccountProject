@@ -3,7 +3,7 @@ package org.myf.wechatofficialaccountproject.infrastructure.util.interceptor;
 import lombok.AllArgsConstructor;
 import org.apache.commons.compress.utils.Lists;
 import org.myf.wechatofficialaccountproject.infrastructure.base.entity.RequestLogDO;
-import org.myf.wechatofficialaccountproject.infrastructure.base.entity.RequestLogDTO;
+import org.myf.wechatofficialaccountproject.application.dto.RequestLogDTO;
 import org.myf.wechatofficialaccountproject.infrastructure.util.dbdriver.reposiitory.RequestLogRepository;
 import org.myf.wechatofficialaccountproject.infrastructure.util.dbdriver.reposiitory.UserRepository;
 import org.myf.wechatofficialaccountproject.infrastructure.util.helper.RequestLogUtil;
@@ -52,6 +52,7 @@ public class LoginInterceptor implements HandlerInterceptor {
     private static final List<String> NEED_NO_LOGIN_URL_LIST = Lists.newArrayList();
 
     static {
+        // todo 补全
         NEED_TO_LOGIN_URL_LIST.add("/ssfh/queryAllData");
         NEED_TO_LOGIN_URL_LIST.add("/ssfh/index");
         NEED_TO_LOGIN_URL_LIST.add("/ssfh/synchronousData");
@@ -77,6 +78,10 @@ public class LoginInterceptor implements HandlerInterceptor {
         NEED_NO_LOGIN_URL_LIST.add("/ssfh/queryCatrgoryList");
         NEED_NO_LOGIN_URL_LIST.add("/ssfh/queryBooleanEnum");
         NEED_NO_LOGIN_URL_LIST.add("/ssfh/queryBelongUserList");
+        NEED_NO_LOGIN_URL_LIST.add("/ssfh/chat");
+        NEED_NO_LOGIN_URL_LIST.add("/ssfh/getMessageList");
+        NEED_NO_LOGIN_URL_LIST.add("/ssfh/canSendMessage");
+
 
     }
 

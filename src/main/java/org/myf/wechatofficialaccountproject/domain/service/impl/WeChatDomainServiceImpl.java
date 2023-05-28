@@ -31,6 +31,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -55,7 +56,7 @@ public class WeChatDomainServiceImpl implements WeChatDomainService {
     @Autowired
     BaiduOcrClient baiduOcrClient;
     @Autowired
-    RedisCilent redisCilent;
+    RedisClient redisClient;
     @Autowired
     TuLingClient tuLingClient;
     @Resource
@@ -179,7 +180,7 @@ public class WeChatDomainServiceImpl implements WeChatDomainService {
         }
         String handleImageResult = "";
         if (BooleanEnum.TRUE.value
-            .equals(redisCilent.getValueByKey(WeChatUtil.OCR_MENU_ACTION + weChatMessageDTO.getFromUserName()))) {
+            .equals(redisClient.getValueByKey(WeChatUtil.OCR_MENU_ACTION + weChatMessageDTO.getFromUserName()))) {
             BaiduOcrResponse generalImageResult =
                 baiduOcrClient.getGeneralImageByPhotoUrl(weChatMessageDTO.getPicUrl());
             if (Objects.isNull(generalImageResult)) {
@@ -214,9 +215,9 @@ public class WeChatDomainServiceImpl implements WeChatDomainService {
                 }
                 if (StringUtils.isNotBlank(handleImageResult)) {
                     if (StringUtils.isNotBlank(
-                        redisCilent.getValueByKey(WeChatUtil.OCR_MENU_ACTION + weChatMessageDTO.getFromUserName()))) {
-                        redisCilent.addValueToRedis(WeChatUtil.OCR_MENU_CONTENT + weChatMessageDTO.getFromUserName(),
-                            redisCilent.getValueByKey(WeChatUtil.OCR_MENU_CONTENT + weChatMessageDTO.getFromUserName())
+                        redisClient.getValueByKey(WeChatUtil.OCR_MENU_ACTION + weChatMessageDTO.getFromUserName()))) {
+                        redisClient.addValueToRedis(WeChatUtil.OCR_MENU_CONTENT + weChatMessageDTO.getFromUserName(),
+                            redisClient.getValueByKey(WeChatUtil.OCR_MENU_CONTENT + weChatMessageDTO.getFromUserName())
                                 + handleImageResult,
                             1000 * 60 * 60 * 24L);
                     }
@@ -267,8 +268,8 @@ public class WeChatDomainServiceImpl implements WeChatDomainService {
 
     @Override
     public String getCurrentPersonNum(String setKey, String value, Long timeOut) {
-        redisCilent.addValueToRedis(setKey, value, timeOut);
-        return redisCilent
+        redisClient.addValueToRedis(setKey, value, timeOut);
+        return redisClient
             .getAllKeys(ThreadLocalHolder.BELONGER_THREAD_LOCAL.get() + WeChatUtil.CURRENT_PERSON_KEY + "*").size()
             + "";
     }
@@ -277,7 +278,7 @@ public class WeChatDomainServiceImpl implements WeChatDomainService {
     public String handleByOpenAi(WeChatMessageDTO weChatMessageDTO) {
         // 从redis中取
         String redisOpenAiValue =
-            redisCilent.getValueByKey(WeChatUtil.CHATGPT + "-" + weChatMessageDTO.getFromUserName());
+            redisClient.getValueByKey(WeChatUtil.CHATGPT + "-" + weChatMessageDTO.getFromUserName());
         if (StringUtils.equalsAny(weChatMessageDTO.getContent(), WeChatUtil.CHATGPT, WeChatUtil.CHATGPT_ONE)) {
             if (StringUtils.isEmpty(redisOpenAiValue)) {
                 return "您尚未发送chatgpt相关请求;请参考示例: chatgpt帮我写一份情书、chatgpt以我爱打游戏写一首打油诗";
@@ -287,25 +288,25 @@ public class WeChatDomainServiceImpl implements WeChatDomainService {
                     redisOpenAiValue =
                         redisOpenAiValue.substring(firstGet ? 0 : 550, firstGet ? 550 : redisOpenAiValue.length());
                     if (!firstGet) {
-                        redisCilent.deleteValueByKey(WeChatUtil.CHATGPT + "-" + weChatMessageDTO.getFromUserName());
+                        redisClient.deleteValueByKey(WeChatUtil.CHATGPT + "-" + weChatMessageDTO.getFromUserName());
                     } else {
                         return "以下数据来自chatgpt(请发送chatgpt1来获取剩下的内容)" + ":\n" + redisOpenAiValue;
                     }
                 } else {
-                    redisCilent.deleteValueByKey(WeChatUtil.CHATGPT + "-" + weChatMessageDTO.getFromUserName());
+                    redisClient.deleteValueByKey(WeChatUtil.CHATGPT + "-" + weChatMessageDTO.getFromUserName());
                 }
                 return "以下数据来自chatgpt" + ":\n" + redisOpenAiValue;
             }
         } else if (weChatMessageDTO.getContent().contains(WeChatUtil.CHATGPT)) {
             String redisProcessValue =
-                redisCilent.getValueByKey(WeChatUtil.CHATGPT_PROCESS + "-" + weChatMessageDTO.getFromUserName());
+                redisClient.getValueByKey(WeChatUtil.CHATGPT_PROCESS + "-" + weChatMessageDTO.getFromUserName());
             if (BooleanEnum.FALSE.value.equals(redisProcessValue)) {
                 return "数据较多,正在处理中,请于一两分钟后发送chatgpt来获取结果;注意:在您获取当前结果前,您不可以再次请求chatgpt。";
             }
             if (StringUtils.isNotBlank(redisOpenAiValue)) {
                 return "您有chatgpt结果尚未接收,请发送chatgpt来接收。";
             }
-            return openAiClient.getResultByOpenAi(weChatMessageDTO);
+            return "以下数据来自chatgpt:\n" + openAiClient.getResultByOpenAi(weChatMessageDTO, 4000, TimeUnit.MILLISECONDS);
         }
         return null;
     }

@@ -1,4 +1,4 @@
-package org.myf.wechatofficialaccountproject.infrastructure.base.entity;
+package org.myf.wechatofficialaccountproject.application.dto;
 
 import lombok.Data;
 

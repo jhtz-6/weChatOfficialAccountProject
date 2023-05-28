@@ -35,7 +35,8 @@ public class EventHandler implements MessageContentHandler {
     public String handlerMessageContent(WeChatMessageDTO weChatMessageDTO) {
         SubscribeQueryParam subscribeQueryParam = new SubscribeQueryParam();
         subscribeQueryParam.setSubscriber(weChatMessageDTO.getFromUserName());
-        subscribeQueryParam.setBelonger(ThreadLocalHolder.BELONGER_THREAD_LOCAL.get());
+        SystemBelongEnum belonger = ThreadLocalHolder.BELONGER_THREAD_LOCAL.get();
+        subscribeQueryParam.setBelonger(belonger);
         lock.lock();
         try {
             SubscribeDO subscribeDO = subscribeRepositoryImpl.selectOneByParam(subscribeQueryParam);
@@ -47,12 +48,13 @@ public class EventHandler implements MessageContentHandler {
             if (EventEnum.SUBSCRIBE.name.equals(weChatMessageDTO.getEvent().name)) {
                 subscribeQueryParam = new SubscribeQueryParam();
                 subscribeQueryParam.setStatus(weChatMessageDTO.getEvent().name);
+                subscribeQueryParam.setBelonger(belonger);
                 Integer count = subscribeRepositoryImpl.selectCountByParam(subscribeQueryParam);
                 String unSubsceibeWord = "";
                 subscribeQueryParam.setStatus(EventEnum.UNSUBSCRIBE.name);
                 if (Objects.isNull(subscribeDO)) {
                     subscribeDO = new SubscribeDO();
-                    subscribeDO.setBelonger(ThreadLocalHolder.BELONGER_THREAD_LOCAL.get());
+                    subscribeDO.setBelonger(belonger);
                     subscribeDO.setStatus(weChatMessageDTO.getEvent().name);
                     subscribeDO.setSubscriber(weChatMessageDTO.getFromUserName());
                     subscribeRepositoryImpl.saveOrUpdateId(subscribeDO);
@@ -62,8 +64,8 @@ public class EventHandler implements MessageContentHandler {
                     subscribeRepositoryImpl.saveOrUpdateId(subscribeDO);
                 }
                 String subscribeToWord = WeChatUtil.WeChatKeyWordMap
-                    .get(ThreadLocalHolder.BELONGER_THREAD_LOCAL.get() + WeChatUtil.SUBSCRIBE_TO_WORD);
-                return (SystemBelongEnum.LEADER.equals(ThreadLocalHolder.BELONGER_THREAD_LOCAL.get())
+                    .get(belonger + WeChatUtil.SUBSCRIBE_TO_WORD);
+                return (SystemBelongEnum.LEADER.equals(belonger)
                     ? "你好," + unSubsceibeWord + "你是第" + (count + 1) + "位关注我的人,欢迎你~。\n" : "") + subscribeToWord;
             } else if (EventEnum.UNSUBSCRIBE.name.equals(weChatMessageDTO.getEvent().name)) {
                 subscribeDO.setStatus(weChatMessageDTO.getEvent().name);

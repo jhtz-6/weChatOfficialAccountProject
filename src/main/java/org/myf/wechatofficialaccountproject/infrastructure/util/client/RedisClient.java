@@ -6,19 +6,16 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
  * @Author: myf
  * @CreateTime: 2023-03-07 14:22
- * @Description: RedisCilent 操作redis客户端
+ * @Description: RedisClient 操作redis客户端
  */
 @Component
-public class RedisCilent {
+public class RedisClient {
 
     @Resource
     private StringRedisTemplate stringRedisTemplate;
@@ -79,6 +76,13 @@ public class RedisCilent {
             stringRedisTemplate.opsForList().leftPop(key);
         }
         stringRedisTemplate.opsForList().rightPush(key, value);
+        return stringRedisTemplate.boundListOps(key).range(0, size);
+    }
+
+    public List<String> getListValueByKey(String key, int size) {
+        if (StringUtils.isBlank(key)) {
+            return Collections.emptyList();
+        }
         return stringRedisTemplate.boundListOps(key).range(0, size);
     }
 }

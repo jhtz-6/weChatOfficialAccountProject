@@ -8,10 +8,9 @@ import org.myf.wechatofficialaccountproject.domain.service.chain.MessageContentH
 import org.myf.wechatofficialaccountproject.infrastructure.base.enums.BooleanEnum;
 import org.myf.wechatofficialaccountproject.infrastructure.base.enums.MsgTypeEnum;
 import org.myf.wechatofficialaccountproject.infrastructure.util.client.BaiduOcrClient;
-import org.myf.wechatofficialaccountproject.infrastructure.util.client.RedisCilent;
+import org.myf.wechatofficialaccountproject.infrastructure.util.client.RedisClient;
 import org.myf.wechatofficialaccountproject.infrastructure.util.entity.BaiduOcrResponse;
 import org.myf.wechatofficialaccountproject.infrastructure.util.entity.BaiduOcrWordsResult;
-import org.myf.wechatofficialaccountproject.infrastructure.util.helper.ApplicationContextUtil;
 import org.myf.wechatofficialaccountproject.infrastructure.util.helper.CommonUtil;
 import org.myf.wechatofficialaccountproject.infrastructure.util.helper.ThreadLocalHolder;
 import org.myf.wechatofficialaccountproject.infrastructure.util.helper.WeChatUtil;
@@ -32,13 +31,13 @@ public class ImageByBaiduOcrHandler implements MessageContentHandler {
     @Autowired
     BaiduOcrClient baiduOcrClient;
     @Autowired
-    RedisCilent redisCilent;
+    RedisClient redisClient;
 
     @Override
     public String handlerMessageContent(WeChatMessageDTO weChatMessageDTO) {
         String handleImageResult = "";
         if (BooleanEnum.TRUE.value
-            .equals(redisCilent.getValueByKey(WeChatUtil.OCR_MENU_ACTION + weChatMessageDTO.getFromUserName()))) {
+            .equals(redisClient.getValueByKey(WeChatUtil.OCR_MENU_ACTION + weChatMessageDTO.getFromUserName()))) {
             BaiduOcrResponse generalImageResult =
                 baiduOcrClient.getGeneralImageByPhotoUrl(weChatMessageDTO.getPicUrl());
             if (Objects.isNull(generalImageResult)) {
@@ -73,9 +72,9 @@ public class ImageByBaiduOcrHandler implements MessageContentHandler {
                 }
                 if (StringUtils.isNotBlank(handleImageResult)) {
                     if (StringUtils.isNotBlank(
-                        redisCilent.getValueByKey(WeChatUtil.OCR_MENU_ACTION + weChatMessageDTO.getFromUserName()))) {
-                        redisCilent.addValueToRedis(WeChatUtil.OCR_MENU_CONTENT + weChatMessageDTO.getFromUserName(),
-                            redisCilent.getValueByKey(WeChatUtil.OCR_MENU_CONTENT + weChatMessageDTO.getFromUserName())
+                        redisClient.getValueByKey(WeChatUtil.OCR_MENU_ACTION + weChatMessageDTO.getFromUserName()))) {
+                        redisClient.addValueToRedis(WeChatUtil.OCR_MENU_CONTENT + weChatMessageDTO.getFromUserName(),
+                            redisClient.getValueByKey(WeChatUtil.OCR_MENU_CONTENT + weChatMessageDTO.getFromUserName())
                                 + handleImageResult,
                             1000 * 60 * 60 * 24L);
                     }

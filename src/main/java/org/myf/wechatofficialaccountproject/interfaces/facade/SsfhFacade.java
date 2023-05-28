@@ -10,11 +10,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.myf.wechatofficialaccountproject.application.dto.*;
 import org.myf.wechatofficialaccountproject.infrastructure.base.entity.*;
 import org.myf.wechatofficialaccountproject.infrastructure.base.enums.*;
-import org.myf.wechatofficialaccountproject.infrastructure.util.dbdriver.Entity.AccompanyQueryParam;
-import org.myf.wechatofficialaccountproject.infrastructure.util.dbdriver.Entity.MenuQueryParam;
-import org.myf.wechatofficialaccountproject.infrastructure.util.dbdriver.Entity.UserQueryParam;
-import org.myf.wechatofficialaccountproject.infrastructure.util.dbdriver.Entity.WechatKeyWordQueryParam;
+import org.myf.wechatofficialaccountproject.infrastructure.util.dbdriver.Entity.*;
 import org.myf.wechatofficialaccountproject.infrastructure.util.dbdriver.reposiitory.*;
+import org.myf.wechatofficialaccountproject.infrastructure.util.entity.ResponseResult;
 import org.myf.wechatofficialaccountproject.infrastructure.util.helper.CommonUtil;
 import org.myf.wechatofficialaccountproject.infrastructure.util.helper.InitData;
 import org.myf.wechatofficialaccountproject.infrastructure.util.helper.WeChatUtil;
@@ -32,6 +30,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.net.URLEncoder;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static org.myf.wechatofficialaccountproject.infrastructure.util.helper.WeChatUtil.CONFIGURATION_MAP;
 
 /**
  * @Author: myf
@@ -54,6 +54,8 @@ public class SsfhFacade {
     InitData initData;
     @Autowired
     FoodRepository foodRepository;
+    @Autowired
+    ChatgptMessageRepository chatgptMessageRepository;
 
     @GetMapping("/index")
     public ModelAndView index(HttpServletRequest request) {
@@ -130,61 +132,30 @@ public class SsfhFacade {
     public String login(@RequestBody UserDTO user, HttpServletRequest request) throws Exception {
         Map checkmap = new HashMap();
         if (StringUtils.isAnyBlank(user.getLoginName(), user.getLoginPassword())) {
-            checkmap.put("result", false);
-            checkmap.put("errorMessage", "账号或密码为空");
-            return JSON.toJSONString(checkmap);
+            return ResponseResult.ErrorOfMapToJson("账号或密码为空");
         }
         UserQueryParam userQueryParam = new UserQueryParam();
         userQueryParam.setLoginName(user.getLoginName());
         userQueryParam.setLoginPassword(user.getLoginPassword());
         UserDO userDO = userRepository.selectOneByParam(userQueryParam);
         if (Objects.isNull(userDO)) {
-            checkmap.put("result", false);
-            checkmap.put("errorMessage", "账号或密码错误");
-            return JSON.toJSONString(checkmap);
+            return ResponseResult.ErrorOfMapToJson("账号或密码为空");
         } else {
             request.getSession().setAttribute(WeChatUtil.USER_NAME, user.getLoginName());
             request.getSession().setAttribute(WeChatUtil.LOGIN_PASSWORD, user.getLoginPassword());
-            request.getSession().setAttribute(WeChatUtil.USER_PHOTO,
-                // https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png
-                CommonUtil.getPhotoUrl());
-            /*String sessionUserName = (String)request.getSession().getAttribute("userName");
-            String sessionUserPhoto = (String)request.getSession().getAttribute("userPhoto");
-            if (StringUtils.isBlank(sessionUserName)) {
-                sessionUserName = "游客";
-            }*/
+            request.getSession().setAttribute(WeChatUtil.USER_PHOTO, CommonUtil.getPhotoUrl());
             checkmap.put(WeChatUtil.USER_NAME, user.getLoginName());
-            checkmap.put("result", true);
             checkmap.put(WeChatUtil.USER_PHOTO, request.getSession().getAttribute(WeChatUtil.USER_PHOTO));
+            return ResponseResult.TrueOfMapToJson(checkmap);
         }
-        /*if (Objects.isNull(user) || !"盛世芳华菜谱管理员".equals(user.getLoginName())
-            || !"ssfh666".equals(user.getLoginPassword())) {
-            checkmap.put("result", false);
-            checkmap.put("errorMessage", "账号或密码错误");
-        } else {
-            request.getSession().setAttribute(WeChatUtil.USER_NAME, user.getLoginName());
-            request.getSession().setAttribute(WeChatUtil.USER_NAME,
-                "https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png");
-            String sessionUserName = (String)request.getSession().getAttribute("userName");
-            String sessionUserPhoto = (String)request.getSession().getAttribute("userPhoto");
-            if (StringUtils.isBlank(sessionUserName)) {
-                sessionUserName = "游客";
-            }
-            checkmap.put("userName", sessionUserName);
-            checkmap.put("result", true);
-            checkmap.put("userPhoto", sessionUserPhoto);
-        }*/
-        return JSON.toJSONString(checkmap);
     }
 
     @PostMapping("/updateFoodData")
     @Transactional
     public String updateFoodData(@RequestBody MenuDTO menuDTO, HttpServletRequest request) {
-        Map<String, Object> map = new HashMap(8);
         String sessionUserName = (String)request.getSession().getAttribute(WeChatUtil.USER_NAME);
         if (StringUtils.isBlank(sessionUserName)) {
-            map.put("result", false);
-            map.put("errorMessage", "您尚未登录,暂无权限更新菜谱~~");
+            return ResponseResult.ErrorOfMapToJson("您尚未登录,暂无权限更新菜谱~~");
         } else {
             SystemBelongEnum belonger = getBelongerByRequest(request);
             if (Objects.isNull(menuDTO.getId())) {
@@ -194,9 +165,7 @@ public class SsfhFacade {
                 menuQueryParam.setBelonger(belonger);
                 List<MenuDO> menuDOList = menuRepository.selectListByParam(menuQueryParam);
                 if (CollectionUtils.isNotEmpty(menuDOList)) {
-                    map.put("result", false);
-                    map.put("errorMessage", "已经存在" + menuDTO.getFood() + ",不可再次添加");
-                    return JSON.toJSONString(map);
+                    return ResponseResult.ErrorOfMapToJson("已经存在" + menuDTO.getFood() + ",不可再次添加");
                 }
                 FoodDO foodDO = new FoodDO();
                 foodDO.setBelonger(belonger);
@@ -207,18 +176,15 @@ public class SsfhFacade {
             BeanUtils.copyProperties(menuDTO, menuDO);
             menuDO.setBelonger(belonger);
             menuRepository.saveOrUpdateById(menuDO);
-            map.put("result", true);
+            return ResponseResult.TrueOfMapToJson();
         }
-        return JSON.toJSONString(map);
     }
 
     @PostMapping("/updateKeyWordData")
     public String updateKeyWordData(@RequestBody WechatKeyWordsDTO wechatKeyWordsDTO, HttpServletRequest request) {
-        Map<String, Object> map = new HashMap(8);
         String sessionUserName = (String)request.getSession().getAttribute(WeChatUtil.USER_NAME);
         if (StringUtils.isBlank(sessionUserName)) {
-            map.put("result", false);
-            map.put("errorMessage", "您尚未登录,暂无权限更新关键字~~");
+            return ResponseResult.ErrorOfMapToJson("您尚未登录,暂无权限更新关键字~~");
         } else {
             SystemBelongEnum belonger = getBelongerByRequest(request);
             if (Objects.isNull(wechatKeyWordsDTO.getId())) {
@@ -228,27 +194,22 @@ public class SsfhFacade {
                 queryParam.setIsValid(BooleanEnum.TRUE);
                 List<WechatKeyWordsDO> wechatKeyWordsDOS = wechatKeyWordsRepository.getListByParam(queryParam);
                 if (CollectionUtils.isNotEmpty(wechatKeyWordsDOS)) {
-                    map.put("result", false);
-                    map.put("errorMessage", "已经存在" + wechatKeyWordsDTO.getKeyName() + ",不可再次添加");
-                    return JSON.toJSONString(map);
+                    return ResponseResult.ErrorOfMapToJson("已经存在" + wechatKeyWordsDTO.getKeyName() + ",不可再次添加");
                 }
             }
             WechatKeyWordsDO wechatKeyWordsDO = new WechatKeyWordsDO();
             BeanUtils.copyProperties(wechatKeyWordsDTO, wechatKeyWordsDO);
             wechatKeyWordsDO.setBelonger(belonger);
             wechatKeyWordsRepository.saveOrUpdateById(wechatKeyWordsDO);
-            map.put("result", true);
+            return ResponseResult.TrueOfMapToJson();
         }
-        return JSON.toJSONString(map);
     }
 
     @PostMapping("/updateAccompanyData")
     public String updateAccompanyData(@RequestBody AccompanyDTO accompanyDTO, HttpServletRequest request) {
-        Map<String, Object> map = new HashMap(8);
         String sessionUserName = (String)request.getSession().getAttribute(WeChatUtil.USER_NAME);
         if (StringUtils.isBlank(sessionUserName)) {
-            map.put("result", false);
-            map.put("errorMessage", "您尚未登录,暂无权限更新随从~~");
+            return ResponseResult.ErrorOfMapToJson("您尚未登录,暂无权限更新随从~~");
         } else {
             SystemBelongEnum belonger = getBelongerByRequest(request);
             if (Objects.isNull(accompanyDTO.getId())) {
@@ -258,18 +219,15 @@ public class SsfhFacade {
                 queryParam.setCharacterName(accompanyDTO.getCharacterName());
                 List<AccompanyDO> accompanyDOList = accompanyRepository.getListByParam(queryParam);
                 if (CollectionUtils.isNotEmpty(accompanyDOList)) {
-                    map.put("result", false);
-                    map.put("errorMessage", "已经存在" + accompanyDTO.getCharacterName() + ",不可再次添加");
-                    return JSON.toJSONString(map);
+                    return ResponseResult.ErrorOfMapToJson("已经存在" + accompanyDTO.getCharacterName() + ",不可再次添加");
                 }
             }
             AccompanyDO accompanyDO = new AccompanyDO();
             BeanUtils.copyProperties(accompanyDTO, accompanyDO);
             accompanyDO.setBelonger(belonger);
             accompanyRepository.saveOrUpdateById(accompanyDO);
-            map.put("result", true);
+            return ResponseResult.TrueOfMapToJson();
         }
-        return JSON.toJSONString(map);
     }
 
     @GetMapping("/queryKeyTypeEnum")
@@ -350,14 +308,10 @@ public class SsfhFacade {
 
     @GetMapping("/synchronousData")
     public String synchronousData(HttpServletRequest request) {
-        Map<String, Object> map = new HashMap(8);
         if (initData.updateDataToMap(getBelongerByRequest(request))) {
-            map.put("result", true);
-            return JSON.toJSONString(map);
+            return ResponseResult.TrueOfMapToJson();
         }
-        map.put("result", false);
-        map.put("errorMessage", "同步数据失败,请联系管理员进行处理~~~");
-        return JSON.toJSONString(map);
+        return ResponseResult.ErrorOfMapToJson("同步数据失败,请联系管理员进行处理~~~");
     }
 
     @GetMapping("/keyWordExport")
@@ -384,9 +338,7 @@ public class SsfhFacade {
     public String keyWordExport(MultipartFile file, HttpServletRequest request) {
         Map<String, Object> map = new HashMap(8);
         if (!file.getOriginalFilename().endsWith("xlsx") && !file.getOriginalFilename().endsWith("xls")) {
-            map.put("result", false);
-            map.put("errorMessage", "只能上传excel");
-            return JSON.toJSONString(map);
+            return ResponseResult.ErrorOfMapToJson("只能上传excel");
         }
         try {
             EasyExcel
@@ -394,12 +346,9 @@ public class SsfhFacade {
                     new KeyTypeImportListener(wechatKeyWordsRepository, getBelongerByRequest(request)))
                 .registerConverter(new KeyTypeConverter()).sheet().doRead();
         } catch (Exception e) {
-            map.put("result", false);
-            map.put("errorMessage", e);
-            return JSON.toJSONString(map);
+            return ResponseResult.ErrorOfMapToJson(e);
         }
-        map.put("result", true);
-        return JSON.toJSONString(map);
+        return ResponseResult.TrueOfMapToJson();
     }
 
     private SystemBelongEnum getBelongerByRequest(HttpServletRequest request) {
@@ -410,5 +359,37 @@ public class SsfhFacade {
         String userName = (String)request.getSession().getAttribute(WeChatUtil.USER_NAME);
         return WeChatUtil.USER_TO_BELONGER_MAP.get(userName);
 
+    }
+
+    @GetMapping("/chat")
+    public ModelAndView chat(HttpServletRequest request) {
+        ModelAndView modelAndView = new ModelAndView();
+        modelAndView.setViewName("pages/ssfh/chat");
+        return modelAndView;
+    }
+
+    @GetMapping("/getMessageList")
+    public String getMessageList(HttpServletRequest request) {
+        String remoteAddr = request.getRemoteAddr();
+        String fromUserName = "netty:" + remoteAddr;
+        Map<String, Object> map = new HashMap(4);
+        ChatgptMessageQueryParam queryParam = new ChatgptMessageQueryParam();
+        queryParam.setFromUserName(fromUserName);
+        queryParam.setLimitNum(15);
+        List<ChatgptMessageDO> chatgptMessageDOList = chatgptMessageRepository.getListByParam(queryParam);
+        map.put("ipAddress", CONFIGURATION_MAP.get(WeChatUtil.IP));
+        map.put("messageList", chatgptMessageDOList);
+        return ResponseResult.TrueOfMapToJson(map);
+    }
+
+    @GetMapping("/canSendMessage")
+    public String canSendMessage(HttpServletRequest request) {
+        String remoteAddr = request.getRemoteAddr();
+        String fromUserName = "netty:" + remoteAddr;
+        if (Objects.nonNull(WeChatUtil.CHATGPT_NUM_MAP.get(fromUserName))
+            && WeChatUtil.CHATGPT_NUM_MAP.get(fromUserName) >= WeChatUtil.CHATGPT_NUM) {
+            return ResponseResult.ErrorOfMapToJson("您今日请求chatgpt次数(" + WeChatUtil.CHATGPT_NUM + "次)已使用完,请于明天再来!!");
+        }
+        return ResponseResult.TrueOfMapToJson();
     }
 }

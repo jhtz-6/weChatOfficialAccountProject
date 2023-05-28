@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Chatgpt 聊天 </title>
+    <link rel="shortcut icon" href="https://110.40.208.47:8089/photo/shortcut.jpg">
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <script src="https://unpkg.com/vue@2.6.14/dist/vue.js"></script>
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+    <style>
+        .chat-container  {
+            width: 85%;
+            height: 100%;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .message-list {
+            height: 450px;
+            overflow-y: auto;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 10px;
+        }
+
+        .message-item {
+            margin-bottom: 10px;
+        }
+
+        .message-content {
+            margin-bottom: 5px;
+        }
+
+        .message-time-right {
+            font-size: 12px;
+            color: #999;
+            text-align: right;
+        }
+
+        .message-time-left {
+            font-size: 12px;
+            color: #999;
+            text-align: left;
+        }
+
+        .sent-message {
+            text-align: left;
+            background-color: #eaf6ff;
+            padding: 5px 10px;
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            height: 100%;
+        }
+
+        .received-message {
+            text-align: right;
+            background-color: #f2f2f2;
+            padding: 5px 10px;
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            height: 100%;
+        }
+    </style>
+
+
+</head>
+
+<body>
+<div id="app" class="chat-container">
+    <h2>Chatgpt 聊天</h2>
+    <div class="message-list">
+        <el-timeline>
+            <el-timeline-item v-for="(message, index) in messages" :key="index" class="message-item"
+                              :class="{ 'sent-message': message.sent, 'received-message': !message.sent }">
+                <div class="message-content">
+                    {{ message.text }}
+                </div>
+                <div :class="{ 'message-time-right': message.sent, 'message-time-left': !message.sent }">
+                    {{ message.createTime }}
+                </div>
+            </el-timeline-item>
+        </el-timeline>
+
+    </div>
+    <el-input v-model="inputMessage" placeholder="请输入内容" @keyup.enter.native="sendMessage"
+              :disabled="sendButton" clearable>
+        <el-button slot="append" @click="sendMessage"   :disabled="sendButton">发送</el-button>
+    </el-input>
+</div>
+
+
+<script>
+
+    var vm = new Vue({
+        el: '#app',
+        data: {
+            ip : '',
+            loading: '',
+            sendButton: false,
+            canSendMessageStatus: true,
+            inputMessage: '',
+            messages: [],
+            message: {},
+        },
+        methods: {
+            sendMessage() {
+                if (this.inputMessage.trim() == '') {
+                    this.$message({
+                        message: "请先输入内容",
+                        type: 'warning'
+                    });
+                    return false;
+                }
+                //先校验次数
+                axios.get('canSendMessage').then(response => {
+                    this.canSendMessageStatus = response.data.result;
+                    if (!this.canSendMessageStatus) {
+                        this.$message({
+                            message: response.data.errorMessage,
+                            type: 'error'
+                        });
+                        return false;
+                    }
+                    if (this.inputMessage) {
+                        this.message.text = this.inputMessage;
+                        this.message.sent = true;
+                        this.messages.push(this.message);
+                        this.send(this.inputMessage);
+                        this.inputMessage = '';
+                        this.message = {};
+                    }
+                }).catch(function (error) { // 请求失败处理
+                    console.log(error);
+                });
+
+            },
+            send(message) {
+                socket.send(message);
+                this.loading = this.$loading({
+                    lock: true,
+                    text: '数据发送中',
+                    spinner: 'el-icon-loading',
+                    background: 'rgba(0, 0, 0, 0.7)'
+                });
+                this.sendButton = true;
+                console.log("发送消息：" + message);
+            },
+            getMessageList() {
+                axios.get('getMessageList').then(response => {
+                    if (response.data.result == true) {
+                        this.ip = response.data.ipAddress;
+                        this.initWebSocket();
+                        for (var i = response.data.messageList.length - 1; i >= 0; i--) {
+                            this.message.text = response.data.messageList[i]
+                                .sendMessage.substring(7);
+                            this.message.sent = true;
+                            this.message.createTime = new Date
+                            (response.data.messageList[i]
+                                .createTime).toLocaleString();
+                            this.messages.push(this.message);
+                            this.message = {};
+
+                            this.message.text = response.data.messageList[i]
+                                .receiveMessage;
+                            this.message.sent = false;
+                            this.message.createTime = new Date
+                            (response.data.messageList[i]
+                                .createTime).toLocaleString();
+                            this.messages.push(this.message);
+                            this.message = {};
+                        }
+                    }/*else{
+                        this.$message({
+                            message: response.data.errorMessage,
+                            type: 'warning'
+                        });
+                    }*/
+
+                }).catch(function (error) { // 请求失败处理
+                    console.log(error);
+                });
+            },
+            initWebSocket(){
+                if (!window.WebSocket) {
+                    window.WebSocket = window.MozWebSocket;
+                }
+                socket = new WebSocket("ws://"+vm.ip+":8824/websocket");
+
+                socket.onopen = function () {
+                    console.log("WebSocket连接已建立");
+                };
+                socket.onmessage = function (event) {
+                    var message = event.data;
+                    console.log("收到消息：" + message);
+                    //vm.messages.push(message);
+                    vm.message.text = message;
+                    vm.message.sent = false;
+                    vm.messages.push(vm.message);
+                    vm.message = {};
+                    vm.loading.close();
+                    vm.sendButton = false;
+                    // 处理收到的消息
+                };
+
+                socket.onclose = function (event) {
+                    this.loading.close();
+                    console.log("WebSocket连接已关闭");
+                };
+
+                socket.onerror = function (error) {
+                    this.loading.close();
+                    console.log("WebSocket发生错误：" + error);
+                };
+            }
+
+        },
+        mounted() {
+            this.getMessageList();
+        }
+    });
+    var socket;
+
+
+</script>
+</body>
+
+</html>

@@ -70,3 +70,9 @@
 系统可以很方便的添加管理员账号和微信公众号的绑定;管理员账号类型对应的处理器信息是存放在数据库中,可以动态地修改账号和微信公众号的功能权限。
 
 ![https://raw.githubusercontent.com/jhtz-6/weChatOfficialAccountProject/master/src/main/resources/static/photo/%E5%BE%AE%E4%BF%A1%E5%85%AC%E4%BC%97%E5%8F%B7%E9%A1%B9%E7%9B%AE%E7%BB%93%E6%9E%84%E5%9B%BE.png](https://raw.githubusercontent.com/jhtz-6/weChatOfficialAccountProject/master/src/main/resources/static/photo/%E5%BE%AE%E4%BF%A1%E5%85%AC%E4%BC%97%E5%8F%B7%E9%A1%B9%E7%9B%AE%E7%BB%93%E6%9E%84%E5%9B%BE.png)
+
+##### 1.0.4
+
+新增chatgpt聊天界面,地址:http://110.40.208.47:8088/xwxsb/ssfh/chat 使用netty进行网络通信;处理器代码优化。
+
+![](https://raw.githubusercontent.com/jhtz-6/weChatOfficialAccountProject/master/src/main/resources/static/photo/chatgptWeb.png)
