@@ -149,6 +149,11 @@
             <artifactId>netty-all</artifactId>
             <version>4.1.42.Final </version>
         </dependency>
+        <dependency>
+            <groupId>com.qcloud</groupId>
+            <artifactId>cos_api</artifactId>
+            <version>5.6.133</version>
+        </dependency>
     </dependencies>
 
     <build>

@@ -20,9 +20,10 @@ public class SimpleKeyWordHandler implements MessageContentHandler {
 
     @Override
     public String handlerMessageContent(WeChatMessageDTO weChatMessageDTO) {
-        WeChatMessage weChatMessage = new WeChatMessage(weChatMessageDTO.getFromUserName(),
-            MsgTypeEnum.getMsgTypeEnumByName(weChatMessageDTO.getMsgType()), weChatMessageDTO.getPicUrl(),
-            weChatMessageDTO.getContent(),WeChatUtil.MENU_LIST_MAP.get(ThreadLocalHolder.BELONGER_THREAD_LOCAL.get()));
+        WeChatMessage weChatMessage = WeChatMessage.builder().fromUserName(weChatMessageDTO.getFromUserName())
+            .msgType(MsgTypeEnum.getMsgTypeEnumByName(weChatMessageDTO.getMsgType()))
+            .picUrl(weChatMessageDTO.getPicUrl()).content(weChatMessageDTO.getContent())
+            .menuList(WeChatUtil.MENU_LIST_MAP.get(ThreadLocalHolder.BELONGER_THREAD_LOCAL.get())).build();
         String handKeyWordResult = weChatMessage.handKeyWord();
         if (StringUtils.isNotBlank(handKeyWordResult)) {
             return handKeyWordResult;

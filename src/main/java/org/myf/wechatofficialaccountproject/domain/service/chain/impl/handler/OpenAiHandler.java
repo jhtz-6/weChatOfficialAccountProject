@@ -34,7 +34,12 @@ public class OpenAiHandler implements MessageContentHandler {
         // 从redis中取
         String redisOpenAiValue =
             redisClient.getValueByKey(WeChatUtil.CHATGPT + "-" + weChatMessageDTO.getFromUserName());
+        String redisProcessValue =
+            redisClient.getValueByKey(WeChatUtil.CHATGPT_PROCESS + "-" + weChatMessageDTO.getFromUserName());
         if (StringUtils.equalsAny(weChatMessageDTO.getContent(), WeChatUtil.CHATGPT, WeChatUtil.CHATGPT_ONE)) {
+            if (StringUtils.isEmpty(redisOpenAiValue) && BooleanEnum.FALSE.value.equals(redisProcessValue)) {
+                return IN_PROCESS;
+            }
             if (StringUtils.isEmpty(redisOpenAiValue)) {
                 return DEFAULT_OPENAI_RESULT;
             } else {
@@ -44,12 +49,15 @@ public class OpenAiHandler implements MessageContentHandler {
                         redisOpenAiValue.substring(firstGet ? 0 : 550, firstGet ? 550 : redisOpenAiValue.length());
                     if (!firstGet) {
                         redisClient.deleteValueByKey(WeChatUtil.CHATGPT + "-" + weChatMessageDTO.getFromUserName());
+                        redisClient
+                            .deleteValueByKey(WeChatUtil.CHATGPT_PROCESS + "-" + weChatMessageDTO.getFromUserName());
                         CommonUtil.addValueToChatgptNumMap(weChatMessageDTO.getFromUserName());
                     } else {
                         return NEED_MORE_REQUEST + redisOpenAiValue;
                     }
                 } else {
                     redisClient.deleteValueByKey(WeChatUtil.CHATGPT + "-" + weChatMessageDTO.getFromUserName());
+                    redisClient.deleteValueByKey(WeChatUtil.CHATGPT_PROCESS + "-" + weChatMessageDTO.getFromUserName());
                     CommonUtil.addValueToChatgptNumMap(weChatMessageDTO.getFromUserName());
                 }
                 return RESULT + redisOpenAiValue;
@@ -59,13 +67,11 @@ public class OpenAiHandler implements MessageContentHandler {
                 && WeChatUtil.CHATGPT_NUM_MAP.get(weChatMessageDTO.getFromUserName()) >= WeChatUtil.CHATGPT_NUM) {
                 return "您今日请求chatgpt次数(" + WeChatUtil.CHATGPT_NUM + "次)已使用完,请于明天再来!!";
             }
-            String redisProcessValue =
-                redisClient.getValueByKey(WeChatUtil.CHATGPT_PROCESS + "-" + weChatMessageDTO.getFromUserName());
-            if (BooleanEnum.FALSE.value.equals(redisProcessValue)) {
-                return IN_PROCESS;
-            }
             if (StringUtils.isNotBlank(redisOpenAiValue)) {
                 return NEED_TO_GET_RESULT;
+            }
+            if (BooleanEnum.FALSE.value.equals(redisProcessValue)) {
+                return IN_PROCESS;
             }
             return RESULT + openAiClient.getResultByOpenAi(weChatMessageDTO, 4000, TimeUnit.MILLISECONDS);
         }

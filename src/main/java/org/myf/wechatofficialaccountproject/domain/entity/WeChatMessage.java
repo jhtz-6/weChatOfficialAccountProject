@@ -2,7 +2,7 @@ package org.myf.wechatofficialaccountproject.domain.entity;
 
 import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Lists;
-import lombok.Data;
+import lombok.Getter;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.myf.wechatofficialaccountproject.application.dto.FoodDTO;
@@ -30,8 +30,7 @@ import static org.myf.wechatofficialaccountproject.infrastructure.util.helper.We
  * @CreateTime: 2023-03-05 23:54
  * @Description: WeChatMessage领域实体
  */
-
-@Data
+@Getter
 public class WeChatMessage {
     private static final Logger LOGGER = LoggerFactory.getLogger(WeChatMessage.class);
 
@@ -44,15 +43,61 @@ public class WeChatMessage {
     private String content;
     private String handleWeChatMessageResult = "";
 
-    private List<MenuDTO> MENU_LIST;
+    private List<MenuDTO> menuList;
 
-    public WeChatMessage(String fromUserName, MsgTypeEnum msgType, String picUrl, String content,
-        List<MenuDTO> menuDTOList) {
-        this.fromUserName = fromUserName;
-        this.msgType = msgType;
-        this.picUrl = picUrl;
-        this.content = content;
-        this.MENU_LIST = menuDTOList;
+    private WeChatMessage(Builder builder) {
+        this.fromUserName = builder.getFromUserName();
+        this.msgType = builder.getMsgType();
+        this.picUrl = builder.getPicUrl();
+        this.content = builder.getContent();
+        this.menuList = builder.getMENU_LIST();
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    @Getter
+    public static final class Builder {
+        private String fromUserName;
+
+        private MsgTypeEnum msgType;
+
+        private String picUrl;
+
+        private String content;
+
+        private List<MenuDTO> MENU_LIST;
+
+        public Builder fromUserName(String fromUserName) {
+            this.fromUserName = fromUserName;
+            return this;
+        }
+
+        public Builder msgType(MsgTypeEnum msgType) {
+            this.msgType = msgType;
+            return this;
+        }
+
+        public Builder picUrl(String picUrl) {
+            this.picUrl = picUrl;
+            return this;
+        }
+
+        public Builder content(String content) {
+            this.content = content;
+            return this;
+        }
+
+        public Builder menuList(List<MenuDTO> MENU_LIST) {
+            this.MENU_LIST = MENU_LIST;
+            return this;
+        }
+
+        public WeChatMessage build() {
+            return new WeChatMessage(this);
+        }
+
     }
 
     public String handKeyWord() {
@@ -86,11 +131,11 @@ public class WeChatMessage {
 
     public String errorCorrection() {
         if (content.length() > 2) {
-            List<MenuDTO> menuDTOList = MENU_LIST.stream().filter(x -> x.getFood().contains(content.substring(0, 2)))
+            List<MenuDTO> menuDTOList = menuList.stream().filter(x -> x.getFood().contains(content.substring(0, 2)))
                 .collect(Collectors.toList());
             if (CollectionUtils.isEmpty(menuDTOList) && content.length() >= 3) {
                 menuDTOList =
-                    MENU_LIST.stream().filter(x -> x.getFood().contains(content.substring(content.length() - 2)))
+                    menuList.stream().filter(x -> x.getFood().contains(content.substring(content.length() - 2)))
                         .collect(Collectors.toList());
             }
             if (CollectionUtils.isNotEmpty(menuDTOList)) {
@@ -108,7 +153,7 @@ public class WeChatMessage {
         List<MenuDTO> menuDTOList;
         if (WeChatUtil.CATEGORY_MAP.containsKey(content)) {
             Integer beginNum = WeChatUtil.CATEGORY_MAP.get(content);
-            menuDTOList = MENU_LIST.stream().filter(x -> content.substring(0, 1).equals(x.getCategory()))
+            menuDTOList = menuList.stream().filter(x -> content.substring(0, 1).equals(x.getCategory()))
                 .collect(Collectors.toList());
             menuDTOList = menuDTOList.subList(beginNum * 30, Math.min((beginNum + 1) * 30, menuDTOList.size()));
             if (Category.COMMON.getValue().equals(content)) {
@@ -127,7 +172,7 @@ public class WeChatMessage {
             && !content.contains("+") && !content.contains("不要")) {
             if (!content.contains(" ")) {
                 // 想查询菜谱归属者
-                menuDTOList = MENU_LIST.stream().filter(x -> content.substring(0, 2).equals(x.getBelongUser()))
+                menuDTOList = menuList.stream().filter(x -> content.substring(0, 2).equals(x.getBelongUser()))
                     .collect(Collectors.toList());
                 if (CollectionUtils.isNotEmpty(menuDTOList)) {
                     Integer ceil = 0;
@@ -169,7 +214,7 @@ public class WeChatMessage {
                 }
             } else {
                 String[] contentArray = content.split(" ");
-                menuDTOList = MENU_LIST.stream()
+                menuDTOList = menuList.stream()
                     .filter(x -> contentArray[0].equals(x.getBelongUser()) && contentArray[1].equals(x.getCategory()))
                     .collect(Collectors.toList());
                 for (int i = 0; i < menuDTOList.size(); i++) {
@@ -217,9 +262,8 @@ public class WeChatMessage {
             return null;
         }
         String handleCostPerformanceResult = "";
-        List<MenuDTO> menuList = Lists.newArrayList(MENU_LIST);
         if (!StringUtils.equalsAny(content, "性价比", "坑比")) {
-            menuList = MENU_LIST.stream()
+            menuList = menuList.stream()
                 .filter(
                     x -> StringUtils.isNotBlank(x.getBelongUser()) && x.getBelongUser().equals(content.substring(0, 2)))
                 .collect(Collectors.toList());
@@ -301,11 +345,11 @@ public class WeChatMessage {
                 if ((contentArray.length >= 2)) {
                     firstList = materialDTOList.stream().filter(x -> contentArray[1].equals(x.getMaterialName()))
                         .collect(Collectors.toList());
-                    menuDTOList = MENU_LIST.stream().filter(x -> contentArray[1].equals(x.getRawMaterial()))
+                    menuDTOList = menuList.stream().filter(x -> contentArray[1].equals(x.getRawMaterial()))
                         .collect(Collectors.toList());
                 } else {
                     menuDTOList =
-                        MENU_LIST.stream().filter(x -> materialDTO.getMaterialName().equals(x.getRawMaterial()))
+                        menuList.stream().filter(x -> materialDTO.getMaterialName().equals(x.getRawMaterial()))
                             .collect(Collectors.toList());
                 }
                 if (contentArray.length == 3) {
@@ -413,7 +457,7 @@ public class WeChatMessage {
         } else if (content.contains("不要")) {
             try {
                 String[] contentArray = content.split("不要");
-                List<MenuDTO> menuDTOList = MENU_LIST.stream().filter(x -> StringUtils.isNotBlank(x.getBelongUser()))
+                List<MenuDTO> menuDTOList = menuList.stream().filter(x -> StringUtils.isNotBlank(x.getBelongUser()))
                     .collect(Collectors.toList());
                 if (contentArray.length == 2) {
                     if (StringUtils.isNotBlank(contentArray[0])) {
@@ -494,7 +538,7 @@ public class WeChatMessage {
             if (content.contains("+")) {
                 String[] contentArray = content.split("\\+");
                 // 想查询指定人物指定材料的菜谱
-                List<MenuDTO> menuDTOList = MENU_LIST.stream()
+                List<MenuDTO> menuDTOList = menuList.stream()
                     .filter(
                         x -> contentArray[0].equals(x.getBelongUser()) && x.getRawMaterial().contains(contentArray[1]))
                     .collect(Collectors.toList());
@@ -533,7 +577,7 @@ public class WeChatMessage {
                             + "】才能实现了啊~~~~99份" + foodname + ",小的只能说大人太壕了";
                     } else {
                         MenuDTO menu = null;
-                        for (MenuDTO menuDTO : MENU_LIST) {
+                        for (MenuDTO menuDTO : menuList) {
                             if (Objects.nonNull(menuDTO.getMaxNum()) && menuDTO.getMaxNum() >= num
                                 && belongUser.equals(menuDTO.getBelongUser()) && Objects.nonNull(menuDTO.getPrice())) {
                                 if (Objects.isNull(menu) || menu.getPrice() > menuDTO.getPrice()) {

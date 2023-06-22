@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Chatgpt 聊天 </title>
-    <link rel="shortcut icon" href="https://110.40.208.47:8089/photo/shortcut.jpg">
+    <link rel="shortcut icon" href="url(../../../static/photo/shortcut.jpg)">
     <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
     <script src="https://unpkg.com/vue@2.6.14/dist/vue.js"></script>
     <script src="https://unpkg.com/element-ui/lib/index.js"></script>
@@ -77,14 +77,23 @@
 
 <body>
 <div id="app" class="chat-container">
-    <h2>Chatgpt 聊天</h2>
+    <div>
+        <h2 style="display: inline-block;">Chatgpt 聊天</h2>
+        <h4 style="display: inline-block;">支持生成图片(示例:图片帮我画一颗树)。前面必须要有图片两个字</h4>
+    </div>
     <div class="message-list">
         <el-timeline>
             <el-timeline-item v-for="(message, index) in messages" :key="index" class="message-item"
                               :class="{ 'sent-message': message.sent, 'received-message': !message.sent }">
                 <div class="message-content">
-                    {{ message.text }}
+                    <template v-if="message.text.endsWith('.jpg')">
+                        <img :src="message.text" alt="图片">
+                    </template>
+                    <template v-else>
+                        {{ message.text }}
+                    </template>
                 </div>
+
                 <div :class="{ 'message-time-right': message.sent, 'message-time-left': !message.sent }">
                     {{ message.createTime }}
                 </div>

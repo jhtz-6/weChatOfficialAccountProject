@@ -24,8 +24,9 @@ import java.util.stream.Collectors;
  */
 public final class WeChatUtil {
 
-    public static String SUBSCRIBE_CONTENT = "新增chatgpt使用方法,发送【chatgpt】了解，https://mp.weixin.qq.com/s?__biz=MzkzNzE4OTAyMA==&mid=2247485132&idx=1&sn=d4ac8d1f048ead3b2f56607a32d241a8&chksm=c2920d3ff5e58429e96dc55e2b5d2c4b91434a467db9baffb2c62e711d3c9b18efec5b8f01a3#rd\n" +
-            "盛世芳华相关功能,请发送【小屋写随笔】五个字了解。";
+    public static String SUBSCRIBE_CONTENT =
+        "新增chatgpt使用方法,发送【chatgpt】了解，https://mp.weixin.qq.com/s?__biz=MzkzNzE4OTAyMA==&mid=2247485132&idx=1&sn=d4ac8d1f048ead3b2f56607a32d241a8&chksm=c2920d3ff5e58429e96dc55e2b5d2c4b91434a467db9baffb2c62e711d3c9b18efec5b8f01a3#rd\n"
+            + "盛世芳华相关功能,请发送【小屋写随笔】五个字了解。";
     public static String XWXSB = "公众号使用异常可右下角联系我处理!!!!\n公众号功能如下:。\n" + "大朝会系列视频可在微信视频号搜索小屋写随笔进行查看\n"
         + "16、新增关键词:【关键词】、【价格表】、【大朝会】、【琉璃拟饵】、【紧急】、【进群】;钓鱼类相关关键词示例:【银河溪】、【蓝鳖虾】、【橙色鱼】、【紫色鱼】、【血红龙】等等。\n"
         + "15、其它部分关键词:【吃瓜】、【兑换码】、【合服】、【并蒂双莲】、【性价比】、【王爷性价比】、【皇帝性价比】、【贵妃性价比】等。\n"
@@ -78,7 +79,7 @@ public final class WeChatUtil {
     public static final String OCR_MENU_ACTION = "ocr_menu_action:";
     public static final String OCR_MENU_CONTENT = "ocr_menu_content:";
     public static List<MenuDTO> MENU_LIST = Lists.newArrayList();
-    public static Map<SystemBelongEnum,List<MenuDTO>> MENU_LIST_MAP = Maps.newHashMap();
+    public static Map<SystemBelongEnum, List<MenuDTO>> MENU_LIST_MAP = Maps.newHashMap();
     public static List<MaterialDTO> MATERIAL_LIST = Lists.newArrayList();
     public static List<FoodDTO> FOOD_LIST = Lists.newArrayList();
     public static List<String> MATERIAL_NAME_LIST = new ArrayList<>();
@@ -97,7 +98,7 @@ public final class WeChatUtil {
     public static Map<String, AccompanyDTO> ACCOMPANY_MAP = new HashMap<>();
     public static Map<String, Integer> CATEGORY_MAP = new HashMap<>();
     public static Set<MenuDTO> FRAGRANCE_MENU_SET = Sets.newHashSet();
-    public static Map<SystemBelongEnum,Set<MenuDTO>> FRAGRANCE_MENU_SET_MAP = Maps.newHashMap();
+    public static Map<SystemBelongEnum, Set<MenuDTO>> FRAGRANCE_MENU_SET_MAP = Maps.newHashMap();
     public static List<String> BELONG_USER_COSTPERFORMANCE_LIST = new ArrayList<>();
     public static List<String> AREA_LIST = new ArrayList<>();
     public static String TENCENT_APPKEY = "TENCENT_APPKEY";
@@ -109,6 +110,11 @@ public final class WeChatUtil {
     public static String BAIDU_SECRET_KEY = "BAIDU_SECRET_KEY";
     public static String OPENAI_APIKEY = "OPENAI_APIKEY";
     public static String OPENAI_APIHOST = "OPENAI_APIHOST";
+    public static String TENCENT_COS_SECRET_ID = "TENCENT_COS_SECRET_ID";
+    public static String TENCENT_COS_SECRET_KEY = "TENCENT_COS_SECRET_KEY";
+    public static String TENCENT_COS_BUCKET_NAME = "TENCENT_COS_BUCKET_NAME";
+    public static String TENCENT_COS_REGION = "TENCENT_COS_REGION";
+    public static String TENCENT_PHOTO_DOMAIN_NAME = "TENCENT_PHOTO_DOMAIN_NAME";
     public static String IP = "ip";
     public static Map<String, String> CONFIGURATION_MAP = new HashMap<>();
     public static long CURRENT_PERSON_TIMEOUT = 600000L;
@@ -121,7 +127,7 @@ public final class WeChatUtil {
     public static String CHATGPT_LIST = "chatgpt-list";
     public static int CHATGPT_LIST_SIZE = 15;
     public static Map<String, Integer> CHATGPT_NUM_MAP = new HashMap<>();
-    public static int CHATGPT_NUM = 15;
+    public static int CHATGPT_NUM = 10;
     public static String RECOMMENDED_MENU = "推荐菜谱";
     public static String USER_NAME = "userName";
     public static String LOGIN_PASSWORD = "loginPassword";

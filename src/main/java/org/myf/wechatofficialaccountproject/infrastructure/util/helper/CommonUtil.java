@@ -31,14 +31,9 @@ import java.util.stream.Collectors;
  */
 public final class CommonUtil {
 
-    private static CommonUtil commonUtil = null;
-    static {
-        if (Objects.isNull(commonUtil)) {
-            commonUtil = new CommonUtil();
-        }
-    }
-
     private CommonUtil() {}
+
+    private static final Random random = new Random();
 
     public static Map<String, String> convertServerletInputStreamToMap(ServletInputStream servletInputStream)
         throws Exception {
@@ -507,8 +502,7 @@ public final class CommonUtil {
         return PHOTO_IP + randomNumber + ".jpg";
     }
 
-    private static int getRandomNumber(int min, int max) {
-        Random random = new Random();
+    public static int getRandomNumber(int min, int max) {
         return random.nextInt(max - min + 1) + min;
     }
 

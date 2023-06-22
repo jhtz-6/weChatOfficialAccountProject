@@ -12,6 +12,8 @@ import java.io.Serializable;
 @Data
 public class HandlerToChainMapping implements Serializable {
 
+
+    private static final long serialVersionUID = -2247493635785697873L;
     private String handlerName;
 
     private Integer priority;

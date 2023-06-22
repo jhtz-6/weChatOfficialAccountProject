@@ -5,6 +5,13 @@ import com.baidu.aip.ocr.AipOcr;
 import com.github.qcloudsms.SmsSingleSender;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.qcloud.cos.COSClient;
+import com.qcloud.cos.ClientConfig;
+import com.qcloud.cos.auth.BasicCOSCredentials;
+import com.qcloud.cos.auth.COSCredentials;
+import com.qcloud.cos.http.HttpProtocol;
+import com.qcloud.cos.region.Region;
+import com.unfbx.chatgpt.OpenAiClient;
 import com.unfbx.chatgpt.OpenAiStreamClient;
 import org.apache.commons.lang3.StringUtils;
 import org.myf.wechatofficialaccountproject.application.dto.*;
@@ -58,9 +65,12 @@ public class InitData {
     public static SmsSingleSender SSENDER;
     public static AipOcr CLIENT;
     public static OpenAiStreamClient OPENAI_STREAM_CLIENT;
+    public static OpenAiClient UNFBX_OPENAI_CLIENT;
     public static Map<String, Map<String, List<HandlerToChainMapping>>> CHAIN_TO_HANDLER_MAP = new HashMap(8);
     private static ReentrantLock UPDATE_DATA_LOCK = new ReentrantLock();
     private static ReentrantLock UPDATE_CONFIG_LOCK = new ReentrantLock();
+    public static COSClient COS_CLIENT;
+    public static String TENCENT_PHOTO_DOMAIN_NAME;
 
     @PostConstruct
     public void initStaticData() {
@@ -106,6 +116,20 @@ public class InitData {
             OPENAI_STREAM_CLIENT = OpenAiStreamClient.builder().connectTimeout(50).readTimeout(50).writeTimeout(50)
                 .apiKey(WeChatUtil.CONFIGURATION_MAP.get(WeChatUtil.OPENAI_APIKEY))
                 .apiHost(WeChatUtil.CONFIGURATION_MAP.get(WeChatUtil.OPENAI_APIHOST)).build();
+
+            UNFBX_OPENAI_CLIENT =
+                OpenAiClient.builder().apiHost(WeChatUtil.CONFIGURATION_MAP.get(WeChatUtil.OPENAI_APIHOST))
+                    .apiKey(WeChatUtil.CONFIGURATION_MAP.get(WeChatUtil.OPENAI_APIKEY)).connectTimeout(50)
+                    .readTimeout(50).writeTimeout(50).build();
+
+            COSCredentials cred =
+                new BasicCOSCredentials(WeChatUtil.CONFIGURATION_MAP.get(WeChatUtil.TENCENT_COS_SECRET_ID),
+                    WeChatUtil.CONFIGURATION_MAP.get(WeChatUtil.TENCENT_COS_SECRET_KEY));
+            ClientConfig clientConfig =
+                new ClientConfig(new Region(WeChatUtil.CONFIGURATION_MAP.get(WeChatUtil.TENCENT_COS_REGION)));
+            clientConfig.setHttpProtocol(HttpProtocol.https);
+            COS_CLIENT = new COSClient(cred, clientConfig);
+            TENCENT_PHOTO_DOMAIN_NAME = WeChatUtil.CONFIGURATION_MAP.get(WeChatUtil.TENCENT_PHOTO_DOMAIN_NAME);
 
             for (SystemBelongEnum systemBelongEnum : SystemBelongEnum.values()) {
                 if (CONFIGURATION_MAP.containsKey(systemBelongEnum.name())) {
@@ -211,4 +235,5 @@ public class InitData {
         }
         return true;
     }
+
 }

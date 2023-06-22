@@ -1,5 +1,6 @@
 package org.myf.wechatofficialaccountproject.infrastructure.util.entity;
 
+import com.unfbx.chatgpt.entity.chat.Message;
 import lombok.Data;
 
 import java.util.List;
@@ -9,7 +10,7 @@ import java.util.List;
  */
 @Data
 public class BaiduOcrResponse {
-
+    Message  message =new Message();
     private String log_id;
 
     private String words_result_num;

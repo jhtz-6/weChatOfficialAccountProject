@@ -90,23 +90,28 @@ public class OpenAiEventSourceListener extends EventSourceListener {
 
     @Override
     public void onFailure(EventSource eventSource, @Nullable Throwable t, @Nullable Response response) {
-        handlerResult(response.message());
+        handlerResult(handlerFaliResponse(response));
         LOGGER.error("response {},t {}", response, t);
     }
 
-
-    private void handlerResult(String openAiText){
+    private void handlerResult(String openAiText) {
         // 数据落库
         chatgptMessageDomainService.handleByOpenAiResult(weChatMessageDTO, openAiText);
         if (Objects.nonNull(countDownLatch)) {
             // 数据放到redis
             REDIS_CILENT.addValueToRedis(WeChatUtil.CHATGPT + "-" + weChatMessageDTO.getFromUserName(), openAiText,
-                    null);
+                null);
             if (1 == countDownLatch.getCount()) {
                 countDownLatch.countDown();
             }
             REDIS_CILENT.deleteValueByKey(WeChatUtil.CHATGPT_PROCESS + "-" + weChatMessageDTO.getFromUserName());
         }
+    }
+
+    private String handlerFaliResponse(Response response) {
+        return Objects.isNull(response) ? "chatgpt返回数据处理异常,请稍后再试。"
+            : StringUtils.isNotBlank(response.message()) ? response.message()
+                : (response.code() == 429 ? "Too Many Requests;please try again tommorrow" : "chatgpt返回数据处理异常,请稍后再试。");
     }
 
     protected static String getOpenAiText() {
