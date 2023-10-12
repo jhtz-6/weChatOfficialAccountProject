@@ -36,8 +36,9 @@ public class ImageByBaiduOcrHandler implements MessageContentHandler {
     @Override
     public String handlerMessageContent(WeChatMessageDTO weChatMessageDTO) {
         String handleImageResult = "";
-        if (BooleanEnum.TRUE.value
-            .equals(redisClient.getValueByKey(WeChatUtil.OCR_MENU_ACTION + weChatMessageDTO.getFromUserName()))) {
+        String ocrMenuAction =
+            redisClient.getValueByKey(WeChatUtil.OCR_MENU_ACTION + weChatMessageDTO.getFromUserName());
+        if (BooleanEnum.TRUE.value.equals(ocrMenuAction)) {
             BaiduOcrResponse generalImageResult =
                 baiduOcrClient.getGeneralImageByPhotoUrl(weChatMessageDTO.getPicUrl());
             if (Objects.isNull(generalImageResult)) {
@@ -71,8 +72,7 @@ public class ImageByBaiduOcrHandler implements MessageContentHandler {
                     }
                 }
                 if (StringUtils.isNotBlank(handleImageResult)) {
-                    if (StringUtils.isNotBlank(
-                        redisClient.getValueByKey(WeChatUtil.OCR_MENU_ACTION + weChatMessageDTO.getFromUserName()))) {
+                    if (StringUtils.isNotBlank(ocrMenuAction)) {
                         redisClient.addValueToRedis(WeChatUtil.OCR_MENU_CONTENT + weChatMessageDTO.getFromUserName(),
                             redisClient.getValueByKey(WeChatUtil.OCR_MENU_CONTENT + weChatMessageDTO.getFromUserName())
                                 + handleImageResult,

@@ -58,6 +58,7 @@ public class CharacterRecognitionHandler implements MessageContentHandler {
             if (StringUtils.isEmpty(redisClient.getValueByKey(ocrMenuContentKey))) {
                 handleResult = CharacterRecognition.DEFAULT_RESULT;
             } else {
+                redisClient.deleteValueByKey(ocrMenuActionKey);
                 String afterwords = weChatMessageDTO.getContent().substring(4);
                 String ocrMenuContentCalue = redisClient.getValueByKey(ocrMenuContentKey);
                 if (WeChatUtil.RECOMMEND_MENU_LIST.contains(afterwords)) {

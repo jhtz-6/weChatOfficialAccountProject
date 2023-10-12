@@ -60,13 +60,13 @@ public class LoginInterceptor implements HandlerInterceptor {
         NEED_TO_LOGIN_URL_LIST.add("/ssfh/updateKeyWordData");
         NEED_TO_LOGIN_URL_LIST.add("/ssfh/updateAccompanyData");
         NEED_TO_LOGIN_URL_LIST.add("/ssfh/keyWordImport");
-        NEED_TO_LOGIN_URL_LIST.add("/ssfh/keyWordExport");
         NEED_TO_LOGIN_URL_LIST.add("/ssfh/synchronousData");
         NEED_TO_LOGIN_URL_LIST.add("/ssfh/keyWordExport");
         NEED_TO_LOGIN_URL_LIST.add("/ssfh/keyWordImport");
 
         NEED_NO_LOGIN_URL_LIST.add("/weChat/msg");
         NEED_NO_LOGIN_URL_LIST.add("/weChat/YnssMsg");
+        NEED_NO_LOGIN_URL_LIST.add("/weChat/anSuiMsg");
         NEED_NO_LOGIN_URL_LIST.add("/weChat/menuExcel");
         NEED_NO_LOGIN_URL_LIST.add("/wx/menuExcel");
         NEED_NO_LOGIN_URL_LIST.add("/wx/menuexcel");
@@ -83,6 +83,7 @@ public class LoginInterceptor implements HandlerInterceptor {
         NEED_NO_LOGIN_URL_LIST.add("/ssfh/chat");
         NEED_NO_LOGIN_URL_LIST.add("/ssfh/getMessageList");
         NEED_NO_LOGIN_URL_LIST.add("/ssfh/canSendMessage");
+        NEED_NO_LOGIN_URL_LIST.add("/ssfh/addInitData");
 
 
     }

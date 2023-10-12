@@ -36,6 +36,9 @@ public class FoodRepositoryImpl implements FoodRepository {
         if (StringUtils.isNotBlank(foodQueryParam.getSfyx())) {
             foodDOQueryWrapper.eq(SFYX, foodQueryParam.getSfyx());
         }
+        if (Objects.nonNull(foodQueryParam.getBelonger())) {
+            foodDOQueryWrapper.eq(BELONGER, foodQueryParam.getBelonger());
+        }
         return foodMapper.selectList(foodDOQueryWrapper);
     }
 

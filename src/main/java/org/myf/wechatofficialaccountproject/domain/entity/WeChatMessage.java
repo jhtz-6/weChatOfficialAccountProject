@@ -120,9 +120,11 @@ public class WeChatMessage {
     }
 
     private String getHandleResultByKeyList() {
-        WeChatUtil.FuzzyMatchingkeyWord fuzzyMatchingkeyWord =
-            FuzzyMatchingList.stream().filter(x -> x.getKeyType().equals(ThreadLocalHolder.BELONGER_THREAD_LOCAL.get())
-                && content.contains(x.getKeyWord())).findAny().orElse(null);
+        WeChatUtil.FuzzyMatchingkeyWord fuzzyMatchingkeyWord = FuzzyMatchingList.stream()
+            .filter(x -> x.getKeyType().equals(x.getKeyType())
+                && x.getBelonger().equals(ThreadLocalHolder.BELONGER_THREAD_LOCAL.get())
+                && content.contains(x.getKeyWord()))
+            .findAny().orElse(null);
         if (Objects.nonNull(fuzzyMatchingkeyWord)) {
             handleWeChatMessageResult = fuzzyMatchingkeyWord.getFuzzyMatchingResult();
         }

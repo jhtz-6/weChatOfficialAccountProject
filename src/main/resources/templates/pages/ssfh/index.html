@@ -49,42 +49,42 @@
                         max-height="500">
                     <el-table-column
                             fixed
-                            prop="belongUser"
+                            prop="belongUser" align="center"
                             label="归属者"
                             sortable
                             width="100">
                     </el-table-column>
                     <el-table-column
-                            prop="category"
+                            prop="category" align="center"
                             label="分类"
                             sortable
                             width="80">
                     </el-table-column>
 
                     <el-table-column
-                            prop="food"
+                            prop="food" align="center"
                             label="菜名"
                             width="120">
                     </el-table-column>
                     <el-table-column
-                            prop="rawMaterial"
+                            prop="rawMaterial" align="center"
                             label="制作方法"
-                            width="200">
+                            >
                     </el-table-column>
                     <el-table-column
-                            prop="minNum"
+                            prop="minNum" align="center"
                             label="好感度最小值"
                             sortable
-                            width="100">
+                            width="150">
                     </el-table-column>
                     <el-table-column
-                            prop="maxNum"
+                            prop="maxNum" align="center"
                             label="好感度最大值"
                             sortable
-                            width="100">
+                            width="150">
                     </el-table-column>
                     <el-table-column
-                            prop="sfyx"
+                            prop="sfyx" align="center"
                             label="是否有效"
                             sortable
                             width="100">
@@ -95,7 +95,7 @@
                         </template>
                     </el-table-column>
                     <el-table-column
-                            prop="updateTimeStr"
+                            prop="updateTimeStr" align="center"
                             label="更新时间"
                             sortable
                             width="180">
@@ -121,41 +121,41 @@
                     <el-table-column
                             fixed
                             prop="belongUser"
-                            label="归属者"
+                            label="归属者" align="center"
                             sortable
                             width="100">
                     </el-table-column>
                     <el-table-column
                             prop="category"
-                            label="分类"
+                            label="分类" align="center"
                             sortable
                             width="100">
                     </el-table-column>
                     <el-table-column
                             prop="food"
-                            label="菜名"
+                            label="菜名" align="center"
                             width="120">
                     </el-table-column>
                     <el-table-column
                             prop="rawMaterial"
-                            label="制作方法"
-                            width="200">
+                            label="制作方法" align="center"
+                            >
                     </el-table-column>
                     <el-table-column
                             prop="minNum"
-                            label="好感度最小值"
+                            label="好感度最小值" align="center"
                             sortable
-                            width="100">
+                            width="150">
                     </el-table-column>
                     <el-table-column
                             prop="maxNum"
-                            label="好感度最大值"
+                            label="好感度最大值" align="center"
                             sortable
-                            width="100">
+                            width="150">
                     </el-table-column>
                     <el-table-column
                             prop="sfyx"
-                            label="是否有效"
+                            label="是否有效" align="center"
                             sortable
                             width="100">
                         <template slot-scope="scope">
@@ -165,7 +165,7 @@
                         </template>
                     </el-table-column>
                     <el-table-column
-                            prop="updateTimeStr"
+                            prop="updateTimeStr" align="center"
                             label="更新时间"
                             sortable
                             width="180">
@@ -346,13 +346,13 @@
                         max-height="800">
                     <el-table-column
                             fixed
-                            prop="keyName"
+                            prop="keyName" align="center"
                             label="关键词"
                             sortable
                             width="100">
                     </el-table-column>
                     <el-table-column
-                            prop="keyType"
+                            prop="keyType" align="center"
                             label="关键词类型"
                             width="120">
                         <template slot-scope="scope">
@@ -362,20 +362,20 @@
                         </template>
                     </el-table-column>
                     <el-table-column
-                            prop="valueContent"
+                            prop="valueContent" align="center"
                             label="对应的返回结果"
                             sortable
                             width="800">
                     </el-table-column>
                     <el-table-column
-                            prop="updateTimeStr"
+                            prop="updateTimeStr" align="center"
                             label="更新时间"
                             sortable
                             width="180">
                     </el-table-column>
 
                     <el-table-column
-                            prop="belonger"
+                            prop="belonger" align="center"
                             label="所属者"
                             width="100">
                     </el-table-column>
@@ -468,13 +468,13 @@
 
         <el-tab-pane label="随从" name="随从">
 
-            <template><p style="color : blueviolet">随从相关&nbsp&nbsp<el-button plain type="primary"
+            <template><p style="color : blueviolet">随从相关(用户发送随从名称时,公众号会返回该随从维护好的数据)&nbsp&nbsp<el-button plain type="primary"
                     @click="AccompanyInsert">添加随从</el-button></p>
 
                 <el-dialog title="添加随从(请小心添加)" :visible.sync=
                         "insertAccompanyFormVisible">
                     <el-form :model="insertAccompany"  ref="insertAccompany">
-                        <el-form-item label="随从名字:"  prop="characterName"   required = true>
+                        <el-form-item label="随从名字:"  prop="characterName"  required = true>
                             <el-input v-model="insertAccompany.characterName" autosize ></el-input>
                         </el-form-item>
                         <el-form-item label="是否为精英:" prop="isElite" width="300" required = true>
@@ -534,23 +534,23 @@
                         max-height="800">
                     <el-table-column
                             fixed
-                            prop="characterName"
+                            prop="characterName" align="center"
                             label="随从名字"
                             sortable
                             width="100">
                     </el-table-column>
                     <el-table-column
                             prop="isElite"
-                            label="是否为精英"
+                            label="是否为精英" align="center"
                             sortable
-                            width="100">
+                            width="130">
                         <template slot-scope="scope">
                             <span v-if="scope.row.isElite">是</span>
                             <span v-else>否</span>
                         </template>
                     </el-table-column>
                     <el-table-column
-                            prop="characterType"
+                            prop="characterType" align="center"
                             label="随从类型"
                             sortable
                             width="100">
@@ -562,12 +562,12 @@
                     </el-table-column>
 
                     <el-table-column
-                            prop="characterristic"
+                            prop="characterristic" align="center"
                             label="特点"
                             width="120">
                     </el-table-column>
                     <el-table-column
-                            prop="department"
+                            prop="department" align="center"
                             label="系别"
                             width="100">
                         <template slot-scope="scope">
@@ -582,22 +582,22 @@
                             width="50">
                     </el-table-column>-->
                     <el-table-column
-                            prop="jadePendant"
+                            prop="jadePendant" align="center"
                             label="玉佩"
                             width="100">
                     </el-table-column>
                     <el-table-column
-                            prop="evaluate"
+                            prop="evaluate" align="center"
                             label="评价"
                             width="300">
                     </el-table-column>
                     <el-table-column
                             prop="url"
-                            label="视频链接"
+                            label="视频链接" align="center"
                             width="200">
                     </el-table-column>
                     <el-table-column
-                            prop="updateTimeStr"
+                            prop="updateTimeStr" align="center"
                             label="更新时间"
                             sortable
                             width="180">

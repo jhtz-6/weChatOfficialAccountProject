@@ -14,6 +14,7 @@ import org.myf.wechatofficialaccountproject.infrastructure.base.enums.SystemBelo
 import org.myf.wechatofficialaccountproject.infrastructure.util.entity.GameFishDTO;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -91,11 +92,11 @@ public final class WeChatUtil {
     public static Map<String, List<GameFishDTO>> FISH_COLOR_MAP = new HashMap<>();
     private static List<GameFishDTO> ORANGE_FISH_LIST = Lists.newArrayList();
     private static List<GameFishDTO> PURPLE_FISH_LIST = Lists.newArrayList();
-    public static Map<String, String> WeChatKeyWordMap = Maps.newHashMap();
+    public static Map<String, String> WeChatKeyWordMap = Maps.newConcurrentMap();
     public static List<String> RECOMMEND_MENU_LIST = new ArrayList<>();
     public static Map<String, GameFishDTO> FISH_MAP;
     public static List<String> FISH_KEY_WORDS = Lists.newArrayList();
-    public static Map<String, AccompanyDTO> ACCOMPANY_MAP = new HashMap<>();
+    public static Map<String, AccompanyDTO> ACCOMPANY_MAP = new ConcurrentHashMap();
     public static Map<String, Integer> CATEGORY_MAP = new HashMap<>();
     public static Set<MenuDTO> FRAGRANCE_MENU_SET = Sets.newHashSet();
     public static Map<SystemBelongEnum, Set<MenuDTO>> FRAGRANCE_MENU_SET_MAP = Maps.newHashMap();
@@ -253,8 +254,9 @@ public final class WeChatUtil {
         String keyWord;
         String fuzzyMatchingResult;
         KeyTypeEnum keyType;
+        SystemBelongEnum belonger;
     }
 
-    public final static List<FuzzyMatchingkeyWord> FuzzyMatchingList = Lists.newArrayList();
+    public static List<FuzzyMatchingkeyWord> FuzzyMatchingList = Lists.newArrayList();
 
 }

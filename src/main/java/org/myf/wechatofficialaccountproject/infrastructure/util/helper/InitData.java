@@ -84,13 +84,6 @@ public class InitData {
         });
         WeChatUtil.MATERIAL_NAME_LIST =
             WeChatUtil.MATERIAL_LIST.stream().map(x -> x.getMaterialName()).collect(Collectors.toList());
-        FoodQueryParam foodQueryParam = new FoodQueryParam();
-        foodRepository.selectListByParam(foodQueryParam).stream().forEach(x -> {
-            FoodDTO foodDTO = new FoodDTO();
-            CommonUtil.copyPropertiesWithNull(x, foodDTO);
-            foodDTO.setFoodName(foodDTO.getFoodName().trim());
-            WeChatUtil.FOOD_LIST.add(foodDTO);
-        });
 
         UserQueryParam userQueryParam = new UserQueryParam();
         List<UserDO> userDOList = userRepository.getListByParam(userQueryParam);
@@ -133,7 +126,8 @@ public class InitData {
 
             for (SystemBelongEnum systemBelongEnum : SystemBelongEnum.values()) {
                 if (CONFIGURATION_MAP.containsKey(systemBelongEnum.name())) {
-                    CHAIN_TO_HANDLER_MAP = JSON.parseObject(CONFIGURATION_MAP.get(systemBelongEnum.name()), Map.class);
+                    CHAIN_TO_HANDLER_MAP
+                        .putAll(JSON.parseObject(CONFIGURATION_MAP.get(systemBelongEnum.name()), Map.class));
                 }
             }
             MessageContentHandlerChain.CLASS_TO_HANDLER_MAP = new HashMap<>();
@@ -153,6 +147,7 @@ public class InitData {
      * @return
      */
     public Boolean updateDataToMap(SystemBelongEnum belonger) {
+        LOGGER.info("updateDataToMap.belonger:" + belonger);
         UPDATE_DATA_LOCK.lock();
         try {
             // 同步menu
@@ -186,6 +181,15 @@ public class InitData {
             // 存入map时的key为belonger+keyName
             List<WechatKeyWordsDO> wechatKeyWordsDOList =
                 wechatKeyWordsRepository.getListByParam(wechatKeyWordQueryParam);
+            if (Objects.nonNull(belonger)) {
+                WeChatUtil.FuzzyMatchingList = WeChatUtil.FuzzyMatchingList.stream()
+                    .filter(x -> !belonger.equals(x.getBelonger())).collect(Collectors.toList());
+                for (String key : WeChatUtil.WeChatKeyWordMap.keySet()) {
+                    if (key.contains(belonger.name())) {
+                        WeChatUtil.WeChatKeyWordMap.remove(key);
+                    }
+                }
+            }
             for (WechatKeyWordsDO wechatKeyWordsDO : wechatKeyWordsDOList) {
                 if (StringUtils.isBlank(wechatKeyWordsDO.getKeyName())) {
                     continue;
@@ -199,16 +203,9 @@ public class InitData {
                             wechatKeyWordsDTO.getValueContent());
                         continue;
                     case FUZZY:
-                        WeChatUtil.FuzzyMatchingkeyWord fuzzyMatchingkeyWord = WeChatUtil.FuzzyMatchingList.stream()
-                            .filter(x -> wechatKeyWordsDTO.getKeyName().equals(x.getKeyWord())
-                                && wechatKeyWordsDTO.getKeyType().equals(x.getKeyType()))
-                            .findAny().orElse(null);
-                        if (Objects.nonNull(fuzzyMatchingkeyWord)) {
-                            WeChatUtil.FuzzyMatchingList.remove(WeChatUtil.FuzzyMatchingList);
-                        }
-                        WeChatUtil.FuzzyMatchingList
-                            .add(new WeChatUtil.FuzzyMatchingkeyWord(wechatKeyWordsDTO.getKeyName(),
-                                wechatKeyWordsDTO.getValueContent(), wechatKeyWordsDTO.getKeyType()));
+                        WeChatUtil.FuzzyMatchingList.add(new WeChatUtil.FuzzyMatchingkeyWord(
+                            wechatKeyWordsDTO.getKeyName(), wechatKeyWordsDTO.getValueContent(),
+                            wechatKeyWordsDTO.getKeyType(), wechatKeyWordsDTO.getBelonger()));
                         continue;
                     default:
                 }
@@ -217,6 +214,13 @@ public class InitData {
             AccompanyQueryParam accompanyQueryParam = new AccompanyQueryParam();
             accompanyQueryParam.setIsValid(Boolean.TRUE);
             accompanyQueryParam.setBelonger(belonger);
+            if (Objects.nonNull(belonger)) {
+                for (String key : WeChatUtil.ACCOMPANY_MAP.keySet()) {
+                    if (key.contains(belonger.name())) {
+                        WeChatUtil.ACCOMPANY_MAP.remove(key);
+                    }
+                }
+            }
             List<AccompanyDO> accompanyDOList = accompanyRepository.getListByParam(accompanyQueryParam);
             for (AccompanyDO accompanyDO : accompanyDOList) {
                 AccompanyDTO accompanyDTO = new AccompanyDTO();
@@ -224,6 +228,18 @@ public class InitData {
                 WeChatUtil.ACCOMPANY_MAP.put(accompanyDTO.getBelonger() + accompanyDTO.getCharacterName(),
                     accompanyDTO);
             }
+
+            FoodQueryParam foodQueryParam = new FoodQueryParam();
+            foodQueryParam.setBelonger(belonger);
+            if (Objects.nonNull(belonger)) {
+                WeChatUtil.FOOD_LIST.removeIf(x -> belonger.equals(x.getBelonger()));
+            }
+            foodRepository.selectListByParam(foodQueryParam).stream().forEach(x -> {
+                FoodDTO foodDTO = new FoodDTO();
+                CommonUtil.copyPropertiesWithNull(x, foodDTO);
+                foodDTO.setFoodName(foodDTO.getFoodName().trim());
+                WeChatUtil.FOOD_LIST.add(foodDTO);
+            });
         } catch (Exception e) {
             LOGGER.error("updateDataToMap.belonger:{}", belonger, e);
             if (Objects.isNull(belonger)) {

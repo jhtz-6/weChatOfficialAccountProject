@@ -18,6 +18,8 @@ import org.myf.wechatofficialaccountproject.infrastructure.util.helper.InitData;
 import org.myf.wechatofficialaccountproject.infrastructure.util.helper.WeChatUtil;
 import org.myf.wechatofficialaccountproject.infrastructure.util.helper.conver.KeyTypeConverter;
 import org.myf.wechatofficialaccountproject.infrastructure.util.helper.listener.KeyTypeImportListener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,6 +43,7 @@ import static org.myf.wechatofficialaccountproject.infrastructure.util.helper.We
 @RestController
 @RequestMapping("ssfh")
 public class SsfhFacade {
+    private static final Logger LOGGER = LoggerFactory.getLogger(SsfhFacade.class);
 
     @Autowired
     MenuRepository menuRepository;
@@ -139,7 +142,7 @@ public class SsfhFacade {
         userQueryParam.setLoginPassword(user.getLoginPassword());
         UserDO userDO = userRepository.selectOneByParam(userQueryParam);
         if (Objects.isNull(userDO)) {
-            return ResponseResult.ErrorOfMapToJson("账号或密码为空");
+            return ResponseResult.ErrorOfMapToJson("账号或密码错误");
         } else {
             request.getSession().setAttribute(WeChatUtil.USER_NAME, user.getLoginName());
             request.getSession().setAttribute(WeChatUtil.LOGIN_PASSWORD, user.getLoginPassword());
@@ -308,6 +311,7 @@ public class SsfhFacade {
 
     @GetMapping("/synchronousData")
     public String synchronousData(HttpServletRequest request) {
+        LOGGER.info("synchronousData.request : {}", request);
         if (initData.updateDataToMap(getBelongerByRequest(request))) {
             return ResponseResult.TrueOfMapToJson();
         }
@@ -336,7 +340,6 @@ public class SsfhFacade {
     @PostMapping("keyWordImport")
     @ResponseBody
     public String keyWordExport(MultipartFile file, HttpServletRequest request) {
-        Map<String, Object> map = new HashMap(8);
         if (!file.getOriginalFilename().endsWith("xlsx") && !file.getOriginalFilename().endsWith("xls")) {
             return ResponseResult.ErrorOfMapToJson("只能上传excel");
         }
@@ -392,4 +395,81 @@ public class SsfhFacade {
         }
         return ResponseResult.TrueOfMapToJson();
     }
+
+    /**
+     * 当新增公众号时进行初始化数据
+     * 
+     * @param request
+     * @return
+     */
+    @GetMapping("/addInitData")
+    @Transactional
+    public String addInitData(HttpServletRequest request, String belonger) {
+        SystemBelongEnum systemBelongEnum = getBelongerByRequest(request);
+        if (!SystemBelongEnum.LEADER.equals(systemBelongEnum)) {
+            return "您尚无权限";
+        }
+        if (StringUtils.isBlank(belonger)) {
+            return "belonger不能为空";
+        }
+        SystemBelongEnum belongEnum = SystemBelongEnum.getByName(belonger);
+        if (Objects.isNull(belongEnum)) {
+            return "没有找到对应的belonger:" + belonger;
+        }
+        // 先初始化accompany的数据
+        initAccompanyData(belongEnum);
+        // 初始化food数据
+        initFoodData(belongEnum);
+        // 初始化menu数据
+        initMenuData(belongEnum);
+        // 初始化keyWord数据
+        initKeyWordData(belongEnum);
+        return "初始化" + belonger + "数据成功";
+    }
+
+    private void initAccompanyData(SystemBelongEnum systemBelongEnum) {
+        AccompanyQueryParam accompanyQueryParam = new AccompanyQueryParam();
+        accompanyQueryParam.setBelonger(SystemBelongEnum.LEADER);
+        accompanyQueryParam.setIsValid(Boolean.TRUE);
+        List<AccompanyDO> accompanyDOList = accompanyRepository.getListByParam(accompanyQueryParam);
+        accompanyDOList.stream().forEach(x -> {
+            x.setId(null);
+            x.setBelonger(systemBelongEnum);
+            accompanyRepository.saveOrUpdateById(x);
+        });
+    }
+
+    private void initFoodData(SystemBelongEnum systemBelongEnum) {
+        FoodQueryParam foodQueryParam = new FoodQueryParam();
+        foodQueryParam.setBelonger(SystemBelongEnum.LEADER);
+        List<FoodDO> foodDOList = foodRepository.selectListByParam(foodQueryParam);
+        foodDOList.stream().forEach(x -> {
+            x.setId(null);
+            x.setBelonger(systemBelongEnum);
+            foodRepository.saveOrUpdateById(x);
+        });
+    }
+
+    private void initMenuData(SystemBelongEnum systemBelongEnum) {
+        MenuQueryParam menuQueryParam = new MenuQueryParam();
+        menuQueryParam.setBelonger(SystemBelongEnum.LEADER);
+        List<MenuDO> menuDOList = menuRepository.selectListByParam(menuQueryParam);
+        menuDOList.stream().forEach(x -> {
+            x.setId(null);
+            x.setBelonger(systemBelongEnum);
+            menuRepository.saveOrUpdateById(x);
+        });
+    }
+
+    private void initKeyWordData(SystemBelongEnum systemBelongEnum) {
+        WechatKeyWordQueryParam wechatKeyWordQueryParam = new WechatKeyWordQueryParam();
+        wechatKeyWordQueryParam.setBelonger(SystemBelongEnum.LEADER);
+        List<WechatKeyWordsDO> wechatKeyWordsDOS = wechatKeyWordsRepository.getListByParam(wechatKeyWordQueryParam);
+        wechatKeyWordsDOS.stream().forEach(x -> {
+            x.setId(null);
+            x.setBelonger(systemBelongEnum);
+            wechatKeyWordsRepository.saveOrUpdateById(x);
+        });
+    }
+
 }

@@ -24,6 +24,7 @@ public class BaiduOcrClient {
     public BaiduOcrResponse getWebImageByPhotoUrl(String photoUrl) {
         buildOcrClientParams();
         JSONObject res = CLIENT.webImageUrl(photoUrl, Maps.newHashMap());
+        LOGGER.info("webImageUrl.photoUrl:{},res:{}", photoUrl, res);
         return getOcrResult(res);
     }
 

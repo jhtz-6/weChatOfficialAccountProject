@@ -50,6 +50,7 @@ public interface MessageContentHandler {
         String OCR = "文字识别";
         String START_OCR = "文字识别开始";
         String END_OCR = "文字识别结束";
+        String OVER_OCR = "文字识别终止";
         String DEFAULT_RESULT = "大人,您尚未发送文字识别图片。请发送关键词【文字识别开始】";
 
     }
