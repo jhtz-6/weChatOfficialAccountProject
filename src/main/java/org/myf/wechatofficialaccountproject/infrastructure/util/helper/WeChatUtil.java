@@ -74,7 +74,7 @@ public final class WeChatUtil {
         + "非非等于是,双重否定等于肯定,非非左就是左。\n\n"
         + "另外一个就是最难的是带有且字的:【非左且非绿色】,这样的很难,也没有很好的技巧(探索中),,我在这个地方必挂,但到这样的选择时已经40+分了,已经很高了(小的目前最高44分,暂排区第一)。";
     public static final String OCR_GEGIN_CONTENT =
-        "文字识别开始,请发送游戏里原材料图片(寝宫->灶台->＋号);图片发送完毕后,请再发送关键词【文字识别结束】" + "使用视频教程:https://www.520myf.com:8089/wzsb.mp4";
+        "文字识别开始,请发送游戏里原材料图片(寝宫->灶台->＋号);图片发送完毕后,请再发送关键词【文字识别结束】" + "使用视频教程:https://weixin.qq.com/sph/APmiK6y2m";
     public static final String CURRENT_PERSON_KEY = "current_person_";
     public static final String NUM_CURRENT_PERSON = "num_current_person";
     public static final String OCR_MENU_ACTION = "ocr_menu_action:";
@@ -123,6 +123,7 @@ public final class WeChatUtil {
         + "<FromUserName><![CDATA[%2$s]]></FromUserName>\n" + "<CreateTime>%3$s</CreateTime>\n"
         + "<MsgType><![CDATA[%4$s]]></MsgType>\n" + "<Content><![CDATA[%5$s]]></Content>\n" + "</xml>";
     public static String CHATGPT = "chatgpt";
+    public static String REDIS_FESTIVAL_KEY = "festival:";
     public static String CHATGPT_ONE = "chatgpt1";
     public static String CHATGPT_PROCESS = "chatgpt-process";
     public static String CHATGPT_LIST = "chatgpt-list";
@@ -137,8 +138,35 @@ public final class WeChatUtil {
     public static Map<String, SystemBelongEnum> USER_TO_BELONGER_MAP = Maps.newHashMap();
     public static String DEFAULT_LAST_HANDLER_RESULT = "没有找到对应的处理器,请联系管理员进行配置~~";
     public static String SUBSCRIBE_TO_WORD = "关注回复";
+    public static List<String> CARE_LIST= org.apache.commons.compress.utils.Lists.newArrayList();
+    public static Map<String,String> FESTIVAL_BLESS_MAP= new HashMap<>();
 
     static {
+
+        FESTIVAL_BLESS_MAP.put("2024-04-04","清明时节，愿逝者安息，生者坚强，愿你的未来充满阳光和希望！");
+        FESTIVAL_BLESS_MAP.put("2024-05-01","劳动节快乐，向所有辛勤工作的人们致敬，愿你们的生活更加美好！");
+        FESTIVAL_BLESS_MAP.put("2024-05-12","岁月匆匆，母爱如歌,祝天下所有的母亲节日快乐");
+        FESTIVAL_BLESS_MAP.put("2024-06-01","端午节安康，愿你的生活像粽子一样，包裹着甜蜜和幸福！");
+        FESTIVAL_BLESS_MAP.put("2024-06-10","愿你像孩子一样永远保持一颗纯真的心，快乐无忧，笑口常开,儿童节快乐!");
+        FESTIVAL_BLESS_MAP.put("2024-06-16","父爱如山，深沉而厚重,祝天下所有的父亲节日快乐");
+        FESTIVAL_BLESS_MAP.put("2024-08-10","银河浪花,翻腾心的表达;鹊桥两端,连接爱的缠绵;愿你拥有个浪漫七夕，幸福七夕!");
+        FESTIVAL_BLESS_MAP.put("2024-09-10","教诲如春风,师恩似海深,祝天下所有的教师节日快乐!");
+        FESTIVAL_BLESS_MAP.put("2024-10-01","国庆节到了,咱少玩会游戏吧,大人出去转转吧!");
+        FESTIVAL_BLESS_MAP.put("2024-11-01","在这个幽灵和巫婆的世界，愿你的万圣节充满快乐和满足。祝你万圣节快乐，所有的恶作剧都得到应有的惩罚！");
+        FESTIVAL_BLESS_MAP.put("2024-12-25","我试着去买鹿,太贵了;我试着去钻烟囱,太脏了;我试着把礼物装袜子,太臭了。无奈只能用公众号给你发祝福了:圣诞节快乐!");
+
+
+
+        CARE_LIST.add("夜已深，大人该睡了");
+        CARE_LIST.add("夜深人静，愿大人有个好梦，晚安好梦");
+        CARE_LIST.add("晚安啦，愿大人今晚有个美好的梦境");
+        CARE_LIST.add("夜已深，早点休息，明天才能元气满满");
+        CARE_LIST.add("晚安，好好休息，明天的阳光会更灿烂");
+        CARE_LIST.add("星星都睡了，大人也该睡了");
+        CARE_LIST.add("夜深了,大人请注意休息~~");
+        CARE_LIST.add("不要等到失去了才知道珍惜，不要等有了黑眼圈才想起该早睡早起◕‿◕");
+        CARE_LIST.add("大人，您的睡眠时间已不足10个小时⏲️");
+        CARE_LIST.add("熬夜很辛苦额,记得白天要睡好☺");
 
         RECOMMEND_MENU_LIST.add(RECOMMENDED_MENU);
         RECOMMEND_MENU_LIST.add("推荐性价比菜谱");
@@ -255,6 +283,19 @@ public final class WeChatUtil {
         String fuzzyMatchingResult;
         KeyTypeEnum keyType;
         SystemBelongEnum belonger;
+    }
+
+    public static String careMessage(){
+        Calendar now = Calendar.getInstance();
+        int now_hour = now.get(Calendar.HOUR_OF_DAY);
+        if(now_hour<6){
+            return CARE_LIST.get(new Random().nextInt(CARE_LIST.size()));
+        }
+        return null;
+    }
+
+    public static String getFestivalBless(String date){
+        return FESTIVAL_BLESS_MAP.get(date);
     }
 
     public static List<FuzzyMatchingkeyWord> FuzzyMatchingList = Lists.newArrayList();

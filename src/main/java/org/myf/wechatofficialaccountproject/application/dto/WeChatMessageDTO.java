@@ -34,4 +34,7 @@ public class WeChatMessageDTO {
     private String mediaId;
 
     private String format;
+
+    private String returnResult;
+
 }

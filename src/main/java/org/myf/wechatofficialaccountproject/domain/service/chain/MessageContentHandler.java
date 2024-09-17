@@ -33,6 +33,14 @@ public interface MessageContentHandler {
         return false;
     };
 
+    /**
+     * 是否始终执行,不管前面的处理器是否已经有执行结果
+     * @return
+     */
+    default boolean alwaysExecute(){
+        return false;
+    }
+
     interface RegisterArea {
         String REGISTER_TIP = "(请大人登记下所在区服(多个区服之间用;隔开),示例:【区服:倾国倾城;有凤来仪】)";
     }

@@ -167,24 +167,51 @@ public class CommonUtilFacade {
 
     @GetMapping("initChainToHandler")
     public String initChainToHandler() {
+
+
+        /*ConfigurationDO configurationDO = new ConfigurationDO();
+        configurationDO.setName(SystemBelongEnum.LEADER.name());
+        configurationDO.setValue(JSON.toJSONString(map));
+        configurationRepository.saveOrUpdateById(configurationDO);*/
+        return JSON.toJSONString(initChain());
+    }
+
+    @GetMapping("updateConfigToMap")
+    public Boolean updateConfigToMap() {
+        return initData.updateConfigToMap();
+    }
+
+
+    public static void main(String[] args) {
+        initChain();
+
+    }
+
+    private static Map<String, Map<String, List<HandlerToChainMapping>>> initChain(){
         Map<String, Map<String, List<HandlerToChainMapping>>> map = new HashMap();
         Map<String, List<HandlerToChainMapping>> listMap = new HashMap<>();
+        HandlerToChainMapping returnWordSuffixMapping = new HandlerToChainMapping();
+        returnWordSuffixMapping.setHandlerName(ReturnWordSuffixHandler.class.getName());
+        returnWordSuffixMapping.setPriority(9);
 
         List<HandlerToChainMapping> eventList = new ArrayList<>();
         HandlerToChainMapping handlerToChainMapping = new HandlerToChainMapping();
         handlerToChainMapping.setHandlerName(EventHandler.class.getName());
         handlerToChainMapping.setPriority(1);
-
+        eventList.add(returnWordSuffixMapping);
         eventList.add(handlerToChainMapping);
         listMap.put(EventMessageContentHandlerChain.class.getName(), eventList);
 
+        //图片处理链
         List<HandlerToChainMapping> imageList = new ArrayList<>();
         HandlerToChainMapping imageByBaiduOcrHandlerMapping = new HandlerToChainMapping();
         imageByBaiduOcrHandlerMapping.setHandlerName(ImageByBaiduOcrHandler.class.getName());
         imageByBaiduOcrHandlerMapping.setPriority(1);
         imageList.add(imageByBaiduOcrHandlerMapping);
+        imageList.add(returnWordSuffixMapping);
         listMap.put(ImageMessageContentHandlerChain.class.getName(), imageList);
 
+        //文字处理链
         List<HandlerToChainMapping> textList = new ArrayList<>();
         HandlerToChainMapping registerAreaHandlerMapping = new HandlerToChainMapping();
         registerAreaHandlerMapping.setHandlerName(RegisterAreaHandler.class.getName());
@@ -195,47 +222,45 @@ public class CommonUtilFacade {
         HandlerToChainMapping SimpleKeyWordHandlerMapping = new HandlerToChainMapping();
         SimpleKeyWordHandlerMapping.setHandlerName(SimpleKeyWordHandler.class.getName());
         SimpleKeyWordHandlerMapping.setPriority(3);
+        HandlerToChainMapping ComplexKeyWordHandlerMapping = new HandlerToChainMapping();
+        ComplexKeyWordHandlerMapping.setHandlerName(ComplexKeyWordHandler.class.getName());
+        ComplexKeyWordHandlerMapping.setPriority(4);
         HandlerToChainMapping CharacterRecognitionHandlerMapping = new HandlerToChainMapping();
         CharacterRecognitionHandlerMapping.setHandlerName(CharacterRecognitionHandler.class.getName());
-        CharacterRecognitionHandlerMapping.setPriority(4);
+        CharacterRecognitionHandlerMapping.setPriority(5);
         HandlerToChainMapping OpenAiHandlerMapping = new HandlerToChainMapping();
         OpenAiHandlerMapping.setHandlerName(OpenAiHandler.class.getName());
-        OpenAiHandlerMapping.setPriority(5);
+        OpenAiHandlerMapping.setPriority(6);
         HandlerToChainMapping SendMobileMessageHandlerMapping = new HandlerToChainMapping();
         SendMobileMessageHandlerMapping.setHandlerName(SendMobileMessageHandler.class.getName());
-        SendMobileMessageHandlerMapping.setPriority(6);
+        SendMobileMessageHandlerMapping.setPriority(7);
         HandlerToChainMapping TuLingHandlerMapping = new HandlerToChainMapping();
         TuLingHandlerMapping.setHandlerName(TuLingHandler.class.getName());
-        TuLingHandlerMapping.setPriority(7);
+        TuLingHandlerMapping.setPriority(8);
+
         textList.add(registerAreaHandlerMapping);
         textList.add(QueryFoodOrMaterialHandlerMapping);
         textList.add(SimpleKeyWordHandlerMapping);
+        textList.add(ComplexKeyWordHandlerMapping);
         textList.add(CharacterRecognitionHandlerMapping);
         textList.add(OpenAiHandlerMapping);
         textList.add(SendMobileMessageHandlerMapping);
         textList.add(TuLingHandlerMapping);
+        textList.add(returnWordSuffixMapping);
         listMap.put(TextMessageContentHandlerChain.class.getName(), textList);
 
+        //声音处理链
         List<HandlerToChainMapping> voiceList = new ArrayList<>();
         voiceList.add(QueryFoodOrMaterialHandlerMapping);
         voiceList.add(SimpleKeyWordHandlerMapping);
         voiceList.add(CharacterRecognitionHandlerMapping);
         voiceList.add(SendMobileMessageHandlerMapping);
         voiceList.add(TuLingHandlerMapping);
+        voiceList.add(returnWordSuffixMapping);
         listMap.put(VoiceMessageContentHandlerChain.class.getName(), voiceList);
         map.put(SystemBelongEnum.LEADER.name(), listMap);
         System.out.println(JSON.toJSONString(map));
-
-        ConfigurationDO configurationDO = new ConfigurationDO();
-        configurationDO.setName(SystemBelongEnum.LEADER.name());
-        configurationDO.setValue(JSON.toJSONString(map));
-        configurationRepository.saveOrUpdateById(configurationDO);
-        return JSON.toJSONString(map);
-    }
-
-    @GetMapping("updateConfigToMap")
-    public Boolean updateConfigToMap() {
-        return initData.updateConfigToMap();
+        return map;
     }
 
 }

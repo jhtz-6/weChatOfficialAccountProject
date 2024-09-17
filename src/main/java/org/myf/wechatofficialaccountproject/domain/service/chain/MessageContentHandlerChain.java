@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @Author: myf
@@ -47,20 +48,34 @@ public abstract class MessageContentHandlerChain {
      */
     public String handleMessageContentByChain(WeChatMessageDTO weChatMessageDTO,
         List<MessageContentHandler> messageContentHandlerList) {
-        String lastHandlerResult = WeChatUtil.DEFAULT_LAST_HANDLER_RESULT;
-        for (MessageContentHandler messageContentHandler : messageContentHandlerList) {
+        List<MessageContentHandler> alwaysExecuteList = messageContentHandlerList.stream().filter
+                (MessageContentHandler::alwaysExecute).collect(Collectors.toList());
+        List<MessageContentHandler> notAlwaysExecuteList = messageContentHandlerList.stream().filter
+                (x -> !x.alwaysExecute()).collect(Collectors.toList());
+        weChatMessageDTO.setReturnResult(WeChatUtil.DEFAULT_LAST_HANDLER_RESULT);
+        for (MessageContentHandler messageContentHandler : notAlwaysExecuteList) {
             if (messageContentHandler.isMatched(weChatMessageDTO)) {
                 String handlerMessageContentResult = messageContentHandler.handlerMessageContent(weChatMessageDTO);
                 if (StringUtils.isNotBlank(handlerMessageContentResult)) {
+                    weChatMessageDTO.setReturnResult(handlerMessageContentResult);
                     if (!messageContentHandler.shouldContinue(weChatMessageDTO)) {
-                        return handlerMessageContentResult;
-                    } else {
-                        lastHandlerResult = handlerMessageContentResult;
+                        break;
                     }
                 }
             }
         }
-        return lastHandlerResult;
+        for (MessageContentHandler messageContentHandler : alwaysExecuteList) {
+            if (messageContentHandler.isMatched(weChatMessageDTO)) {
+                String handlerMessageContentResult = messageContentHandler.handlerMessageContent(weChatMessageDTO);
+                if (StringUtils.isNotBlank(handlerMessageContentResult)) {
+                    weChatMessageDTO.setReturnResult(weChatMessageDTO.getReturnResult()+handlerMessageContentResult);
+                    if (!messageContentHandler.shouldContinue(weChatMessageDTO)) {
+                        break;
+                    }
+                }
+            }
+        }
+        return weChatMessageDTO.getReturnResult();
     };
 
     /**
