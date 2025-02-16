@@ -63,10 +63,15 @@ public class EventHandler implements MessageContentHandler {
                     subscribeDO.setStatus(weChatMessageDTO.getEvent().name);
                     subscribeRepositoryImpl.saveOrUpdateId(subscribeDO);
                 }
-                String subscribeToWord = WeChatUtil.WeChatKeyWordMap
-                    .get(belonger + WeChatUtil.SUBSCRIBE_TO_WORD);
-                return (SystemBelongEnum.LEADER.equals(belonger)
-                    ? "你好," + unSubsceibeWord + "你是第" + (count + 1) + "位关注我的人,欢迎你~。\n" : "") + subscribeToWord;
+                if(belonger.equals(SystemBelongEnum.GAME)){
+                    return "感谢您的关注～";
+                }else {
+                    String subscribeToWord = WeChatUtil.WeChatKeyWordMap
+                            .get(belonger + WeChatUtil.SUBSCRIBE_TO_WORD);
+                    return (SystemBelongEnum.LEADER.equals(belonger)
+                            ? "你好," + unSubsceibeWord + "你是第" + (count + 1) + "位关注我的人,欢迎你~。\n" : "") + subscribeToWord;
+                }
+
             } else if (EventEnum.UNSUBSCRIBE.name.equals(weChatMessageDTO.getEvent().name)) {
                 subscribeDO.setStatus(weChatMessageDTO.getEvent().name);
                 subscribeRepositoryImpl.saveOrUpdateId(subscribeDO);

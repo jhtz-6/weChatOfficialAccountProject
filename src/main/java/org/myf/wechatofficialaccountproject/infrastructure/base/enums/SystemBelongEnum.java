@@ -16,7 +16,13 @@ public enum SystemBelongEnum {
 
     YNSS("YNSS", "予你盛世"),
 
-    ANSUI("ANSUI", "安岁");
+    YHJ("YHJ", "一壶酒"),
+
+    ZZNH("ZZNH", "猪猪女孩"),
+
+    ANSUI("ANSUI", "安岁"),
+
+    GAME("GAME", "GAME");
 
     private String name;
 

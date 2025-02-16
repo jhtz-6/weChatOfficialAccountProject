@@ -84,7 +84,8 @@ public abstract class MessageContentHandlerChain {
     protected List<MessageContentHandler>
         createMessageContentHandlerChain(List<MessageContentHandler> originMessageContentHandlerList, Class<?> clazz) {
         try {
-            List<MessageContentHandler> messageContentHandlers = CLASS_TO_HANDLER_MAP.get(clazz.getName());
+            List<MessageContentHandler> messageContentHandlers = CLASS_TO_HANDLER_MAP.get(ThreadLocalHolder.BELONGER_THREAD_LOCAL.get().name()
+                    +":"+clazz.getName());
             if (CollectionUtils.isNotEmpty(messageContentHandlers)) {
                 return messageContentHandlers;
             }
@@ -108,7 +109,7 @@ public abstract class MessageContentHandlerChain {
                     .filter(handler -> handler.getClass().getName().equals(handlerName)).findFirst();
                 matchingHandler.ifPresent(messageContentHandlers::add);
             }
-            CLASS_TO_HANDLER_MAP.put(clazz.getName(), messageContentHandlers);
+            CLASS_TO_HANDLER_MAP.put(ThreadLocalHolder.BELONGER_THREAD_LOCAL.get().name()+":"+clazz.getName(), messageContentHandlers);
             return messageContentHandlers;
         } catch (Exception e) {
             LOGGER.error("createMessageContentHandlerChain.messageContentHandlerList : {}",

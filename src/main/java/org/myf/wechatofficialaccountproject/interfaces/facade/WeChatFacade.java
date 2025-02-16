@@ -53,9 +53,63 @@ public class WeChatFacade {
         handleOriginalMsg(request,response);
     }
 
-    @PostMapping("/YnssMsg")
-    public void YnssMsg(HttpServletRequest request, HttpServletResponse response) {
-        ThreadLocalHolder.BELONGER_THREAD_LOCAL.set(SystemBelongEnum.YNSS);
+    @GetMapping("/msg")
+    public String msg(String echostr,String signature,String timestamp,String nonce) {
+        System.out.println("echostr:"+echostr);
+        return echostr;
+    }
+
+    @PostMapping("/yHuJiuMsg")
+    public void YHuJiuMsg(HttpServletRequest request, HttpServletResponse response) {
+        ThreadLocalHolder.BELONGER_THREAD_LOCAL.set(SystemBelongEnum.YHJ);
+        handleOriginalMsg(request,response);
+    }
+
+    @GetMapping("/yHuJiuMsg")
+    public String yHuJiuMsg(String echostr,String signature,String timestamp,String nonce) {
+        System.out.println("echostr:"+echostr);
+        return echostr;
+    }
+
+    @PostMapping("/pdxMsg")
+    public void pdxMsg(HttpServletRequest request, HttpServletResponse response) {
+        ThreadLocalHolder.BELONGER_THREAD_LOCAL.set(SystemBelongEnum.YHJ);
+        handleOriginalMsg(request,response);
+    }
+
+    @GetMapping("/pdxMsg")
+    public String pdxMsg(String echostr,String signature,String timestamp,String nonce) {
+        System.out.println("echostr:"+echostr);
+        return echostr;
+    }
+
+    @PostMapping("/anSuiMsg")
+    public void AnSuiMsg(HttpServletRequest request, HttpServletResponse response) {
+        ThreadLocalHolder.BELONGER_THREAD_LOCAL.set(SystemBelongEnum.ANSUI);
+        handleOriginalMsg(request,response);
+    }
+
+    @GetMapping("/zznhMsg")
+    public String zznhMsg(String echostr,String signature,String timestamp,String nonce) {
+        System.out.println("echostr:"+echostr);
+        return echostr;
+    }
+
+    @PostMapping("/zznhMsg")
+    public void zznhMsg(HttpServletRequest request, HttpServletResponse response) {
+        ThreadLocalHolder.BELONGER_THREAD_LOCAL.set(SystemBelongEnum.ZZNH);
+        handleOriginalMsg(request,response);
+    }
+
+    @GetMapping("/gameMsg")
+    public String gameMsg(String echostr,String signature,String timestamp,String nonce) {
+        System.out.println("echostr:"+echostr);
+        return echostr;
+    }
+
+    @PostMapping("/gameMsg")
+    public void gameMsg(HttpServletRequest request, HttpServletResponse response) {
+        ThreadLocalHolder.BELONGER_THREAD_LOCAL.set(SystemBelongEnum.GAME);
         handleOriginalMsg(request,response);
     }
 

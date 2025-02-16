@@ -84,6 +84,15 @@ public class LoginInterceptor implements HandlerInterceptor {
         NEED_NO_LOGIN_URL_LIST.add("/ssfh/getMessageList");
         NEED_NO_LOGIN_URL_LIST.add("/ssfh/canSendMessage");
         NEED_NO_LOGIN_URL_LIST.add("/ssfh/addInitData");
+        NEED_NO_LOGIN_URL_LIST.add("/testFacade/index");
+        NEED_NO_LOGIN_URL_LIST.add("/testFacade/index");
+        NEED_NO_LOGIN_URL_LIST.add("/weChat/yHuJiuMsg");
+        NEED_NO_LOGIN_URL_LIST.add("/weChat/yHuJiuMsg");
+        NEED_NO_LOGIN_URL_LIST.add("/weChat/yHuJiuMsg");
+        NEED_NO_LOGIN_URL_LIST.add("/weChat/zznhMsg");
+        NEED_NO_LOGIN_URL_LIST.add("/weChat/pdxMsg");
+        NEED_NO_LOGIN_URL_LIST.add("/weChat/gameMsg");
+
 
 
     }

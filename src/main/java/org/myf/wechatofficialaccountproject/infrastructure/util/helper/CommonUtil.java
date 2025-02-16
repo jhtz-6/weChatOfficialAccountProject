@@ -5,6 +5,7 @@ import com.google.common.collect.Maps;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
@@ -393,6 +394,7 @@ public final class CommonUtil {
         CloseableHttpClient httpClient = HttpClients.createDefault();
         try {
             BasicResponseHandler handler = new BasicResponseHandler();
+            MultipartEntityBuilder builder = MultipartEntityBuilder.create();
             // 解决中文乱码问题
             StringEntity entity = new StringEntity(json, "utf-8");
             entity.setContentEncoding("UTF-8");

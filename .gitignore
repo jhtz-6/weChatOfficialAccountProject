@@ -1,0 +1,4 @@
+/src/main/java/org/myf/wechatofficialaccountproject/interfaces/webservice/
+/target/**
+/.idea/**
+/logs/**

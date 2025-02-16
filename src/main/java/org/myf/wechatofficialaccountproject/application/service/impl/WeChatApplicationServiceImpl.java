@@ -1,7 +1,9 @@
 package org.myf.wechatofficialaccountproject.application.service.impl;
 
+import cn.hutool.json.JSONUtil;
 import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Maps;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.myf.wechatofficialaccountproject.application.dto.WeChatMessageDTO;
 import org.myf.wechatofficialaccountproject.application.service.WeChatApplicationService;
@@ -31,6 +33,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @Description: WeChatApplicationService实现类
  */
 @Service
+@Slf4j
 public class WeChatApplicationServiceImpl implements WeChatApplicationService {
     private static final Logger LOGGER = LoggerFactory.getLogger(WeChatApplicationServiceImpl.class);
 
@@ -56,6 +59,7 @@ public class WeChatApplicationServiceImpl implements WeChatApplicationService {
 
     @Override
     public String handleMsgByMap(Map<String, String> map) {
+        log.info("handleMsgByMap.map:{}", JSONUtil.toJsonStr(map));
         WeChatMessageDTO weChatMessageDTO = convertMapToWeChatMessageDTO(map);
         String handleMsgResult = "";
         try {
@@ -67,11 +71,11 @@ public class WeChatApplicationServiceImpl implements WeChatApplicationService {
             if (StringUtils.isEmpty(handleMsgResult)) {
                 handleMsgResult = "服务处理异常,请稍后再试或联系管理员处理";
             }
-            String currentPersonNum = weChatDomainService.getCurrentPersonNum(
+            /*String currentPersonNum = weChatDomainService.getCurrentPersonNum(
                 ThreadLocalHolder.BELONGER_THREAD_LOCAL.get() + WeChatUtil.CURRENT_PERSON_KEY
                     + weChatMessageDTO.getFromUserName(),
                 weChatMessageDTO.getFromUserName(), WeChatUtil.CURRENT_PERSON_TIMEOUT);
-            handleMsgResult = "当前在线人数:" + currentPersonNum + "\n" + handleMsgResult;
+            handleMsgResult = "当前在线人数:" + currentPersonNum + "\n" + handleMsgResult;*/
         } catch (RejectedExecutionException rejectedExecutionException) {
             if (StringUtils.isBlank(handleMsgResult)) {
                 handleMsgResult = "当前访问人数较多,请稍后再试!";

@@ -198,21 +198,19 @@ public class CommonUtilFacade {
         HandlerToChainMapping handlerToChainMapping = new HandlerToChainMapping();
         handlerToChainMapping.setHandlerName(EventHandler.class.getName());
         handlerToChainMapping.setPriority(1);
-        eventList.add(returnWordSuffixMapping);
+        //eventList.add(returnWordSuffixMapping);
         eventList.add(handlerToChainMapping);
         listMap.put(EventMessageContentHandlerChain.class.getName(), eventList);
 
         //图片处理链
-        List<HandlerToChainMapping> imageList = new ArrayList<>();
-        HandlerToChainMapping imageByBaiduOcrHandlerMapping = new HandlerToChainMapping();
-        imageByBaiduOcrHandlerMapping.setHandlerName(ImageByBaiduOcrHandler.class.getName());
-        imageByBaiduOcrHandlerMapping.setPriority(1);
-        imageList.add(imageByBaiduOcrHandlerMapping);
-        imageList.add(returnWordSuffixMapping);
-        listMap.put(ImageMessageContentHandlerChain.class.getName(), imageList);
+
 
         //文字处理链
         List<HandlerToChainMapping> textList = new ArrayList<>();
+        HandlerToChainMapping httpRequestHandlerMapping = new HandlerToChainMapping();
+        httpRequestHandlerMapping.setHandlerName(HttpRequestHandler.class.getName());
+        httpRequestHandlerMapping.setPriority(1);
+
         HandlerToChainMapping registerAreaHandlerMapping = new HandlerToChainMapping();
         registerAreaHandlerMapping.setHandlerName(RegisterAreaHandler.class.getName());
         registerAreaHandlerMapping.setPriority(1);
@@ -238,27 +236,28 @@ public class CommonUtilFacade {
         TuLingHandlerMapping.setHandlerName(TuLingHandler.class.getName());
         TuLingHandlerMapping.setPriority(8);
 
-        textList.add(registerAreaHandlerMapping);
-        textList.add(QueryFoodOrMaterialHandlerMapping);
-        textList.add(SimpleKeyWordHandlerMapping);
-        textList.add(ComplexKeyWordHandlerMapping);
-        textList.add(CharacterRecognitionHandlerMapping);
-        textList.add(OpenAiHandlerMapping);
-        textList.add(SendMobileMessageHandlerMapping);
-        textList.add(TuLingHandlerMapping);
-        textList.add(returnWordSuffixMapping);
+        //textList.add(registerAreaHandlerMapping);
+        //textList.add(QueryFoodOrMaterialHandlerMapping);
+        //textList.add(SimpleKeyWordHandlerMapping);
+        //textList.add(ComplexKeyWordHandlerMapping);
+        textList.add(httpRequestHandlerMapping);
+        //textList.add(CharacterRecognitionHandlerMapping);
+        //textList.add(OpenAiHandlerMapping);
+        //textList.add(SendMobileMessageHandlerMapping);
+        //textList.add(TuLingHandlerMapping);
+        //textList.add(returnWordSuffixMapping);
         listMap.put(TextMessageContentHandlerChain.class.getName(), textList);
 
         //声音处理链
         List<HandlerToChainMapping> voiceList = new ArrayList<>();
-        voiceList.add(QueryFoodOrMaterialHandlerMapping);
+        //voiceList.add(QueryFoodOrMaterialHandlerMapping);
         voiceList.add(SimpleKeyWordHandlerMapping);
-        voiceList.add(CharacterRecognitionHandlerMapping);
-        voiceList.add(SendMobileMessageHandlerMapping);
-        voiceList.add(TuLingHandlerMapping);
-        voiceList.add(returnWordSuffixMapping);
-        listMap.put(VoiceMessageContentHandlerChain.class.getName(), voiceList);
-        map.put(SystemBelongEnum.LEADER.name(), listMap);
+        voiceList.add(ComplexKeyWordHandlerMapping);
+        //voiceList.add(SendMobileMessageHandlerMapping);
+        //voiceList.add(TuLingHandlerMapping);
+        //voiceList.add(returnWordSuffixMapping);
+        //listMap.put(VoiceMessageContentHandlerChain.class.getName(), voiceList);
+        map.put(SystemBelongEnum.GAME.name(), listMap);
         System.out.println(JSON.toJSONString(map));
         return map;
     }

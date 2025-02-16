@@ -23,6 +23,7 @@ import org.myf.wechatofficialaccountproject.infrastructure.base.entity.WechatKey
 import org.myf.wechatofficialaccountproject.infrastructure.base.enums.BooleanEnum;
 import org.myf.wechatofficialaccountproject.infrastructure.base.enums.SfyxEnum;
 import org.myf.wechatofficialaccountproject.infrastructure.base.enums.SystemBelongEnum;
+import org.myf.wechatofficialaccountproject.infrastructure.util.client.RedisClient;
 import org.myf.wechatofficialaccountproject.infrastructure.util.dbdriver.Entity.*;
 import org.myf.wechatofficialaccountproject.infrastructure.util.dbdriver.reposiitory.*;
 import org.myf.wechatofficialaccountproject.infrastructure.util.entity.HandlerToChainMapping;
