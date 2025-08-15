@@ -18,6 +18,7 @@ public class TestFacade {
 
     @GetMapping("/index")
     public String index() {
+        System.out.println("1");
         testServer.teacher("12");
         System.out.println(testServer);;
         return testServer.toString();
