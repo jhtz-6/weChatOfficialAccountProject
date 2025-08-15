@@ -1,5 +1,6 @@
 package org.myf.wechatofficialaccountproject.interfaces.facade;
 
+import cn.hutool.json.JSONUtil;
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.ExcelWriter;
 import com.alibaba.excel.write.metadata.WriteSheet;
@@ -50,70 +51,88 @@ public class WeChatFacade {
     @PostMapping("/msg")
     public void msg(HttpServletRequest request, HttpServletResponse response) {
         ThreadLocalHolder.BELONGER_THREAD_LOCAL.set(SystemBelongEnum.LEADER);
-        handleOriginalMsg(request,response);
+        handleOriginalMsg(request, response);
     }
 
     @GetMapping("/msg")
-    public String msg(String echostr,String signature,String timestamp,String nonce) {
-        System.out.println("echostr:"+echostr);
+    public String msg(String echostr, String signature, String timestamp, String nonce) {
+        System.out.println("echostr:" + echostr);
         return echostr;
     }
 
     @PostMapping("/yHuJiuMsg")
     public void YHuJiuMsg(HttpServletRequest request, HttpServletResponse response) {
         ThreadLocalHolder.BELONGER_THREAD_LOCAL.set(SystemBelongEnum.YHJ);
-        handleOriginalMsg(request,response);
+        handleOriginalMsg(request, response);
     }
 
     @GetMapping("/yHuJiuMsg")
-    public String yHuJiuMsg(String echostr,String signature,String timestamp,String nonce) {
-        System.out.println("echostr:"+echostr);
+    public String yHuJiuMsg(String echostr, String signature, String timestamp, String nonce) {
+        System.out.println("echostr:" + echostr);
         return echostr;
     }
 
+    /**
+     * pdx和yhj一样
+     *
+     * @param request
+     * @param response
+     */
     @PostMapping("/pdxMsg")
     public void pdxMsg(HttpServletRequest request, HttpServletResponse response) {
         ThreadLocalHolder.BELONGER_THREAD_LOCAL.set(SystemBelongEnum.YHJ);
-        handleOriginalMsg(request,response);
+        handleOriginalMsg(request, response);
     }
 
     @GetMapping("/pdxMsg")
-    public String pdxMsg(String echostr,String signature,String timestamp,String nonce) {
-        System.out.println("echostr:"+echostr);
+    public String pdxMsg(String echostr, String signature, String timestamp, String nonce) {
+        System.out.println("echostr:" + echostr);
         return echostr;
     }
 
     @PostMapping("/anSuiMsg")
     public void AnSuiMsg(HttpServletRequest request, HttpServletResponse response) {
         ThreadLocalHolder.BELONGER_THREAD_LOCAL.set(SystemBelongEnum.ANSUI);
-        handleOriginalMsg(request,response);
+        handleOriginalMsg(request, response);
     }
 
     @GetMapping("/zznhMsg")
-    public String zznhMsg(String echostr,String signature,String timestamp,String nonce) {
-        System.out.println("echostr:"+echostr);
+    public String zznhMsg(String echostr, String signature, String timestamp, String nonce) {
+        System.out.println("echostr:" + echostr);
         return echostr;
     }
 
     @PostMapping("/zznhMsg")
     public void zznhMsg(HttpServletRequest request, HttpServletResponse response) {
         ThreadLocalHolder.BELONGER_THREAD_LOCAL.set(SystemBelongEnum.ZZNH);
-        handleOriginalMsg(request,response);
+        handleOriginalMsg(request, response);
     }
 
     @GetMapping("/gameMsg")
-    public String gameMsg(String echostr,String signature,String timestamp,String nonce) {
-        System.out.println("echostr:"+echostr);
+    public String gameMsg(String echostr, String signature, String timestamp, String nonce) {
+        System.out.println("echostr:" + echostr);
         return echostr;
     }
 
     @PostMapping("/gameMsg")
     public void gameMsg(HttpServletRequest request, HttpServletResponse response) {
         ThreadLocalHolder.BELONGER_THREAD_LOCAL.set(SystemBelongEnum.GAME);
-        handleOriginalMsg(request,response);
+        handleOriginalMsg(request, response);
     }
 
-    private void handleOriginalMsg(HttpServletRequest request, HttpServletResponse response){
+    @GetMapping("/weMoneyMsg")
+    public String weMoneyMsg(String echostr, String signature, String timestamp, String nonce) {
+        System.out.println("echostr:" + echostr);
+        return echostr;
+    }
+
+    @PostMapping("/weMoneyMsg")
+    public void weMoneyMsg(HttpServletRequest request, HttpServletResponse response) {
+        ThreadLocalHolder.BELONGER_THREAD_LOCAL.set(SystemBelongEnum.WEMONEY);
+        handleOriginalMsg(request, response);
+    }
+
+    private void handleOriginalMsg(HttpServletRequest request, HttpServletResponse response) {
         WeChatMessageResponse weChatMessageResponse = new WeChatMessageResponse();
         Map<String, String> map = Maps.newHashMap();
         response.setCharacterEncoding("utf-8");
@@ -122,6 +141,18 @@ public class WeChatFacade {
             map = CommonUtil.convertServerletInputStreamToMap(request.getInputStream());
             buildResponse(weChatMessageResponse, map);
             weChatMessageResponse.setContent(weChatApplicationService.handleMsgByMap(map));
+            //如果是wemoney且是1 则发送图片
+            LOGGER.info("handleOriginalMsg.weChatMessageResponse:{}", JSONUtil.toJsonStr(weChatMessageResponse));
+            /*if(Objects.equals(ThreadLocalHolder.BELONGER_THREAD_LOCAL.get(),SystemBelongEnum.WEMONEY) &&
+                    Objects.equals(map.get("MsgType"),"text") &&
+            Objects.equals(map.get("Content"),"1")){
+                weChatMessageResponse.setMsgType(MsgTypeEnum.IMAGE.getName());
+                String picResponseWrite = buildMoneyPicResponseWrite(weChatMessageResponse, weChatMessageResponse.getContent());
+                LOGGER.info("handleOriginalMsg.picResponseWrite:{}",picResponseWrite);
+                response.getWriter().write(picResponseWrite);
+                return;
+            }*/
+
             response.getWriter().write(buildResponseWrite(weChatMessageResponse, weChatMessageResponse.getContent()));
         } catch (IOException ioException) {
             LOGGER.error("weChatMessageResponse:{},map:{}", JSON.toJSONString(weChatMessageResponse),
@@ -153,18 +184,18 @@ public class WeChatFacade {
         // 设置 水平居中
         contentWriteCellStyle.setHorizontalAlignment(HorizontalAlignment.CENTER);
         HorizontalCellStyleStrategy horizontalCellStyleStrategy =
-            new HorizontalCellStyleStrategy(headWriteCellStyle, contentWriteCellStyle);
+                new HorizontalCellStyleStrategy(headWriteCellStyle, contentWriteCellStyle);
         List<WaterMarkModelUtil> waterMarkList = new ArrayList<>();
 
         // 水印数据
         byte[] waterMarkBytes = POICommonUtil.createWaterMark("公众号:小屋写随笔", 600, 450, new Color(220, 181, 21, 100),
-            new Font("微软雅黑", Font.BOLD, 40));
+                new Font("微软雅黑", Font.BOLD, 40));
         waterMarkList.add(WaterMarkModelUtil.createWaterMarkModel("菜谱", waterMarkBytes));
         waterMarkList.add(WaterMarkModelUtil.createWaterMarkModel("价格", waterMarkBytes));
 
         ExcelWriter excelWriter = EasyExcel.write(response.getOutputStream()).inMemory(Boolean.TRUE)
-            .registerWriteHandler(new CustomWaterMarkHandler(waterMarkList))
-            .registerWriteHandler(horizontalCellStyleStrategy).build();
+                .registerWriteHandler(new CustomWaterMarkHandler(waterMarkList))
+                .registerWriteHandler(horizontalCellStyleStrategy).build();
         try {
             WriteSheet writeMenuSheet = EasyExcel.writerSheet(0, "菜谱").head(MenuDTO.class).build();
             excelWriter.write(menuList, writeMenuSheet);
@@ -180,8 +211,14 @@ public class WeChatFacade {
 
     private String buildResponseWrite(WeChatMessageResponse weChatMessageResponse, String content) {
         return String.format(WeChatUtil.RESPONSE_FORMAT, weChatMessageResponse.getToUserName(),
-            weChatMessageResponse.getFromUserName(), DateUtils.dateToString(new Date(), null),
-            weChatMessageResponse.getMsgType(), content);
+                weChatMessageResponse.getFromUserName(), DateUtils.dateToString(new Date(), null),
+                weChatMessageResponse.getMsgType(), content);
+    }
+
+    private String buildMoneyPicResponseWrite(WeChatMessageResponse weChatMessageResponse, String content) {
+        return String.format(WeChatUtil.RESPONSE_PIC_FORMAT, weChatMessageResponse.getToUserName(),
+                weChatMessageResponse.getFromUserName(), DateUtils.dateToString(new Date(), null),
+                weChatMessageResponse.getMsgType(), content);
     }
 
     private void buildResponse(WeChatMessageResponse weChatMessageResponse, Map<String, String> map) {

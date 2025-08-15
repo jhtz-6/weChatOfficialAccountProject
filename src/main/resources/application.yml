@@ -18,7 +18,7 @@ spring:
     mode: HTML5
     cache: false
   datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
+    driver-class-name: com.mysql.cj.jdbc.Driver # 175.24.61.204
     url: jdbc:mysql://localhost:3306/myf?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf8
     username: root
     password:
@@ -33,13 +33,13 @@ spring:
       restart:
         enabled: true
   redis:
-    host: localhost
+    host:
     port: 6379
     password:
     timeout: 5000 # 连接超时时间（毫秒）
     jedis:
       pool:
-        max-active: 40 # 最大活动连接数
+        max-active: 400 # 最大活动连接数
         max-idle: 10 # 最大空闲连接数
         min-idle: 5 # 连接池中的最小空闲连接
         max-wait: -1 # 获取连接时的最大等待时间（负数表示无限等待）

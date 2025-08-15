@@ -29,4 +29,9 @@ public class WeChatMessageResponse {
     private String mediaId;
 
     private String format;
+
+    /**
+     * 图文消息个数；当用户发送文本、图片、语音、视频、图文、地理位置这六种消息时，开发者只能回复1条图文消息；其余场景最多可回复8条
+     */
+    private Integer articleCount = 1;
 }

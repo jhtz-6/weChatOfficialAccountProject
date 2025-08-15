@@ -1,9 +1,10 @@
-package org.myf.wechatofficialaccountproject.domain.service.chain.impl.handler;
+package org.myf.wechatofficialaccountproject.domain.service.chain.impl.handler.pdx;
 
 import com.alibaba.fastjson.JSON;
 import org.apache.commons.lang3.StringUtils;
 import org.myf.wechatofficialaccountproject.application.dto.WeChatMessageDTO;
 import org.myf.wechatofficialaccountproject.domain.service.chain.MessageContentHandler;
+import org.myf.wechatofficialaccountproject.domain.service.chain.impl.handler.EventHandler;
 import org.myf.wechatofficialaccountproject.infrastructure.base.entity.SubscribeDO;
 import org.myf.wechatofficialaccountproject.infrastructure.base.enums.EventEnum;
 import org.myf.wechatofficialaccountproject.infrastructure.base.enums.SystemBelongEnum;
@@ -25,8 +26,8 @@ import java.util.concurrent.locks.ReentrantLock;
  * @Description: 订阅/取消订阅事件处理逻辑
  */
 @Service
-public class EventHandler implements MessageContentHandler {
-    private static final Logger LOGGER = LoggerFactory.getLogger(EventHandler.class);
+public class PdxEventHandler extends EventHandler {
+    private static final Logger LOGGER = LoggerFactory.getLogger(PdxEventHandler.class);
     @Autowired
     protected SubscribeRepository subscribeRepositoryImpl;
     private static final ReentrantLock lock = new ReentrantLock();
@@ -42,15 +43,15 @@ public class EventHandler implements MessageContentHandler {
             SubscribeDO subscribeDO = subscribeRepositoryImpl.selectOneByParam(subscribeQueryParam);
             // 幂等处理
             if (Objects.nonNull(subscribeDO) && weChatMessageDTO.getEvent().name.equals(subscribeDO.getStatus())) {
-                return WeChatUtil.SUBSCRIBE_CONTENT;
+                return WeChatUtil.WeChatKeyWordMap.get(belonger + WeChatUtil.SUBSCRIBE_TO_WORD);
             }
             // 说明是关注/取消关注
             if (EventEnum.SUBSCRIBE.name.equals(weChatMessageDTO.getEvent().name)) {
                 subscribeQueryParam = new SubscribeQueryParam();
                 subscribeQueryParam.setStatus(weChatMessageDTO.getEvent().name);
                 subscribeQueryParam.setBelonger(belonger);
-                Integer count = subscribeRepositoryImpl.selectCountByParam(subscribeQueryParam);
-                String unSubsceibeWord = "";
+                //Integer count = subscribeRepositoryImpl.selectCountByParam(subscribeQueryParam);
+                //String unSubsceibeWord = "";
                 subscribeQueryParam.setStatus(EventEnum.UNSUBSCRIBE.name);
                 if (Objects.isNull(subscribeDO)) {
                     subscribeDO = new SubscribeDO();
@@ -59,18 +60,11 @@ public class EventHandler implements MessageContentHandler {
                     subscribeDO.setSubscriber(weChatMessageDTO.getFromUserName());
                     subscribeRepositoryImpl.saveOrUpdateId(subscribeDO);
                 } else {
-                    unSubsceibeWord = Event.UN_SUBSCEIBE_WORD;
+                    //unSubsceibeWord = Event.UN_SUBSCEIBE_WORD;
                     subscribeDO.setStatus(weChatMessageDTO.getEvent().name);
                     subscribeRepositoryImpl.saveOrUpdateId(subscribeDO);
                 }
-                if(belonger.equals(SystemBelongEnum.GAME)){
-                    return "感谢您的关注～";
-                }else {
-                    String subscribeToWord = WeChatUtil.WeChatKeyWordMap
-                            .get(belonger + WeChatUtil.SUBSCRIBE_TO_WORD);
-                    return (SystemBelongEnum.LEADER.equals(belonger)
-                            ? "你好," + unSubsceibeWord + "你是第" + (count + 1) + "位关注我的人,欢迎你~。\n" : "") + subscribeToWord;
-                }
+                return WeChatUtil.WeChatKeyWordMap.get(belonger + WeChatUtil.SUBSCRIBE_TO_WORD);
 
             } else if (EventEnum.UNSUBSCRIBE.name.equals(weChatMessageDTO.getEvent().name)) {
                 subscribeDO.setStatus(weChatMessageDTO.getEvent().name);

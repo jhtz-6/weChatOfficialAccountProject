@@ -29,9 +29,9 @@ import java.util.stream.Collectors;
 @Service
 public class ImageByBaiduOcrHandler implements MessageContentHandler {
     @Autowired
-    BaiduOcrClient baiduOcrClient;
+    protected BaiduOcrClient baiduOcrClient;
     @Autowired
-    RedisClient redisClient;
+    protected RedisClient redisClient;
 
     @Override
     public String handlerMessageContent(WeChatMessageDTO weChatMessageDTO) {

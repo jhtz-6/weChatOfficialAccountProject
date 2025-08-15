@@ -84,7 +84,7 @@ public class InitData {
             WeChatUtil.MATERIAL_LIST.add(materialDTO);
         });
         WeChatUtil.MATERIAL_NAME_LIST =
-            WeChatUtil.MATERIAL_LIST.stream().map(x -> x.getMaterialName()).collect(Collectors.toList());
+                WeChatUtil.MATERIAL_LIST.stream().map(x -> x.getMaterialName()).collect(Collectors.toList());
 
         UserQueryParam userQueryParam = new UserQueryParam();
         List<UserDO> userDOList = userRepository.getListByParam(userQueryParam);
@@ -96,31 +96,31 @@ public class InitData {
         UPDATE_CONFIG_LOCK.lock();
         try {
             List<ConfigurationDO> configurationDOList =
-                configurationRepositoryl.selectListByParam(new ConfigurationQueryParam());
+                    configurationRepositoryl.selectListByParam(new ConfigurationQueryParam());
             for (ConfigurationDO configurationDO : configurationDOList) {
                 CONFIGURATION_MAP.put(configurationDO.getName(), configurationDO.getValue());
             }
             SSENDER = new SmsSingleSender(Integer.parseInt(CONFIGURATION_MAP.get(WeChatUtil.TENCENT_APPID)),
-                CONFIGURATION_MAP.get(WeChatUtil.TENCENT_APPKEY));
+                    CONFIGURATION_MAP.get(WeChatUtil.TENCENT_APPKEY));
 
             CLIENT = new AipOcr(WeChatUtil.CONFIGURATION_MAP.get(WeChatUtil.BAIDU_APPID),
-                WeChatUtil.CONFIGURATION_MAP.get(WeChatUtil.BAIDU_APPKEY),
-                WeChatUtil.CONFIGURATION_MAP.get(WeChatUtil.BAIDU_SECRET_KEY));
+                    WeChatUtil.CONFIGURATION_MAP.get(WeChatUtil.BAIDU_APPKEY),
+                    WeChatUtil.CONFIGURATION_MAP.get(WeChatUtil.BAIDU_SECRET_KEY));
 
             OPENAI_STREAM_CLIENT = OpenAiStreamClient.builder().connectTimeout(50).readTimeout(50).writeTimeout(50)
-                .apiKey(WeChatUtil.CONFIGURATION_MAP.get(WeChatUtil.OPENAI_APIKEY))
-                .apiHost(WeChatUtil.CONFIGURATION_MAP.get(WeChatUtil.OPENAI_APIHOST)).build();
+                    .apiKey(WeChatUtil.CONFIGURATION_MAP.get(WeChatUtil.OPENAI_APIKEY))
+                    .apiHost(WeChatUtil.CONFIGURATION_MAP.get(WeChatUtil.OPENAI_APIHOST)).build();
 
             UNFBX_OPENAI_CLIENT =
-                OpenAiClient.builder().apiHost(WeChatUtil.CONFIGURATION_MAP.get(WeChatUtil.OPENAI_APIHOST))
-                    .apiKey(WeChatUtil.CONFIGURATION_MAP.get(WeChatUtil.OPENAI_APIKEY)).connectTimeout(50)
-                    .readTimeout(50).writeTimeout(50).build();
+                    OpenAiClient.builder().apiHost(WeChatUtil.CONFIGURATION_MAP.get(WeChatUtil.OPENAI_APIHOST))
+                            .apiKey(WeChatUtil.CONFIGURATION_MAP.get(WeChatUtil.OPENAI_APIKEY)).connectTimeout(50)
+                            .readTimeout(50).writeTimeout(50).build();
 
             COSCredentials cred =
-                new BasicCOSCredentials(WeChatUtil.CONFIGURATION_MAP.get(WeChatUtil.TENCENT_COS_SECRET_ID),
-                    WeChatUtil.CONFIGURATION_MAP.get(WeChatUtil.TENCENT_COS_SECRET_KEY));
+                    new BasicCOSCredentials(WeChatUtil.CONFIGURATION_MAP.get(WeChatUtil.TENCENT_COS_SECRET_ID),
+                            WeChatUtil.CONFIGURATION_MAP.get(WeChatUtil.TENCENT_COS_SECRET_KEY));
             ClientConfig clientConfig =
-                new ClientConfig(new Region(WeChatUtil.CONFIGURATION_MAP.get(WeChatUtil.TENCENT_COS_REGION)));
+                    new ClientConfig(new Region(WeChatUtil.CONFIGURATION_MAP.get(WeChatUtil.TENCENT_COS_REGION)));
             clientConfig.setHttpProtocol(HttpProtocol.https);
             COS_CLIENT = new COSClient(cred, clientConfig);
             TENCENT_PHOTO_DOMAIN_NAME = WeChatUtil.CONFIGURATION_MAP.get(WeChatUtil.TENCENT_PHOTO_DOMAIN_NAME);
@@ -128,7 +128,7 @@ public class InitData {
             for (SystemBelongEnum systemBelongEnum : SystemBelongEnum.values()) {
                 if (CONFIGURATION_MAP.containsKey(systemBelongEnum.name())) {
                     CHAIN_TO_HANDLER_MAP
-                        .putAll(JSON.parseObject(CONFIGURATION_MAP.get(systemBelongEnum.name()), Map.class));
+                            .putAll(JSON.parseObject(CONFIGURATION_MAP.get(systemBelongEnum.name()), Map.class));
                 }
             }
             MessageContentHandlerChain.CLASS_TO_HANDLER_MAP = new HashMap<>();
@@ -143,7 +143,7 @@ public class InitData {
 
     /**
      * 根据belonger来同步数据,belonger则会同步所有belonger的数据
-     * 
+     *
      * @param belonger
      * @return
      */
@@ -181,10 +181,10 @@ public class InitData {
             wechatKeyWordQueryParam.setBelonger(belonger);
             // 存入map时的key为belonger+keyName
             List<WechatKeyWordsDO> wechatKeyWordsDOList =
-                wechatKeyWordsRepository.getListByParam(wechatKeyWordQueryParam);
+                    wechatKeyWordsRepository.getListByParam(wechatKeyWordQueryParam);
             if (Objects.nonNull(belonger)) {
                 WeChatUtil.FuzzyMatchingList = WeChatUtil.FuzzyMatchingList.stream()
-                    .filter(x -> !belonger.equals(x.getBelonger())).collect(Collectors.toList());
+                        .filter(x -> !belonger.equals(x.getBelonger())).collect(Collectors.toList());
                 for (String key : WeChatUtil.WeChatKeyWordMap.keySet()) {
                     if (key.contains(belonger.name())) {
                         WeChatUtil.WeChatKeyWordMap.remove(key);
@@ -200,13 +200,13 @@ public class InitData {
                 switch (wechatKeyWordsDTO.getKeyType()) {
                     case PRECISE:
                         WeChatUtil.WeChatKeyWordMap.put(
-                            wechatKeyWordsDTO.getBelonger() + wechatKeyWordsDTO.getKeyName(),
-                            wechatKeyWordsDTO.getValueContent());
+                                wechatKeyWordsDTO.getBelonger() + wechatKeyWordsDTO.getKeyName(),
+                                wechatKeyWordsDTO.getValueContent());
                         continue;
                     case FUZZY:
                         WeChatUtil.FuzzyMatchingList.add(new WeChatUtil.FuzzyMatchingkeyWord(
-                            wechatKeyWordsDTO.getKeyName(), wechatKeyWordsDTO.getValueContent(),
-                            wechatKeyWordsDTO.getKeyType(), wechatKeyWordsDTO.getBelonger()));
+                                wechatKeyWordsDTO.getKeyName(), wechatKeyWordsDTO.getValueContent(),
+                                wechatKeyWordsDTO.getKeyType(), wechatKeyWordsDTO.getBelonger()));
                         continue;
                     default:
                 }
@@ -227,7 +227,7 @@ public class InitData {
                 AccompanyDTO accompanyDTO = new AccompanyDTO();
                 CommonUtil.copyPropertiesWithNull(accompanyDO, accompanyDTO);
                 WeChatUtil.ACCOMPANY_MAP.put(accompanyDTO.getBelonger() + accompanyDTO.getCharacterName(),
-                    accompanyDTO);
+                        accompanyDTO);
             }
 
             FoodQueryParam foodQueryParam = new FoodQueryParam();

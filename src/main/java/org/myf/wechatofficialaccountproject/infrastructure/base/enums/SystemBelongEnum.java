@@ -16,13 +16,19 @@ public enum SystemBelongEnum {
 
     YNSS("YNSS", "予你盛世"),
 
+    /**
+     * pdx账号
+     */
     YHJ("YHJ", "一壶酒"),
 
     ZZNH("ZZNH", "猪猪女孩"),
 
     ANSUI("ANSUI", "安岁"),
 
-    GAME("GAME", "GAME");
+    GAME("GAME", "GAME"),
+
+    WEMONEY("WEMONEY", "微信支付成功"),
+    ;
 
     private String name;
 

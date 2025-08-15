@@ -1,5 +1,6 @@
 package org.myf.wechatofficialaccountproject.infrastructure.util.dbdriver.reposiitory.impl;
 
+import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.apache.commons.lang3.StringUtils;
 import org.myf.wechatofficialaccountproject.infrastructure.base.entity.WechatKeyWordsDO;
@@ -63,9 +64,13 @@ public class WechatKeyWordsRepositoryImpl implements WechatKeyWordsRepository {
             queryWrapper.eq(BELONGER, keyWordsDO.getBelonger());
             queryWrapper.apply("BINARY key_name = {0}", keyWordsDO.getKeyName());
             queryWrapper.eq(IS_VALID,
-                Objects.nonNull(keyWordsDO.getIsValid()) ? keyWordsDO.getIsValid() : BooleanEnum.TRUE.name);
-            queryWrapper.eq(KEY_TYPE, keyWordsDO.getKeyType().name());
+                    Objects.nonNull(keyWordsDO.getIsValid()) ? keyWordsDO.getIsValid() : BooleanEnum.TRUE.name);
+            //queryWrapper.eq(KEY_TYPE, keyWordsDO.getKeyType().name());
             preWechatKeyWordsDO = wechatKeyWordsMapper.selectOne(queryWrapper);
+            //如果content为空,则 删除对应的数据
+            if(StrUtil.isEmpty(keyWordsDO.getValueContent())) {
+                return wechatKeyWordsMapper.deleteById(preWechatKeyWordsDO);
+            }
         }
         if (Objects.nonNull(preWechatKeyWordsDO)) {
             CommonUtil.copyPropertiesExceptNull(keyWordsDO, preWechatKeyWordsDO);

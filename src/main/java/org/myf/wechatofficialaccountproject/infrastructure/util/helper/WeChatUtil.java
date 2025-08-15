@@ -122,6 +122,11 @@ public final class WeChatUtil {
     public static String RESPONSE_FORMAT = "<xml>\n" + "<ToUserName><![CDATA[%1$s]]></ToUserName>\n"
         + "<FromUserName><![CDATA[%2$s]]></FromUserName>\n" + "<CreateTime>%3$s</CreateTime>\n"
         + "<MsgType><![CDATA[%4$s]]></MsgType>\n" + "<Content><![CDATA[%5$s]]></Content>\n" + "</xml>";
+
+    public static String RESPONSE_PIC_FORMAT = "<xml>\n" + "<ToUserName><![CDATA[%1$s]]></ToUserName>\n"
+            + "<FromUserName><![CDATA[%2$s]]></FromUserName>\n" + "<CreateTime>%3$s</CreateTime>\n"
+            + "<MsgType><![CDATA[%4$s]]></MsgType>\n" + "<Image>\n<MediaId><![CDATA[%5$s]]></MediaId>\n</Image>\n"
+            + "</xml>";
     public static String CHATGPT = "chatgpt";
     public static String REDIS_FESTIVAL_KEY = "festival:";
     public static String CHATGPT_ONE = "chatgpt1";

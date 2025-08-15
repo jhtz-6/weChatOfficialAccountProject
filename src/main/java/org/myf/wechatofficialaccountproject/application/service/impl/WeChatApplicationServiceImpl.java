@@ -3,6 +3,7 @@ package org.myf.wechatofficialaccountproject.application.service.impl;
 import cn.hutool.json.JSONUtil;
 import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Maps;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.myf.wechatofficialaccountproject.application.dto.WeChatMessageDTO;
@@ -22,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.*;
@@ -46,15 +48,16 @@ public class WeChatApplicationServiceImpl implements WeChatApplicationService {
     @Autowired
     MessageTypeHandlerFactory messageTypeHandlerFactory;
     static ExecutorService weChatSaveThreadPoolExecutor;
+
     static {
         AtomicInteger saveSendThreadNumber = new AtomicInteger(1);
         weChatSaveThreadPoolExecutor =
-            new ThreadPoolExecutor(10, 20, 30, TimeUnit.SECONDS, new LinkedBlockingDeque<>(20), task -> {
-                Thread thread = new Thread(task);
-                thread.setName(
-                    "weChatMessageSaveThread-" + saveSendThreadNumber.incrementAndGet() + "-" + thread.getName());
-                return thread;
-            });
+                new ThreadPoolExecutor(10, 20, 30, TimeUnit.SECONDS, new LinkedBlockingDeque<>(20), task -> {
+                    Thread thread = new Thread(task);
+                    thread.setName(
+                            "weChatMessageSaveThread-" + saveSendThreadNumber.incrementAndGet() + "-" + thread.getName());
+                    return thread;
+                });
     }
 
     @Override
@@ -64,10 +67,16 @@ public class WeChatApplicationServiceImpl implements WeChatApplicationService {
         String handleMsgResult = "";
         try {
             weChatMessageDTO.setType("receive");
-            weChatSaveThreadPoolExecutor
-                .submit(new WeChatSaveSendTask(weChatMessageDTO, ThreadLocalHolder.BELONGER_THREAD_LOCAL.get()));
             replaceCharacter(weChatMessageDTO);
-            handleMsgResult = messageTypeHandlerFactory.createMessageTypeHandler(weChatMessageDTO).handleMessageChain();
+            try {
+                handleMsgResult = messageTypeHandlerFactory.createMessageTypeHandler(weChatMessageDTO).handleMessageChain();
+            } catch (Exception e) {
+                weChatSaveThreadPoolExecutor
+                        .submit(new WeChatSaveSendTask(weChatMessageDTO, ThreadLocalHolder.BELONGER_THREAD_LOCAL.get()));
+                throw e;
+            }
+            weChatSaveThreadPoolExecutor
+                    .submit(new WeChatSaveSendTask(weChatMessageDTO, ThreadLocalHolder.BELONGER_THREAD_LOCAL.get()));
             if (StringUtils.isEmpty(handleMsgResult)) {
                 handleMsgResult = "服务处理异常,请稍后再试或联系管理员处理";
             }
@@ -88,7 +97,8 @@ public class WeChatApplicationServiceImpl implements WeChatApplicationService {
         }
         WeChatMessageDTO weChatSendMessageDTO = new WeChatMessageDTO();
         try {
-            buildAndSaveWechatSendMessageDTO(weChatSendMessageDTO, weChatMessageDTO, handleMsgResult);
+            final String handleMsgResultTemp = handleMsgResult;
+            CompletableFuture.runAsync(() -> buildAndSaveWechatSendMessageDTO(weChatSendMessageDTO, weChatMessageDTO, handleMsgResultTemp));
         } catch (RejectedExecutionException rejectedExecutionException) {
             LOGGER.error("handleMsgbyMap.map:{}", JSON.toJSONString(map), rejectedExecutionException);
         }
@@ -150,6 +160,8 @@ public class WeChatApplicationServiceImpl implements WeChatApplicationService {
     }
 
     private void replaceCharacter(WeChatMessageDTO weChatMessageDTO) {
+        if(Objects.equals(ThreadLocalHolder.BELONGER_THREAD_LOCAL.get(),SystemBelongEnum.LEADER) ||
+                Objects.equals(ThreadLocalHolder.BELONGER_THREAD_LOCAL.get(),SystemBelongEnum.ANSUI)){
         Map<String, String> replaceMap = Maps.newHashMap();
         replaceMap.put("推荐王爷菜谱", "推荐王爷性价比菜谱");
         replaceMap.put("推荐皇帝菜谱", "推荐皇帝性价比菜谱");
@@ -161,6 +173,7 @@ public class WeChatApplicationServiceImpl implements WeChatApplicationService {
         replaceMap.put("。", ";");
         replaceMap.put("和", ";");
         weChatMessageDTO.setContent(CommonUtil.replaceCharacterByMap(replaceMap, weChatMessageDTO.getContent()));
+        }
     }
 
     private WeChatMessageDTO convertMapToWeChatMessageDTO(Map<String, String> map) {
@@ -189,8 +202,9 @@ public class WeChatApplicationServiceImpl implements WeChatApplicationService {
         return weChatMessageDTO;
     }
 
+    @SneakyThrows
     private void buildAndSaveWechatSendMessageDTO(WeChatMessageDTO weChatSendMessageDTO,
-        WeChatMessageDTO weChatMessageDTO, String handleMsgResult) {
+                                                  WeChatMessageDTO weChatMessageDTO, String handleMsgResult) {
         weChatSendMessageDTO.setContent(handleMsgResult);
         weChatSendMessageDTO.setType("send");
         weChatSendMessageDTO.setCreateTime(null);
@@ -198,7 +212,8 @@ public class WeChatApplicationServiceImpl implements WeChatApplicationService {
         weChatSendMessageDTO.setToUserName(weChatMessageDTO.getFromUserName());
         weChatSendMessageDTO.setMsgType(MsgTypeEnum.TEXT.name);
         weChatSendMessageDTO.setMsgId(weChatMessageDTO.getMsgId());
+        Thread.sleep(1000);
         weChatSaveThreadPoolExecutor
-            .submit(new WeChatSaveSendTask(weChatSendMessageDTO, ThreadLocalHolder.BELONGER_THREAD_LOCAL.get()));
+                .submit(new WeChatSaveSendTask(weChatSendMessageDTO, ThreadLocalHolder.BELONGER_THREAD_LOCAL.get()));
     }
 }

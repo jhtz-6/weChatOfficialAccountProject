@@ -110,6 +110,16 @@ public class WeChatMessage {
         return null;
     }
 
+    public String moneyHandKeyWord() {
+        if (StringUtils.equalsAny(MsgTypeEnum.IMAGE.name())) {
+            if (StringUtils.isNotBlank(getHandleResultByKeyMap())
+                    || StringUtils.isNotBlank(getHandleResultByKeyList())) {
+                return handleWeChatMessageResult;
+            }
+        }
+        return null;
+    }
+
     private String getHandleResultByKeyMap() {
         if (StringUtils
             .isNotBlank(WeChatUtil.WeChatKeyWordMap.get(ThreadLocalHolder.BELONGER_THREAD_LOCAL.get() + content))) {

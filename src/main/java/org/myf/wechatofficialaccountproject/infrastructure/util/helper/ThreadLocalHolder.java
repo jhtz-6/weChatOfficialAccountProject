@@ -1,5 +1,6 @@
 package org.myf.wechatofficialaccountproject.infrastructure.util.helper;
 
+import com.alibaba.ttl.TransmittableThreadLocal;
 import org.myf.wechatofficialaccountproject.infrastructure.base.enums.SystemBelongEnum;
 
 /**
@@ -9,8 +10,8 @@ import org.myf.wechatofficialaccountproject.infrastructure.base.enums.SystemBelo
  */
 public class ThreadLocalHolder {
     /**
-     * 区分请求
+     * 区分请求 TransmittableThreadLocal<String> ttl = new TransmittableThreadLocal<>();
      */
-    public static ThreadLocal<SystemBelongEnum> BELONGER_THREAD_LOCAL = new ThreadLocal<>();
+    public static TransmittableThreadLocal<SystemBelongEnum> BELONGER_THREAD_LOCAL = new TransmittableThreadLocal<>();
 
 }

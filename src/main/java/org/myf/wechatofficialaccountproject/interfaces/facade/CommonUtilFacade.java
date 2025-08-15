@@ -8,6 +8,10 @@ import org.myf.wechatofficialaccountproject.domain.service.chain.impl.ImageMessa
 import org.myf.wechatofficialaccountproject.domain.service.chain.impl.TextMessageContentHandlerChain;
 import org.myf.wechatofficialaccountproject.domain.service.chain.impl.VoiceMessageContentHandlerChain;
 import org.myf.wechatofficialaccountproject.domain.service.chain.impl.handler.*;
+import org.myf.wechatofficialaccountproject.domain.service.chain.impl.handler.money.MoneyImageByBaiduOcrHandler;
+import org.myf.wechatofficialaccountproject.domain.service.chain.impl.handler.money.MoneySimpleKeyWordHandler;
+import org.myf.wechatofficialaccountproject.domain.service.chain.impl.handler.pdx.PdxEventHandler;
+import org.myf.wechatofficialaccountproject.domain.service.chain.impl.handler.pdx.PdxSimpleKeyWordHandler;
 import org.myf.wechatofficialaccountproject.infrastructure.base.entity.AccompanyDO;
 import org.myf.wechatofficialaccountproject.infrastructure.base.entity.ConfigurationDO;
 import org.myf.wechatofficialaccountproject.infrastructure.base.entity.WechatKeyWordsDO;
@@ -183,8 +187,95 @@ public class CommonUtilFacade {
 
 
     public static void main(String[] args) {
-        initChain();
+        //initChain();
+        //initWeMoneyChain();
+        initPdxChain();
+    }
 
+    private static void initPdxChain() {
+        Map<String, Map<String, List<HandlerToChainMapping>>> map = new HashMap();
+        Map<String, List<HandlerToChainMapping>> listMap = new HashMap<>();
+       /* HandlerToChainMapping returnWordSuffixMapping = new HandlerToChainMapping();
+        returnWordSuffixMapping.setHandlerName(ReturnWordSuffixHandler.class.getName());
+        returnWordSuffixMapping.setPriority(9);*/
+
+        List<HandlerToChainMapping> eventList = new ArrayList<>();
+        HandlerToChainMapping handlerToChainMapping = new HandlerToChainMapping();
+        handlerToChainMapping.setHandlerName(PdxEventHandler.class.getName());
+        handlerToChainMapping.setPriority(1);
+        //eventList.add(returnWordSuffixMapping);
+        eventList.add(handlerToChainMapping);
+        //listMap.put(EventMessageContentHandlerChain.class.getName(), eventList);
+
+        //文字处理链
+        List<HandlerToChainMapping> textList = new ArrayList<>();
+
+        HandlerToChainMapping SimpleKeyWordHandlerMapping = new HandlerToChainMapping();
+        SimpleKeyWordHandlerMapping.setHandlerName(PdxSimpleKeyWordHandler.class.getName());
+        SimpleKeyWordHandlerMapping.setPriority(1);
+        textList.add(SimpleKeyWordHandlerMapping);
+
+
+       /* HandlerToChainMapping complexKeyWordHandlerMapping = new HandlerToChainMapping();
+        complexKeyWordHandlerMapping.setHandlerName(ComplexKeyWordHandler.class.getName());
+        complexKeyWordHandlerMapping.setPriority(2);
+        textList.add(complexKeyWordHandlerMapping);*/
+
+        listMap.put(EventMessageContentHandlerChain.class.getName(), eventList);
+
+        listMap.put(TextMessageContentHandlerChain.class.getName(), textList);
+
+        //声音处理链
+        /*List<HandlerToChainMapping> voiceList = new ArrayList<>();
+        voiceList.add(SimpleKeyWordHandlerMapping);
+        voiceList.add(ComplexKeyWordHandlerMapping);*/
+        map.put(SystemBelongEnum.YHJ.name(), listMap);
+        System.out.println(JSON.toJSONString(map));
+        //return map;
+    }
+
+
+    /**
+     * 处理微信支付成功的,先是 关注事件、处理图片处理器 、简单词语处理器
+     * MoneyEventHandler、MoneyImageByBaiduOcrHandler、MoneySimpleKeyWordHandler
+     * @return
+     */
+    private static Map<String, Map<String, List<HandlerToChainMapping>>> initWeMoneyChain(){
+        Map<String, Map<String, List<HandlerToChainMapping>>> map = new HashMap();
+        Map<String, List<HandlerToChainMapping>> listMap = new HashMap<>();
+
+        List<HandlerToChainMapping> eventList = new ArrayList<>();
+        //关注事件
+        HandlerToChainMapping handlerToChainMapping = new HandlerToChainMapping();
+        handlerToChainMapping.setHandlerName(EventHandler.class.getName());
+        handlerToChainMapping.setPriority(1);
+        eventList.add(handlerToChainMapping);
+        listMap.put(EventMessageContentHandlerChain.class.getName(), eventList);
+
+        //图片处理链
+        List<HandlerToChainMapping> imageList = new ArrayList<>();
+        //简单词语处理器
+        HandlerToChainMapping moneyImageByBaiduOcrHandlerMapping = new HandlerToChainMapping();
+        moneyImageByBaiduOcrHandlerMapping.setHandlerName(MoneyImageByBaiduOcrHandler.class.getName());
+        moneyImageByBaiduOcrHandlerMapping.setPriority(1);
+        imageList.add(moneyImageByBaiduOcrHandlerMapping);
+        listMap.put(ImageMessageContentHandlerChain.class.getName(), imageList);
+
+        //文字处理链
+        List<HandlerToChainMapping> textList = new ArrayList<>();
+        HandlerToChainMapping moneySimpleKeyWordHandlerMapping = new HandlerToChainMapping();
+        moneySimpleKeyWordHandlerMapping.setHandlerName(MoneySimpleKeyWordHandler.class.getName());
+        moneySimpleKeyWordHandlerMapping.setPriority(1);
+        textList.add(moneySimpleKeyWordHandlerMapping);
+        listMap.put(TextMessageContentHandlerChain.class.getName(), textList);
+
+        //声音处理链
+        List<HandlerToChainMapping> voiceList = new ArrayList<>();
+        voiceList.add(moneySimpleKeyWordHandlerMapping);
+        listMap.put(VoiceMessageContentHandlerChain.class.getName(), voiceList);
+        map.put(SystemBelongEnum.WEMONEY.name(), listMap);
+        System.out.println(JSON.toJSONString(map));
+        return map;
     }
 
     private static Map<String, Map<String, List<HandlerToChainMapping>>> initChain(){

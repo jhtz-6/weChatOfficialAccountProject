@@ -1,5 +1,6 @@
 package org.myf.wechatofficialaccountproject.infrastructure.util.helper.listener;
 
+import cn.hutool.core.util.StrUtil;
 import com.alibaba.excel.context.AnalysisContext;
 import com.alibaba.excel.read.listener.ReadListener;
 import com.google.common.collect.Lists;
@@ -33,6 +34,10 @@ public class KeyTypeImportListener implements ReadListener<WechatKeyWordsDTO> {
     public void invoke(WechatKeyWordsDTO wechatKeyWordsDTO, AnalysisContext context) {
         WechatKeyWordsDO wechatKeyWordsDO = new WechatKeyWordsDO();
         BeanUtils.copyProperties(wechatKeyWordsDTO, wechatKeyWordsDO);
+        //如果key和value都为空,则忽略。
+        if(StrUtil.isEmpty(wechatKeyWordsDO.getValueContent()) && StrUtil.isEmpty(wechatKeyWordsDO.getKeyName())){
+            return;
+        }
         wechatKeyWordsDO.setBelonger(belonger);
         wechatKeyWordsDO.setIsValid(BooleanEnum.TRUE);
         wechatKeyWordsRepository.saveOrUpdateById(wechatKeyWordsDO);

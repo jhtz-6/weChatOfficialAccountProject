@@ -21,6 +21,11 @@ import static org.myf.wechatofficialaccountproject.infrastructure.util.helper.In
 public class BaiduOcrClient {
     private static final Logger LOGGER = LoggerFactory.getLogger(BaiduOcrClient.class);
 
+    /**
+     * 不包含位置 https://cloud.baidu.com/doc/OCR/s/Sk3h7xyad
+     * @param photoUrl
+     * @return
+     */
     public BaiduOcrResponse getWebImageByPhotoUrl(String photoUrl) {
         buildOcrClientParams();
         JSONObject res = CLIENT.webImageUrl(photoUrl, Maps.newHashMap());
@@ -28,6 +33,11 @@ public class BaiduOcrClient {
         return getOcrResult(res);
     }
 
+    /**
+     * 包含位置信息 https://cloud.baidu.com/doc/OCR/s/vk3h7y58v
+     * @param photoUrl
+     * @return
+     */
     public BaiduOcrResponse getGeneralImageByPhotoUrl(String photoUrl) {
         HashMap<String, String> options = Maps.newHashMap();
         options.put("recognize_granularity", "big");
